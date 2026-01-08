@@ -176,25 +176,28 @@
     </div>
 
     <div class="content">
-      <div class="warning" id="connectionStatus">
-        ⚠ Checking connection to backend...
+      <div class="warning" style="background: rgba(0, 170, 255, 0.1); border-color: #00aaff; color: #00aaff;">
+        💡 This shows a REAL gasless transaction that already happened on Sonic testnet
       </div>
 
       <div class="status-bar">
         <div class="status-item">
-          <div class="status-label">COUNTER VALUE</div>
-          <div class="status-value" id="counterValue">--</div>
+          <div class="status-label">WHAT HAPPENED</div>
+          <div class="status-value">Counter: 0 → 1</div>
         </div>
         <div class="status-item">
-          <div class="status-label">USER BALANCE</div>
-          <div class="status-value" id="userBalance">-- S</div>
+          <div class="status-label">USER PAID</div>
+          <div class="status-value" style="color: #00ff00;">0.0 S (ZERO!)</div>
         </div>
       </div>
 
       <div class="action-section">
-        <button id="incrementBtn" onclick="executeTransaction()">
-          ► INCREMENT COUNTER (GASLESS)
+        <button id="viewTxBtn" onclick="viewTransaction()">
+          🔗 VIEW PROOF ON BLOCKCHAIN EXPLORER
         </button>
+        <div style="margin-top: 15px; font-size: 0.9em; color: #00aa00;">
+          Click to see the actual transaction on Sonic testnet
+        </div>
       </div>
 
       <div class="terminal" id="terminal">
@@ -211,15 +214,8 @@
 
   <script>
     // Configuration
-    const CONFIG = {
-      backendUrl: 'http://localhost:3000',
-      sonicRpc: 'https://rpc.testnet.soniclabs.com',
-      simpleAccount: '0x4BEfFA7558375a0f8e55a4eABbE9a53F661E5506',
-      testCounter: '0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3',
-      explorerUrl: 'https://testnet.soniclabs.com',
-    };
-
-    let isExecuting = false;
+    const TX_HASH = '0xef679dfc09206f4c6b8358715ddc519353ce7d5a5b29fa18bf11141bb927cc2c';
+    const EXPLORER_URL = `https://testnet.soniclabs.com/tx/${TX_HASH}`;
 
     // Terminal logging
     function log(message, type = 'info') {
@@ -246,146 +242,84 @@
       terminal.scrollTop = terminal.scrollHeight;
     }
 
-    // Check backend connection
-    async function checkConnection() {
-      try {
-        const response = await fetch(`${CONFIG.backendUrl}/health`);
-        if (response.ok) {
-          document.getElementById('connectionStatus').style.display = 'none';
-          log('✓ Connected to backend', 'success');
-          await loadState();
-        } else {
-          throw new Error('Backend not responding');
-        }
-      } catch (error) {
-        document.getElementById('connectionStatus').innerHTML =
-          '⚠ Backend not running. Start with: cd backend && npm run dev';
-        log('✗ Failed to connect to backend', 'error');
-        document.getElementById('incrementBtn').disabled = true;
-      }
+    // View the actual transaction
+    function viewTransaction() {
+      window.open(EXPLORER_URL, '_blank');
+      log('> Opening blockchain explorer...', 'info');
+      log('🔗 Transaction: ' + TX_HASH, 'success');
     }
 
-    // Load current state
-    async function loadState() {
-      try {
-        log('> Fetching current state from Sonic testnet...');
+    // Show the transaction flow
+    function showTransactionFlow() {
+      log('═══════════════════════════════════════════════════', 'prompt');
+      log('📋 GASLESS TRANSACTION REPLAY', 'info');
+      log('═══════════════════════════════════════════════════', 'prompt');
+      log('', 'info');
 
-        // Call RPC to get counter value
-        const counterResponse = await fetch(CONFIG.sonicRpc, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'eth_call',
-            params: [{
-              to: CONFIG.testCounter,
-              data: '0x8ada066e000000000000000000000000' + CONFIG.simpleAccount.slice(2), // getCounter(address)
-            }, 'latest']
-          })
-        });
-        const counterData = await counterResponse.json();
-        const counterValue = parseInt(counterData.result, 16);
-        document.getElementById('counterValue').textContent = counterValue;
+      setTimeout(() => {
+        log('STEP 1: User wants to increment counter', 'info');
+        log('> Counter before: 0', 'info');
+        log('> User balance: 0.01 S', 'info');
+      }, 500);
 
-        // Get balance
-        const balanceResponse = await fetch(CONFIG.sonicRpc, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 2,
-            method: 'eth_getBalance',
-            params: [CONFIG.simpleAccount, 'latest']
-          })
-        });
-        const balanceData = await balanceResponse.json();
-        const balance = parseInt(balanceData.result, 16) / 1e18;
-        document.getElementById('userBalance').textContent = balance.toFixed(4) + ' S';
+      setTimeout(() => {
+        log('', 'info');
+        log('STEP 2: Request gas sponsorship from backend', 'info');
+        log('> Sending request to Sorted.fund...', 'info');
+      }, 1500);
 
-        log(`✓ Counter: ${counterValue}, Balance: ${balance.toFixed(4)} S`, 'success');
-      } catch (error) {
-        log('✗ Failed to load state: ' + error.message, 'error');
-      }
-    }
+      setTimeout(() => {
+        log('✓ Sponsorship APPROVED!', 'success');
+        log('> Backend signed paymasterAndData', 'success');
+      }, 2500);
 
-    // Execute gasless transaction
-    async function executeTransaction() {
-      if (isExecuting) return;
+      setTimeout(() => {
+        log('', 'info');
+        log('STEP 3: Build and sign UserOperation', 'info');
+        log('> Creating UserOperation...', 'info');
+      }, 3500);
 
-      isExecuting = true;
-      document.getElementById('incrementBtn').disabled = true;
+      setTimeout(() => {
+        log('✓ UserOperation signed by user', 'success');
+      }, 4500);
 
-      try {
+      setTimeout(() => {
+        log('', 'info');
+        log('STEP 4: Submit to Pimlico bundler', 'info');
+        log('> Sending to bundler...', 'info');
+      }, 5500);
+
+      setTimeout(() => {
+        log('✓ UserOp accepted by bundler', 'success');
+        log('> Waiting for on-chain execution...', 'info');
+      }, 6500);
+
+      setTimeout(() => {
+        log('', 'info');
+        log('🎉 TRANSACTION CONFIRMED ON-CHAIN!', 'success');
+        log('', 'info');
+        log('RESULTS:', 'info');
+        log('  Counter: 0 → 1 ✓', 'success');
+        log('  User balance: 0.01 S → 0.01 S (NO CHANGE!)', 'success');
+        log('  User paid: 0.0 S (ZERO GAS!)', 'success');
+        log('  Gas used: 203,944', 'info');
+        log('  Gas cost: 0.000203944 S (paid by Sorted.fund)', 'success');
+        log('', 'info');
+        logLink('📋 Proof on blockchain:', EXPLORER_URL);
+        log('', 'info');
         log('═══════════════════════════════════════════════════', 'prompt');
-        log('> Initiating gasless transaction...', 'info');
-
-        // Note: This is a simplified demo
-        // In production, you'd use Web3/ethers and the full SDK
-        log('> This demo shows the concept', 'info');
-        log('> Run the full demo with: npx hardhat run scripts/demo.ts --network sonic', 'info');
-        log('═══════════════════════════════════════════════════', 'prompt');
-
-        // Show what would happen
-        setTimeout(() => {
-          log('> Requesting authorization from backend...', 'info');
-        }, 500);
-
-        setTimeout(() => {
-          log('✓ Authorization received (gas sponsorship approved)', 'success');
-        }, 1000);
-
-        setTimeout(() => {
-          log('> Building UserOperation...', 'info');
-        }, 1500);
-
-        setTimeout(() => {
-          log('✓ UserOperation signed', 'success');
-        }, 2000);
-
-        setTimeout(() => {
-          log('> Submitting to Pimlico bundler...', 'info');
-        }, 2500);
-
-        setTimeout(() => {
-          log('✓ Submitted! Hash: 0xef679dfc...', 'success');
-          log('⏳ Waiting for confirmation...', 'info');
-        }, 3000);
-
-        setTimeout(() => {
-          log('🎉 TRANSACTION SUCCESSFUL!', 'success');
-          log('✓ Counter incremented', 'success');
-          log('✓ User paid: 0.0 S (ZERO GAS!)', 'success');
-          log('✓ Gas cost: 0.000203944 S (paid by Sorted.fund)', 'success');
-          logLink('📋 View on explorer:',
-            'https://testnet.soniclabs.com/tx/0xef679dfc09206f4c6b8358715ddc519353ce7d5a5b29fa18bf11141bb927cc2c');
-
-          // Reload state
-          setTimeout(() => {
-            loadState();
-            isExecuting = false;
-            document.getElementById('incrementBtn').disabled = false;
-          }, 1000);
-        }, 4000);
-
-      } catch (error) {
-        log('✗ Transaction failed: ' + error.message, 'error');
-        isExecuting = false;
-        document.getElementById('incrementBtn').disabled = false;
-      }
+      }, 7500);
     }
 
     // Initialize on load
     window.addEventListener('load', () => {
-      checkConnection();
-    });
+      log('> Ready to view gasless transaction proof', 'success');
+      log('> Click button above to view on blockchain explorer', 'info');
+      log('', 'info');
 
-    // Refresh state every 10 seconds
-    setInterval(() => {
-      if (!isExecuting) {
-        loadState();
-      }
-    }, 10000);
+      // Auto-play the transaction flow after 2 seconds
+      setTimeout(showTransactionFlow, 2000);
+    });
   </script>
 </body>
 </html>
