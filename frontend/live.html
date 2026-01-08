@@ -195,6 +195,9 @@
         <button id="executeBtn" onclick="executeGaslessTransaction()">
           ► EXECUTE GASLESS TRANSACTION NOW
         </button>
+        <button id="checkNonceBtn" onclick="checkCurrentNonce()" style="margin-left: 10px; background: #333; color: #00ff00;">
+          🔍 CHECK NONCE
+        </button>
         <div id="statusMessage" style="margin-top: 15px; font-size: 0.9em; color: #00aa00;">
           This will increment the counter on-chain WITHOUT you paying gas
         </div>
@@ -300,6 +303,32 @@
       }
     }
 
+    // Check current nonce (diagnostic tool)
+    async function checkCurrentNonce() {
+      try {
+        log('═══════════════════════════════════════════════════', 'prompt');
+        log('🔍 CHECKING CURRENT NONCE', 'info');
+        log('═══════════════════════════════════════════════════', 'prompt');
+        log('', 'info');
+
+        const simpleAccount = new ethers.Contract(CONFIG.simpleAccount, ACCOUNT_ABI, provider);
+
+        log('> Querying blockchain for latest nonce...', 'info');
+        const nonce = await simpleAccount.getNonce({ blockTag: 'latest' });
+
+        log('', 'info');
+        log(`✓ Current nonce: ${nonce}`, 'success');
+        log('', 'info');
+        log('This is the next nonce that will be used for a UserOperation.', 'info');
+        log('If you\'re getting AA25 errors, the nonce may be stuck.', 'info');
+        log('Wait 60 seconds and check again to see if it increments.', 'info');
+        log('', 'info');
+        log('═══════════════════════════════════════════════════', 'prompt');
+      } catch (error) {
+        log(`✗ Failed to check nonce: ${error.message}`, 'error');
+      }
+    }
+
     // Pack gas limits
     function packGasLimits(verificationGasLimit, callGasLimit) {
       const packed = ethers.BigNumber.from(verificationGasLimit).shl(128).or(callGasLimit);
@@ -331,12 +360,26 @@
         log('🚀 EXECUTING LIVE GASLESS TRANSACTION', 'success');
         log('═══════════════════════════════════════════════════', 'prompt');
 
-        // Step 1: Get nonce
+        // Step 1: Get nonce (fresh from blockchain)
         log('', 'info');
         log('STEP 1: Preparing transaction...', 'info');
         const simpleAccount = new ethers.Contract(CONFIG.simpleAccount, ACCOUNT_ABI, provider);
-        const nonce = await simpleAccount.getNonce();
-        log(`> Nonce: ${nonce}`, 'info');
+
+        // Force fresh nonce by querying latest block
+        const nonce = await simpleAccount.getNonce({ blockTag: 'latest' });
+        log(`> Fresh nonce from blockchain: ${nonce}`, 'info');
+
+        // Wait longer to ensure any pending tx has propagated through Pimlico's mempool
+        log('> Waiting 3 seconds for mempool to clear...', 'info');
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Double-check nonce hasn't changed
+        const nonceCheck = await simpleAccount.getNonce({ blockTag: 'latest' });
+        if (!nonce.eq(nonceCheck)) {
+          log(`> Nonce changed! Old: ${nonce}, New: ${nonceCheck}`, 'info');
+          throw new Error('Nonce changed during preparation. A previous transaction may have completed. Please try again.');
+        }
+        log(`> Nonce confirmed: ${nonce}`, 'success');
 
         // Step 2: Request authorization
         log('', 'info');
@@ -484,37 +527,57 @@
         // Update status message
         statusMsg.innerHTML = '<span style="color: #00ff00;">✓ Transaction successful! Counter incremented with ZERO gas cost!</span>';
 
-        // Reload state
-        setTimeout(() => {
-          loadState();
+        // Reload state after longer delay to ensure nonce updates
+        setTimeout(async () => {
+          await loadState();
           statusMsg.innerHTML = '<span style="color: #00aa00;">Ready to execute another transaction</span>';
-        }, 3000);
+          btn.disabled = false;
+        }, 10000);
+
+        // Keep button disabled during cooldown
+        btn.disabled = true;
+        btn.textContent = '⏳ COOLDOWN (10 seconds)...';
 
       } catch (error) {
         log('', 'info');
         log(`✗ Transaction failed: ${error.message}`, 'error');
 
-        // Check for specific error
+        // Check for specific errors
         if (error.message.includes('AA25') || error.message.includes('same sender and nonce')) {
           log('', 'info');
-          log('💡 TIP: Another transaction is still processing.', 'info');
-          log('   Wait for it to complete, then refresh the page.', 'info');
-          statusMsg.innerHTML = '<span style="color: #ff6600;">⚠ Please refresh the page and try again</span>';
+          log('⚠️  NONCE COLLISION ERROR (AA25)', 'error');
+          log('', 'info');
+          log('This means there\'s a pending transaction with the same nonce.', 'info');
+          log('', 'info');
+          log('TROUBLESHOOTING STEPS:', 'info');
+          log('  1. Wait 60 seconds for the pending transaction to complete', 'info');
+          log('  2. Refresh this page', 'info');
+          log('  3. Try again', 'info');
+          log('', 'info');
+          log('TO CHECK NONCE MANUALLY:', 'info');
+          log('  cd contracts', 'info');
+          log('  npx hardhat run scripts/check-nonce.ts --network sonic', 'info');
+          log('', 'info');
+          statusMsg.innerHTML = '<span style="color: #ff6600;">⚠ Nonce collision - wait 60 seconds and refresh page</span>';
+        } else if (error.message.includes('AA33') || error.message.includes('MaxCostExceeded')) {
+          log('', 'info');
+          log('💡 Gas estimation was too low. This is rare.', 'info');
+          log('   Please report this error.', 'info');
+          statusMsg.innerHTML = '<span style="color: #ff0000;">✗ Gas estimation error - please try again</span>';
         } else {
           statusMsg.innerHTML = '<span style="color: #ff0000;">✗ Transaction failed - check terminal for details</span>';
         }
 
         log('═══════════════════════════════════════════════════', 'prompt');
       } finally {
-        isExecuting = false;
-        btn.disabled = false;
-        btn.textContent = '► EXECUTE GASLESS TRANSACTION NOW';
-
-        // If success, add cooldown
-        if (!btn.textContent.includes('PROGRESS')) {
-          setTimeout(() => {
-            statusMsg.innerHTML = '<span style="color: #00aa00;">Ready to execute another transaction</span>';
-          }, 2000);
+        // Only reset if there was an error (success case handles its own cooldown)
+        if (btn.textContent.includes('PROGRESS')) {
+          isExecuting = false;
+          btn.disabled = false;
+          btn.textContent = '► EXECUTE GASLESS TRANSACTION NOW';
+        } else {
+          // Success case - cooldown is already running
+          isExecuting = false;
         }
       }
     }

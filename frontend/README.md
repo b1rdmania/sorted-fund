@@ -15,6 +15,9 @@ Executes REAL gasless transactions when you click!
 - Requires backend running
 - Actually submits to blockchain
 - Each click = new transaction
+- Built-in nonce collision protection
+- 10-second cooldown between transactions
+- Diagnostic "Check Nonce" button for troubleshooting
 
 ## Quick Start
 
@@ -53,6 +56,32 @@ For **real live execution**, use:
 cd ../contracts
 npx hardhat run scripts/demo.ts --network sonic
 ```
+
+## Troubleshooting
+
+### AA25 Nonce Collision Error
+
+If you get an "AA25 invalid account nonce" error:
+
+1. **Wait 60 seconds** for the pending transaction to complete
+2. **Refresh the page** to clear any cached state
+3. **Use the "Check Nonce" button** to verify the current nonce
+4. **Try again**
+
+The live frontend includes:
+- 3-second propagation delay before submission
+- 10-second cooldown between transactions
+- Automatic nonce verification
+
+If the error persists, check the nonce manually:
+```bash
+cd contracts
+npx hardhat run scripts/check-nonce.ts --network sonic
+```
+
+### AA33 MaxCostExceeded Error
+
+This means gas estimation was too low. This should be rare with the current 600k gas estimate. If you encounter this, please report it.
 
 ## Styling
 
