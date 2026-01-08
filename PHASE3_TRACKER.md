@@ -80,22 +80,22 @@
 ## Stage 3: Update Add Funds Page (1 hour)
 
 ### Task 3.1: Wire up add-funds.html
-- [ ] Load project info from `/projects/:id`
-- [ ] Display real deposit_address from backend
-- [ ] Remove MetaMask button and section entirely
-- [ ] Update instructions: "Send S tokens to this address on Sonic testnet"
-- [ ] Keep "Copy Address" button functional
-- [ ] Add note: "Deposits are not auto-detected yet. Contact admin to credit your account."
+- [x] Load project info from `/projects/:id`
+- [x] Display real deposit_address from backend
+- [x] Remove MetaMask button and section entirely
+- [x] Update instructions: "Send S tokens to this address on Sonic testnet"
+- [x] Keep "Copy Address" button functional
+- [x] Add note: "Deposits are not auto-detected yet. Contact admin to credit your account."
 
 ### Task 3.2: Test manual deposit
-- [ ] Open add-funds page in browser
-- [ ] Verify displays correct deposit address
-- [ ] Copy address
-- [ ] Send 0.1 S from external wallet to address
-- [ ] Verify transaction on Sonic explorer
-- [ ] Verify funds arrive at deposit address
+- [x] Open add-funds page in browser (accessible at http://localhost:8080/dashboard-v2/add-funds.html)
+- [ ] Verify displays correct deposit address (pending - PostgreSQL migration needed)
+- [ ] Copy address (pending - need address first)
+- [ ] Send 0.1 S from external wallet to address (pending - need address first)
+- [ ] Verify transaction on Sonic explorer (pending - need transaction first)
+- [ ] Verify funds arrive at deposit address (pending - need transaction first)
 
-**Stage 3 Complete:** ⬜
+**Stage 3 Complete:** ✅ (code complete, testing pending PostgreSQL)
 
 ---
 
