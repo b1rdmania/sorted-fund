@@ -9,6 +9,7 @@ import { initializeDatabase, closeDatabase } from './db/database';
 import projectRoutes from './routes/projects';
 import sponsorRoutes from './routes/sponsor';
 import allowlistRoutes from './routes/allowlist';
+import analyticsRoutes from './routes/analytics';
 
 // Load environment variables
 dotenv.config();
@@ -36,6 +37,7 @@ app.get('/health', (req: Request, res: Response) => {
 app.use('/projects', projectRoutes);
 app.use('/sponsor', sponsorRoutes);
 app.use('/projects', allowlistRoutes); // Allowlist routes under /projects/:id/allowlist
+app.use('/analytics', analyticsRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
