@@ -245,6 +245,35 @@ class ApiClient {
     });
   }
 
+  // ===== Blockchain =====
+
+  /**
+   * Get counter value for user
+   * @param {string} contractAddress - Counter contract address
+   * @param {string} userAddress - User address
+   * @returns {Promise<Object>} Counter data
+   */
+  async getCounterValue(contractAddress, userAddress) {
+    return this._get(`/blockchain/counter/${contractAddress}/${userAddress}`);
+  }
+
+  /**
+   * Get account balance
+   * @param {string} address - Account address
+   * @returns {Promise<Object>} Balance data
+   */
+  async getAccountBalance(address) {
+    return this._get(`/blockchain/balance/${address}`);
+  }
+
+  /**
+   * Get current block number
+   * @returns {Promise<Object>} Block number
+   */
+  async getCurrentBlock() {
+    return this._get('/blockchain/block');
+  }
+
   // ===== Health Check =====
 
   /**

@@ -6,19 +6,37 @@
 import { query } from '../db/database';
 import { Project, CreateProjectRequest, RefuelRequest, GasTankRefuel } from '../types';
 import { ethers } from 'ethers';
+import * as depositService from './depositService';
 
 export class ProjectService {
+  /**
+   * Get next available derivation index
+   */
+  private async getNextDerivationIndex(): Promise<number> {
+    const result = await query<{ max_index: number }>(
+      'SELECT COALESCE(MAX(derivation_index), -1) as max_index FROM projects'
+    );
+
+    return (result.rows[0]?.max_index ?? -1) + 1;
+  }
+
   /**
    * Create a new project
    */
   async createProject(data: CreateProjectRequest): Promise<Project> {
     const dailyCap = data.dailyCap || ethers.parseEther('1').toString();
 
+    // Get next derivation index
+    const derivationIndex = await this.getNextDerivationIndex();
+
+    // Generate deposit address
+    const { address: depositAddress } = depositService.generateDepositAddress(derivationIndex);
+
     const result = await query<Project>(
-      `INSERT INTO projects (id, name, owner, daily_cap, daily_reset_at)
-       VALUES ($1, $2, $3, $4, NOW())
+      `INSERT INTO projects (id, name, owner, daily_cap, daily_reset_at, deposit_address, derivation_index)
+       VALUES ($1, $2, $3, $4, NOW(), $5, $6)
        RETURNING *`,
-      [data.id, data.name, data.owner, dailyCap]
+      [data.id, data.name, data.owner, dailyCap, depositAddress, derivationIndex]
     );
 
     return result.rows[0];

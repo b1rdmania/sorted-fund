@@ -14,7 +14,7 @@ const CONFIG = {
   METRICS_REFRESH_INTERVAL: 30000,   // 30 seconds
 
   // Blockchain
-  CHAIN_ID: 146,
+  CHAIN_ID: 14601,
   CHAIN_NAME: 'Sonic Testnet',
   RPC_URL: 'https://rpc.testnet.soniclabs.com',
   EXPLORER_URL: 'https://testnet.soniclabs.com',

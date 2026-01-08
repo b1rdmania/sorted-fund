@@ -10,6 +10,7 @@ import projectRoutes from './routes/projects';
 import sponsorRoutes from './routes/sponsor';
 import allowlistRoutes from './routes/allowlist';
 import analyticsRoutes from './routes/analytics';
+import blockchainRoutes from './routes/blockchain';
 
 // Load environment variables
 dotenv.config();
@@ -38,6 +39,7 @@ app.use('/projects', projectRoutes);
 app.use('/sponsor', sponsorRoutes);
 app.use('/projects', allowlistRoutes); // Allowlist routes under /projects/:id/allowlist
 app.use('/analytics', analyticsRoutes);
+app.use('/blockchain', blockchainRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
