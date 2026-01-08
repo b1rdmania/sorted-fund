@@ -1,5 +1,21 @@
 # Architecture & Lifecycle
 
+## What is Sorted.fund?
+
+Sorted.fund is a gasless transaction infrastructure for Sonic testnet. It allows developers to sponsor gas fees for their users, enabling true zero-friction onboarding—no wallets, no tokens, no gas fees required.
+
+**For Developers:**
+1. Create a project on the Sorted dashboard
+2. Fund your gas tank by sending S tokens to your unique deposit address
+3. Add one line of code to your app: `import { SortedClient } from '@sorted/sdk'`
+4. Your users can now interact with your smart contracts without paying gas
+
+**For End Users:**
+- Click buttons, mint NFTs, play games—all with zero balance
+- No crypto wallet setup, no buying tokens, no transaction fees
+- Instant, seamless blockchain interactions that feel like Web2
+
+**The Stack:**
 The Sorted.fund stack keeps the sponsored transaction path predictable: SDK → backend control plane → Pimlico bundler → Sonic EntryPoint → Sorted paymaster → target contract. Every sponsored call includes a backend-signed `paymasterAndData` that encodes the scope of what the paymaster is allowed to fund.
 
 ## Complete System Architecture
