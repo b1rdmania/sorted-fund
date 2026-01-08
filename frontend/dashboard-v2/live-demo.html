@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Demo - Sorted.fund</title>
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <style>
+    .demo-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .demo-hero {
+      text-align: center;
+      padding: var(--spacing-xl) 0;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .demo-hero h1 {
+      font-size: 48px;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .demo-hero p {
+      font-size: var(--font-size-lg);
+      color: var(--color-text-secondary);
+    }
+
+    .state-panel {
+      background: var(--color-bg-secondary);
+      border: var(--border-primary);
+      padding: var(--spacing-xl);
+      margin-bottom: var(--spacing-lg);
+      box-shadow: var(--glow-primary);
+    }
+
+    .state-panel-title {
+      font-size: var(--font-size-lg);
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-lg);
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .state-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+    }
+
+    .state-item {
+      text-align: center;
+    }
+
+    .state-label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-sm);
+      text-transform: uppercase;
+    }
+
+    .state-value {
+      font-size: var(--font-size-2xl);
+      color: var(--color-text-primary);
+      font-weight: bold;
+    }
+
+    .state-value.highlight {
+      color: var(--color-accent-cyan);
+      text-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+    }
+
+    .state-note {
+      font-size: var(--font-size-xs);
+      color: var(--color-accent-orange);
+      margin-top: var(--spacing-xs);
+      font-weight: bold;
+    }
+
+    .execute-button-container {
+      text-align: center;
+      margin: var(--spacing-xl) 0;
+    }
+
+    .execute-button {
+      font-size: var(--font-size-xl);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      background: var(--color-text-primary);
+      color: var(--color-bg-primary);
+      border: none;
+      font-family: var(--font-mono);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .execute-button:hover {
+      background: var(--color-accent-cyan);
+      box-shadow: 0 0 40px rgba(0, 170, 255, 0.8);
+      transform: scale(1.1);
+    }
+
+    .execute-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .terminal {
+      background: var(--color-bg-primary);
+      border: var(--border-primary);
+      padding: var(--spacing-lg);
+      font-family: var(--font-mono);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      min-height: 200px;
+      margin-bottom: var(--spacing-lg);
+      box-shadow: var(--glow-primary);
+      overflow-y: auto;
+      max-height: 400px;
+    }
+
+    .terminal-line {
+      margin-bottom: var(--spacing-xs);
+      padding: var(--spacing-xs) 0;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .terminal-line.success {
+      color: var(--color-success);
+    }
+
+    .terminal-line.error {
+      color: var(--color-error);
+    }
+
+    .terminal-line.warning {
+      color: var(--color-warning);
+    }
+
+    .terminal-prompt {
+      color: var(--color-accent-cyan);
+    }
+
+    .terminal-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: var(--color-text-primary);
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .result-link {
+      text-align: center;
+      margin-top: var(--spacing-lg);
+      padding: var(--spacing-lg);
+      background: rgba(0, 255, 0, 0.05);
+      border: var(--border-secondary);
+    }
+
+    .result-link a {
+      color: var(--color-accent-cyan);
+      font-size: var(--font-size-lg);
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .result-link a:hover {
+      text-shadow: var(--glow-primary);
+    }
+
+    .info-box {
+      background: rgba(0, 170, 255, 0.1);
+      border: 1px solid var(--color-accent-cyan);
+      padding: var(--spacing-md) var(--spacing-lg);
+      margin-top: var(--spacing-lg);
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-sm);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--color-text-muted);
+      border-top-color: var(--color-text-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-left">
+        <a href="gas-station.html" class="header-brand">⛽ SORTED.FUND</a>
+        <div class="header-balance">
+          <div class="balance-item">
+            <span class="balance-label">Gas Tank</span>
+            <span class="balance-value">5.2450 S</span>
+          </div>
+          <div class="balance-item">
+            <span class="balance-label">Today Used</span>
+            <span class="balance-value">0.1234 S / 1.0000 S</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-add-funds" onclick="window.location.href='add-funds.html'">
+          + Add Funds
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <div class="app-main">
+      <!-- SIDEBAR -->
+      <nav class="sidebar">
+        <div class="sidebar-section">
+          <a href="gas-station.html" class="sidebar-item">
+            🏠 Gas Station
+          </a>
+          <a href="access-keys.html" class="sidebar-item">
+            🔑 Access Keys
+          </a>
+          <a href="allowlist.html" class="sidebar-item">
+            ✅ Allowlist
+          </a>
+          <a href="add-funds.html" class="sidebar-item">
+            💰 Add Funds
+          </a>
+          <a href="transactions.html" class="sidebar-item">
+            📊 Transactions
+          </a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section">
+          <a href="live-demo.html" class="sidebar-item active">
+            🎮 Live Demo
+          </a>
+          <a href="https://docs.sorted.fund" target="_blank" class="sidebar-item">
+            📖 Documentation
+          </a>
+        </div>
+      </nav>
+
+      <!-- CONTENT -->
+      <main class="content">
+        <div class="demo-container">
+          <!-- HERO -->
+          <div class="demo-hero">
+            <h1>🎮 LIVE DEMO</h1>
+            <p>See a gasless transaction happen in real-time on Sonic testnet</p>
+          </div>
+
+          <!-- BEFORE STATE -->
+          <div class="state-panel">
+            <div class="state-panel-title">📊 BEFORE</div>
+            <div class="state-grid">
+              <div class="state-item">
+                <div class="state-label">User Balance</div>
+                <div class="state-value" id="beforeBalance">0.0000 S</div>
+                <div class="state-note">no gas!</div>
+              </div>
+              <div class="state-item">
+                <div class="state-label">Counter Value</div>
+                <div class="state-value" id="beforeCounter">42</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EXECUTE BUTTON -->
+          <div class="execute-button-container">
+            <button class="execute-button" id="executeBtn" onclick="executeTransaction()">
+              🚀 Execute Gasless Transaction
+            </button>
+          </div>
+
+          <!-- TERMINAL LOG -->
+          <div class="terminal" id="terminal">
+            <div class="terminal-line">
+              <span class="terminal-prompt">$</span> Ready to execute gasless transaction<span class="terminal-cursor"></span>
+            </div>
+          </div>
+
+          <!-- AFTER STATE (hidden initially) -->
+          <div class="state-panel" id="afterState" style="display: none;">
+            <div class="state-panel-title">📊 AFTER</div>
+            <div class="state-grid">
+              <div class="state-item">
+                <div class="state-label">User Balance</div>
+                <div class="state-value highlight" id="afterBalance">0.0000 S</div>
+                <div class="state-note">still zero! ✨</div>
+              </div>
+              <div class="state-item">
+                <div class="state-label">Counter Value</div>
+                <div class="state-value highlight" id="afterCounter">43</div>
+                <div class="state-note">incremented! 🎉</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESULT LINK (hidden initially) -->
+          <div class="result-link" id="resultLink" style="display: none;">
+            <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">
+              View transaction on explorer:
+            </p>
+            <a href="#" target="_blank" id="explorerLink">
+              View on Sonic Explorer ↗
+            </a>
+          </div>
+
+          <!-- INFO BOX -->
+          <div class="info-box">
+            <strong>What just happened?</strong><br>
+            The user's account had ZERO balance - no gas to execute transactions. But Sorted.fund sponsored the gas, allowing the transaction to go through. The user's balance remained at zero, yet the transaction succeeded on-chain. This is the power of gasless transactions via ERC-4337 account abstraction!
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    let executing = false;
+
+    function addTerminalLine(text, className = '') {
+      const terminal = document.getElementById('terminal');
+      const line = document.createElement('div');
+      line.className = `terminal-line ${className}`;
+      line.innerHTML = `<span class="terminal-prompt">></span> ${text}`;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    async function executeTransaction() {
+      if (executing) return;
+      executing = true;
+
+      const btn = document.getElementById('executeBtn');
+      btn.disabled = true;
+      btn.textContent = 'Executing...';
+
+      // Clear terminal
+      document.getElementById('terminal').innerHTML = '';
+
+      // Simulate execution flow
+      await sleep(500);
+      addTerminalLine('Fetching current counter value...');
+
+      await sleep(800);
+      addTerminalLine('Counter: 42', 'success');
+
+      await sleep(500);
+      addTerminalLine('Requesting authorization from Sorted.fund...');
+
+      await sleep(1000);
+      addTerminalLine('✓ Authorization received', 'success');
+
+      await sleep(500);
+      addTerminalLine('Building UserOperation...');
+
+      await sleep(800);
+      addTerminalLine('✓ UserOperation built', 'success');
+
+      await sleep(500);
+      addTerminalLine('Submitting to Pimlico bundler...');
+
+      await sleep(1500);
+      addTerminalLine('✓ Submitted to bundler', 'success');
+
+      await sleep(500);
+      addTerminalLine('Waiting for on-chain confirmation...');
+
+      await sleep(2000);
+      const txHash = '0xef679dfc8b3e4d5a7c2b1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c';
+      addTerminalLine(`✓ Transaction confirmed!`, 'success');
+      addTerminalLine(`TX: ${txHash}`, 'success');
+
+      await sleep(500);
+      addTerminalLine('Fetching updated counter value...');
+
+      await sleep(800);
+      addTerminalLine('Counter: 43 (incremented!)', 'success');
+
+      await sleep(500);
+      addTerminalLine('✅ Gasless transaction completed successfully!', 'success');
+
+      // Show after state
+      document.getElementById('afterState').style.display = 'block';
+      document.getElementById('afterCounter').textContent = '43';
+
+      // Show explorer link
+      const explorerLink = document.getElementById('explorerLink');
+      explorerLink.href = `https://testnet.soniclabs.com/tx/${txHash}`;
+      document.getElementById('resultLink').style.display = 'block';
+
+      // Reset button
+      btn.disabled = false;
+      btn.textContent = '🔄 Run Again';
+      executing = false;
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  </script>
+</body>
+</html>

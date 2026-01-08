@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Keys - Sorted.fund</title>
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <style>
+    .page-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .keys-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--color-bg-secondary);
+      border: var(--border-secondary);
+    }
+
+    .keys-table th {
+      background: rgba(0, 255, 0, 0.05);
+      padding: var(--spacing-md) var(--spacing-lg);
+      text-align: left;
+      border-bottom: var(--border-muted);
+      color: var(--color-text-primary);
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: var(--font-size-sm);
+    }
+
+    .keys-table td {
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-bottom: var(--border-muted);
+      color: var(--color-text-secondary);
+    }
+
+    .keys-table tr:hover {
+      background: rgba(0, 255, 0, 0.05);
+    }
+
+    .key-value {
+      font-family: var(--font-mono);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-sm);
+    }
+
+    .key-note {
+      color: var(--color-warning);
+      font-size: var(--font-size-xs);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: var(--font-size-xs);
+      font-weight: bold;
+    }
+
+    .badge-enabled {
+      background: var(--color-success);
+      color: var(--color-bg-primary);
+    }
+
+    .badge-disabled {
+      background: var(--color-text-muted);
+      color: var(--color-bg-primary);
+    }
+
+    .btn-danger {
+      background: var(--color-error);
+      color: #fff;
+    }
+
+    .btn-sm {
+      padding: var(--spacing-xs) var(--spacing-md);
+      font-size: var(--font-size-sm);
+    }
+
+    .expandable-row {
+      background: rgba(0, 170, 255, 0.05);
+    }
+
+    .tabs {
+      display: flex;
+      gap: var(--spacing-md);
+      border-bottom: var(--border-muted);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .tab {
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: transparent;
+      border: none;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab:hover {
+      color: var(--color-text-primary);
+    }
+
+    .tab.active {
+      color: var(--color-text-primary);
+      border-bottom-color: var(--color-text-primary);
+    }
+
+    .tab-content {
+      display: none;
+      padding: var(--spacing-lg);
+      background: var(--color-bg-secondary);
+      border: var(--border-secondary);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      color: var(--color-text-primary);
+      font-weight: bold;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-md);
+      background: var(--color-bg-primary);
+      border: var(--border-secondary);
+      color: var(--color-text-primary);
+      font-family: var(--font-mono);
+      font-size: var(--font-size-base);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-text-primary);
+      box-shadow: var(--glow-primary);
+    }
+
+    .api-docs-section {
+      background: var(--color-bg-secondary);
+      border: var(--border-secondary);
+      padding: var(--spacing-lg);
+      margin-top: var(--spacing-xl);
+    }
+
+    .code-block {
+      background: var(--color-bg-primary);
+      border: var(--border-muted);
+      padding: var(--spacing-md);
+      font-family: var(--font-mono);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      overflow-x: auto;
+      margin: var(--spacing-md) 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-left">
+        <a href="gas-station.html" class="header-brand">⛽ SORTED.FUND</a>
+        <div class="header-balance">
+          <div class="balance-item">
+            <span class="balance-label">Gas Tank</span>
+            <span class="balance-value">5.2450 S</span>
+          </div>
+          <div class="balance-item">
+            <span class="balance-label">Today Used</span>
+            <span class="balance-value">0.1234 S / 1.0000 S</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-add-funds" onclick="window.location.href='add-funds.html'">
+          + Add Funds
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <div class="app-main">
+      <!-- SIDEBAR -->
+      <nav class="sidebar">
+        <div class="sidebar-section">
+          <a href="gas-station.html" class="sidebar-item">
+            🏠 Gas Station
+          </a>
+          <a href="access-keys.html" class="sidebar-item active">
+            🔑 Access Keys
+          </a>
+          <a href="allowlist.html" class="sidebar-item">
+            ✅ Allowlist
+          </a>
+          <a href="add-funds.html" class="sidebar-item">
+            💰 Add Funds
+          </a>
+          <a href="transactions.html" class="sidebar-item">
+            📊 Transactions
+          </a>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section">
+          <a href="live-demo.html" class="sidebar-item">
+            🎮 Live Demo
+          </a>
+          <a href="https://docs.sorted.fund" target="_blank" class="sidebar-item">
+            📖 Documentation
+          </a>
+        </div>
+      </nav>
+
+      <!-- CONTENT -->
+      <main class="content">
+        <div class="page-header">
+          <h1 class="page-title">Access Keys</h1>
+          <p class="page-subtitle">Generate and manage API keys for backend authentication</p>
+        </div>
+
+        <div class="page-actions">
+          <button onclick="openCreateKeyModal()">+ Create Key</button>
+        </div>
+
+        <!-- KEYS TABLE -->
+        <table class="keys-table">
+          <thead>
+            <tr>
+              <th>Name / Key</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="key-value">Production Key</div>
+                <div class="key-value">sk_sorted_•••••••b67cc</div>
+                <div class="key-note">(FOR BACKEND USE)</div>
+              </td>
+              <td>
+                <span class="badge badge-enabled">Enabled</span>
+              </td>
+              <td>Jan 5, 2026</td>
+              <td>
+                <button class="btn-sm" onclick="expandKey(this)">Configure</button>
+                <button class="btn-sm btn-danger" onclick="disableKey()">Disable</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- EXPANDABLE KEY CONFIG (Shinami-style tabs) -->
+        <div id="keyConfigPanel" style="display: none; margin-top: var(--spacing-lg);">
+          <div class="tabs">
+            <button class="tab active" onclick="switchTab(event, 'gasStationTab')">
+              Gas Station
+            </button>
+            <button class="tab" onclick="switchTab(event, 'accessControlTab')">
+              Access Control
+            </button>
+          </div>
+
+          <div id="gasStationTab" class="tab-content active">
+            <h3>Gas Station Settings</h3>
+            <div class="form-group">
+              <label class="form-label">Operations Limit (QPS)</label>
+              <input type="number" class="form-input" value="7" min="1" max="100">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Allotment in Use</label>
+              <div style="color: var(--color-text-secondary);">7 / 30</div>
+            </div>
+            <button>Save</button>
+          </div>
+
+          <div id="accessControlTab" class="tab-content">
+            <h3>Access Control</h3>
+            <div class="form-group">
+              <label class="form-label">Domains Allowlist</label>
+              <input type="text" class="form-input" placeholder="www.mydomain.com" value="www.mygame.com">
+              <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin-top: var(--spacing-sm);">
+                Only requests from these domains will be accepted
+              </p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">IPs Allowlist</label>
+              <input type="text" class="form-input" placeholder="127.0.0.1" value="127.0.0.1">
+              <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin-top: var(--spacing-sm);">
+                Only requests from these IP addresses will be accepted
+              </p>
+            </div>
+            <button>Save</button>
+          </div>
+        </div>
+
+        <!-- API DOCS -->
+        <div class="api-docs-section">
+          <h2>Gas Station API</h2>
+          <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">
+            Use your API key to request transaction sponsorship
+          </p>
+
+          <h3>Endpoint</h3>
+          <div class="code-block">
+POST https://api.sorted.fund/v1/sponsor
+          </div>
+
+          <h3 style="margin-top: var(--spacing-lg);">Example Request (cURL)</h3>
+          <div class="code-block">
+curl https://api.sorted.fund/v1/sponsor \
+  -X POST \
+  -H "X-API-Key: sk_sorted_your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userOp": {...},
+    "entryPoint": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
+    "chainId": 146
+  }'
+          </div>
+
+          <button class="btn-secondary" onclick="window.open('https://docs.sorted.fund', '_blank')">
+            View Full Documentation
+          </button>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    const currentProjectId = CONFIG.DEFAULT_PROJECT_ID;
+
+    // Load API keys from backend
+    async function loadApiKeys() {
+      try {
+        const keys = await api.getApiKeys(currentProjectId);
+        displayApiKeys(keys);
+      } catch (error) {
+        console.error('Failed to load API keys:', error);
+        showError('Failed to load API keys');
+      }
+    }
+
+    // Display API keys in table
+    function displayApiKeys(keys) {
+      const tbody = document.querySelector('.keys-table tbody');
+
+      if (!keys || keys.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: var(--spacing-xl);">
+              No API keys yet. Create your first key to get started.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const html = keys.map(key => `
+        <tr>
+          <td>
+            <div class="key-value">${key.name || 'API Key'}</div>
+            <div class="key-value">${key.key_preview}</div>
+            <div class="key-note">(FOR BACKEND USE)</div>
+          </td>
+          <td>
+            <span class="badge ${key.enabled ? 'badge-enabled' : 'badge-disabled'}">
+              ${key.enabled ? 'Enabled' : 'Disabled'}
+            </span>
+          </td>
+          <td>${formatDate(key.created_at)}</td>
+          <td>
+            <button class="btn-sm" onclick="expandKey(this)">Configure</button>
+            <button class="btn-sm btn-danger" onclick="disableKey('${key.id}')">Disable</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tbody.innerHTML = html;
+    }
+
+    // Create new API key
+    async function openCreateKeyModal() {
+      const rateLimit = prompt('Enter rate limit (requests per minute):', '60');
+
+      if (!rateLimit) return;
+
+      const limit = parseInt(rateLimit);
+      if (isNaN(limit) || limit < 1 || limit > 1000) {
+        showError('Rate limit must be between 1 and 1000');
+        return;
+      }
+
+      try {
+        const result = await api.generateApiKey(currentProjectId, { rateLimit: limit });
+
+        // Show the full key (ONE TIME ONLY)
+        alert(`API Key Generated!\n\nCopy this now - it will not be shown again:\n\n${result.apiKey}\n\nKey ID: ${result.id}`);
+
+        // Reload keys list
+        await loadApiKeys();
+      } catch (error) {
+        console.error('Failed to generate API key:', error);
+        showError('Failed to generate API key: ' + error.message);
+      }
+    }
+
+    // Disable API key
+    async function disableKey(keyId) {
+      if (!confirm('Are you sure you want to disable this key? Applications using this key will stop working.')) {
+        return;
+      }
+
+      try {
+        // TODO: Implement disable endpoint in backend
+        alert('Disable key endpoint not yet implemented in backend');
+        // await api.disableApiKey(currentProjectId, keyId);
+        // await loadApiKeys();
+      } catch (error) {
+        console.error('Failed to disable key:', error);
+        showError('Failed to disable key: ' + error.message);
+      }
+    }
+
+    // Expand key configuration panel
+    function expandKey(btn) {
+      const panel = document.getElementById('keyConfigPanel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Switch tabs
+    function switchTab(event, tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // Show error
+    function showError(message) {
+      alert(message);
+    }
+
+    // Initialize on load
+    window.addEventListener('load', async () => {
+      await loadApiKeys();
+    });
+  </script>
+</body>
+</html>
