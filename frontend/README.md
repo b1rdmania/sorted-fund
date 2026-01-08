@@ -1,22 +1,36 @@
 # Sorted.fund Frontend
 
-Terminal-style web interface for demonstrating gasless transactions.
+Terminal-style web interfaces for demonstrating gasless transactions.
+
+## Two Versions
+
+### 1. `index.html` - Transaction Replay
+Shows a replay of a past transaction with step-by-step animation.
+- No backend needed
+- Just proof-of-concept demonstration
+- Links to actual on-chain transaction
+
+### 2. `live.html` - LIVE Execution ⚡
+Executes REAL gasless transactions when you click!
+- Requires backend running
+- Actually submits to blockchain
+- Each click = new transaction
 
 ## Quick Start
 
-**Option 1: Simple HTTP Server**
+**Start the server:**
 ```bash
 # Python 3
 python3 -m http.server 8080
 
-# Or Node.js
-npx http-server -p 8080
+# Or use the helper script from root:
+cd ..
+./start-frontend.sh
 ```
 
-Then open: http://localhost:8080
-
-**Option 2: Open Directly**
-Just open `index.html` in your browser (CORS may block backend calls)
+**Then open:**
+- Replay demo: http://localhost:8080/index.html
+- Live demo: http://localhost:8080/live.html
 
 ## Requirements
 

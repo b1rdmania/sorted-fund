@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SORTED.FUND - LIVE GASLESS TRANSACTIONS</title>
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0a0a;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      border: 2px solid #00ff00;
+      background: #000;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+
+    .header {
+      background: #00ff00;
+      color: #000;
+      padding: 15px 20px;
+      font-weight: bold;
+      border-bottom: 2px solid #00ff00;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .status-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #00ff00;
+      background: rgba(0, 255, 0, 0.05);
+    }
+
+    .status-item {
+      padding: 10px;
+    }
+
+    .status-label {
+      color: #00aa00;
+      font-size: 0.9em;
+      margin-bottom: 5px;
+    }
+
+    .status-value {
+      font-size: 1.3em;
+      font-weight: bold;
+    }
+
+    .action-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #00ff00;
+    }
+
+    button {
+      background: #00ff00;
+      color: #000;
+      border: none;
+      padding: 12px 30px;
+      font-family: 'Courier New', monospace;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    button:hover:not(:disabled) {
+      background: #00aa00;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+
+    button:disabled {
+      background: #333;
+      color: #666;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .terminal {
+      background: #000;
+      border: 1px solid #00ff00;
+      padding: 15px;
+      height: 400px;
+      overflow-y: auto;
+      font-size: 0.9em;
+      margin-top: 20px;
+    }
+
+    .terminal-line {
+      margin: 3px 0;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .terminal-prompt {
+      color: #00ff00;
+    }
+
+    .terminal-info {
+      color: #00aaff;
+    }
+
+    .terminal-success {
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    .terminal-error {
+      color: #ff0000;
+      font-weight: bold;
+    }
+
+    .terminal-link {
+      color: #00aaff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .terminal-link:hover {
+      color: #00ff00;
+    }
+
+    .warning {
+      color: #ffaa00;
+      padding: 10px;
+      border: 1px solid #ffaa00;
+      margin-bottom: 15px;
+      background: rgba(255, 170, 0, 0.1);
+    }
+
+    .info-box {
+      background: rgba(0, 170, 255, 0.1);
+      border: 1px solid #00aaff;
+      color: #00aaff;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+
+    .footer {
+      padding: 15px 20px;
+      border-top: 1px solid #00ff00;
+      font-size: 0.8em;
+      text-align: center;
+      color: #00aa00;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      █ SORTED.FUND - LIVE GASLESS TRANSACTION DEMO
+    </div>
+
+    <div class="content">
+      <div class="info-box">
+        🚀 Click the button to execute a REAL gasless transaction on Sonic testnet!
+      </div>
+
+      <div class="status-bar">
+        <div class="status-item">
+          <div class="status-label">COUNTER VALUE</div>
+          <div class="status-value" id="counterValue">--</div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">YOUR BALANCE</div>
+          <div class="status-value" id="userBalance">-- S</div>
+        </div>
+      </div>
+
+      <div class="action-section">
+        <button id="executeBtn" onclick="executeGaslessTransaction()">
+          ► EXECUTE GASLESS TRANSACTION NOW
+        </button>
+        <div style="margin-top: 15px; font-size: 0.9em; color: #00aa00;">
+          This will increment the counter on-chain WITHOUT you paying gas
+        </div>
+      </div>
+
+      <div class="terminal" id="terminal">
+        <div class="terminal-line terminal-prompt">
+          > Terminal ready. Waiting for your command...
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      SONIC TESTNET | ERC-4337 v0.7 | POWERED BY PIMLICO
+    </div>
+  </div>
+
+  <script>
+    // Configuration
+    const CONFIG = {
+      backendUrl: 'http://localhost:3000',
+      sonicRpc: 'https://rpc.testnet.soniclabs.com',
+      simpleAccount: '0x4BEfFA7558375a0f8e55a4eABbE9a53F661E5506',
+      testCounter: '0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3',
+      incrementSelector: '0xd09de08a',
+      entryPoint: '0x0000000071727de22e5e9d8baf0edac6f37da032',
+      // Owner private key for signing (from .env)
+      ownerPrivateKey: '0xbb1ab1a9dadbbca09ff9042dfe912c68620f742882ed9bd925a93e628ac755df',
+      apiKey: 'sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092',
+      pimlicoApiKey: 'pim_ZL9gKSF5okZT96AHbrTu6d',
+    };
+
+    let provider;
+    let wallet;
+    let isExecuting = false;
+
+    // ABI fragments
+    const COUNTER_ABI = [
+      'function getCounter(address) view returns (uint256)',
+      'function increment()'
+    ];
+    const ACCOUNT_ABI = [
+      'function getNonce() view returns (uint256)',
+      'function execute(address,uint256,bytes)'
+    ];
+    const ENTRYPOINT_ABI = [
+      'function getUserOpHash((address,uint256,bytes,bytes,bytes32,uint256,bytes32,bytes,bytes)) view returns (bytes32)'
+    ];
+
+    // Terminal logging
+    function log(message, type = 'info') {
+      const terminal = document.getElementById('terminal');
+      const line = document.createElement('div');
+      line.className = `terminal-line terminal-${type}`;
+
+      const timestamp = new Date().toLocaleTimeString();
+      line.innerHTML = `<span class="terminal-prompt">[${timestamp}]</span> ${message}`;
+
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function logLink(message, url) {
+      const terminal = document.getElementById('terminal');
+      const line = document.createElement('div');
+      line.className = 'terminal-line';
+
+      const timestamp = new Date().toLocaleTimeString();
+      line.innerHTML = `<span class="terminal-prompt">[${timestamp}]</span> ${message} <a href="${url}" target="_blank" class="terminal-link">${url}</a>`;
+
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    // Initialize
+    async function init() {
+      try {
+        provider = new ethers.providers.JsonRpcProvider(CONFIG.sonicRpc);
+        wallet = new ethers.Wallet(CONFIG.ownerPrivateKey, provider);
+
+        log('> System initialized', 'success');
+        log(`> Wallet: ${wallet.address}`, 'info');
+
+        await loadState();
+      } catch (error) {
+        log(`✗ Initialization failed: ${error.message}`, 'error');
+      }
+    }
+
+    // Load current state
+    async function loadState() {
+      try {
+        const counter = new ethers.Contract(CONFIG.testCounter, COUNTER_ABI, provider);
+        const counterValue = await counter.getCounter(CONFIG.simpleAccount);
+        document.getElementById('counterValue').textContent = counterValue.toString();
+
+        const balance = await provider.getBalance(CONFIG.simpleAccount);
+        document.getElementById('userBalance').textContent = ethers.utils.formatEther(balance) + ' S';
+
+        log(`> Counter: ${counterValue}, Balance: ${ethers.utils.formatEther(balance)} S`, 'info');
+      } catch (error) {
+        log(`✗ Failed to load state: ${error.message}`, 'error');
+      }
+    }
+
+    // Pack gas limits
+    function packGasLimits(verificationGasLimit, callGasLimit) {
+      const packed = ethers.BigNumber.from(verificationGasLimit).shl(128).or(callGasLimit);
+      return ethers.utils.hexZeroPad(packed.toHexString(), 32);
+    }
+
+    // Pack gas fees
+    function packGasFees(maxPriorityFeePerGas, maxFeePerGas) {
+      const packed = ethers.BigNumber.from(maxPriorityFeePerGas).shl(128).or(maxFeePerGas);
+      return ethers.utils.hexZeroPad(packed.toHexString(), 32);
+    }
+
+    // Execute gasless transaction
+    async function executeGaslessTransaction() {
+      if (isExecuting) return;
+
+      isExecuting = true;
+      document.getElementById('executeBtn').disabled = true;
+
+      try {
+        log('═══════════════════════════════════════════════════', 'prompt');
+        log('🚀 EXECUTING LIVE GASLESS TRANSACTION', 'success');
+        log('═══════════════════════════════════════════════════', 'prompt');
+
+        // Step 1: Get nonce
+        log('', 'info');
+        log('STEP 1: Preparing transaction...', 'info');
+        const simpleAccount = new ethers.Contract(CONFIG.simpleAccount, ACCOUNT_ABI, provider);
+        const nonce = await simpleAccount.getNonce();
+        log(`> Nonce: ${nonce}`, 'info');
+
+        // Step 2: Request authorization
+        log('', 'info');
+        log('STEP 2: Requesting gas sponsorship from backend...', 'info');
+        const authResponse = await fetch(`${CONFIG.backendUrl}/sponsor/authorize`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${CONFIG.apiKey}`
+          },
+          body: JSON.stringify({
+            projectId: 'test-game',
+            user: CONFIG.simpleAccount,
+            target: CONFIG.testCounter,
+            selector: CONFIG.incrementSelector,
+            estimatedGas: 450000,
+            clientNonce: ethers.utils.hexlify(nonce),
+            chainId: 14601
+          })
+        });
+
+        if (!authResponse.ok) {
+          throw new Error(`Backend returned ${authResponse.status}`);
+        }
+
+        const auth = await authResponse.json();
+        log('✓ Sponsorship APPROVED!', 'success');
+        log(`> Expires: ${auth.expiresAt}`, 'info');
+
+        // Step 3: Build UserOperation
+        log('', 'info');
+        log('STEP 3: Building UserOperation...', 'info');
+        const counter = new ethers.Contract(CONFIG.testCounter, COUNTER_ABI, provider);
+        const incrementCallData = counter.interface.encodeFunctionData('increment');
+        const executeCallData = simpleAccount.interface.encodeFunctionData('execute', [
+          CONFIG.testCounter,
+          0,
+          incrementCallData
+        ]);
+
+        const feeData = await provider.getFeeData();
+        const userOp = {
+          sender: CONFIG.simpleAccount,
+          nonce: nonce,
+          initCode: '0x',
+          callData: executeCallData,
+          accountGasLimits: packGasLimits(100000, 200000),
+          preVerificationGas: ethers.BigNumber.from(50000),
+          gasFees: packGasFees(
+            feeData.maxPriorityFeePerGas || ethers.BigNumber.from('1000000000'),
+            feeData.maxFeePerGas || ethers.BigNumber.from('2000000001')
+          ),
+          paymasterAndData: auth.paymasterAndData,
+          signature: '0x'
+        };
+
+        log('> UserOperation built', 'info');
+
+        // Step 4: Sign UserOperation
+        log('', 'info');
+        log('STEP 4: Signing UserOperation...', 'info');
+        const entryPoint = new ethers.Contract(CONFIG.entryPoint, ENTRYPOINT_ABI, provider);
+        const packedUserOp = [
+          userOp.sender,
+          userOp.nonce,
+          userOp.initCode,
+          userOp.callData,
+          userOp.accountGasLimits,
+          userOp.preVerificationGas,
+          userOp.gasFees,
+          userOp.paymasterAndData,
+          userOp.signature
+        ];
+
+        const userOpHash = await entryPoint.getUserOpHash(packedUserOp);
+        const signature = await wallet.signMessage(ethers.utils.arrayify(userOpHash));
+        userOp.signature = signature;
+
+        log('✓ UserOperation signed', 'success');
+
+        // Step 5: Submit to Pimlico
+        log('', 'info');
+        log('STEP 5: Submitting to Pimlico bundler...', 'info');
+
+        // Serialize for Pimlico
+        const serializedUserOp = serializeUserOp(userOp);
+
+        const submitResponse = await fetch(`https://api.pimlico.io/v1/14601/rpc?apikey=${CONFIG.pimlicoApiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'eth_sendUserOperation',
+            params: [serializedUserOp, CONFIG.entryPoint]
+          })
+        });
+
+        const submitResult = await submitResponse.json();
+        if (submitResult.error) {
+          throw new Error(submitResult.error.message);
+        }
+
+        const submittedHash = submitResult.result;
+        log('✓ Submitted to bundler!', 'success');
+        log(`> UserOp Hash: ${submittedHash.slice(0, 20)}...`, 'info');
+
+        // Step 6: Wait for confirmation
+        log('', 'info');
+        log('STEP 6: Waiting for on-chain confirmation...', 'info');
+        log('> This may take 10-30 seconds...', 'info');
+
+        const receipt = await waitForUserOp(submittedHash);
+
+        if (!receipt.success) {
+          throw new Error(receipt.reason || 'Transaction failed');
+        }
+
+        log('', 'info');
+        log('🎉 TRANSACTION SUCCESSFUL!', 'success');
+        log('', 'info');
+        log('RESULTS:', 'info');
+        log(`> Transaction Hash: ${receipt.transactionHash}`, 'success');
+        log(`> Block: ${receipt.blockNumber}`, 'info');
+        log(`> Gas Used: ${receipt.actualGasUsed.toString()}`, 'info');
+        log(`> Gas Cost: ${ethers.utils.formatEther(receipt.actualGasCost)} S`, 'info');
+        log('> User Paid: 0.0 S (ZERO GAS!)', 'success');
+        log('', 'info');
+        logLink('📋 View on explorer:', `https://testnet.soniclabs.com/tx/${receipt.transactionHash}`);
+        log('', 'info');
+        log('═══════════════════════════════════════════════════', 'prompt');
+
+        // Reload state
+        setTimeout(() => loadState(), 2000);
+
+      } catch (error) {
+        log('', 'info');
+        log(`✗ Transaction failed: ${error.message}`, 'error');
+        log('═══════════════════════════════════════════════════', 'prompt');
+      } finally {
+        isExecuting = false;
+        document.getElementById('executeBtn').disabled = false;
+      }
+    }
+
+    // Serialize UserOp for Pimlico
+    function serializeUserOp(userOp) {
+      // Unpack gas limits
+      const accountGasLimitsHex = userOp.accountGasLimits.slice(2);
+      const verificationGasLimit = '0x' + accountGasLimitsHex.slice(0, 32);
+      const callGasLimit = '0x' + accountGasLimitsHex.slice(32, 64);
+
+      // Unpack gas fees
+      const gasFeesHex = userOp.gasFees.slice(2);
+      const maxPriorityFeePerGas = '0x' + gasFeesHex.slice(0, 32);
+      const maxFeePerGas = '0x' + gasFeesHex.slice(32, 64);
+
+      // Extract paymaster data
+      const paymasterAndDataHex = userOp.paymasterAndData;
+      const paymaster = paymasterAndDataHex.slice(0, 42);
+      const paymasterVerificationGasLimit = '0x' + paymasterAndDataHex.slice(42, 74);
+      const paymasterPostOpGasLimit = '0x' + paymasterAndDataHex.slice(74, 106);
+      const paymasterData = '0x' + paymasterAndDataHex.slice(106);
+
+      return {
+        sender: userOp.sender,
+        nonce: ethers.utils.hexlify(userOp.nonce),
+        callData: userOp.callData,
+        callGasLimit,
+        verificationGasLimit,
+        preVerificationGas: ethers.utils.hexlify(userOp.preVerificationGas),
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+        paymaster,
+        paymasterVerificationGasLimit,
+        paymasterPostOpGasLimit,
+        paymasterData,
+        signature: userOp.signature
+      };
+    }
+
+    // Wait for UserOp receipt
+    async function waitForUserOp(userOpHash, timeout = 60000) {
+      const startTime = Date.now();
+      const pollInterval = 2000;
+
+      while (Date.now() - startTime < timeout) {
+        try {
+          const response = await fetch(`https://api.pimlico.io/v1/14601/rpc?apikey=${CONFIG.pimlicoApiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'eth_getUserOperationReceipt',
+              params: [userOpHash]
+            })
+          });
+
+          const result = await response.json();
+          if (result.result) {
+            return {
+              success: result.result.success,
+              transactionHash: result.result.receipt.transactionHash,
+              blockNumber: result.result.receipt.blockNumber,
+              actualGasCost: ethers.BigNumber.from(result.result.actualGasCost),
+              actualGasUsed: ethers.BigNumber.from(result.result.actualGasUsed),
+            };
+          }
+
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+        } catch (error) {
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+        }
+      }
+
+      throw new Error('Transaction timeout');
+    }
+
+    // Initialize on load
+    window.addEventListener('load', () => {
+      init();
+    });
+  </script>
+</body>
+</html>
