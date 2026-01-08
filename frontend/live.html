@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SORTED.FUND - LIVE GASLESS TRANSACTIONS</title>
-  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -551,6 +551,14 @@
 
     // Initialize on load
     window.addEventListener('load', () => {
+      // Check if ethers loaded
+      if (typeof ethers === 'undefined') {
+        log('✗ Failed to load ethers.js library', 'error');
+        log('> Please refresh the page', 'error');
+        document.getElementById('executeBtn').disabled = true;
+        return;
+      }
+
       init();
     });
   </script>
