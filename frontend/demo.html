@@ -512,7 +512,7 @@ fetch('/api/sponsor/authorize', {
             'Authorization': `Bearer ${CONFIG.apiKey}`
           },
           body: JSON.stringify({
-            projectId: actionType === 'game' ? 'epic-game' : 'social-app',
+            projectId: 'test-game',
             user: CONFIG.simpleAccount,
             target: CONFIG.testCounter,
             selector: CONFIG.incrementSelector,
