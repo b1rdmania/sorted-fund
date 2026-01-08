@@ -2,15 +2,17 @@
 
 Terminal-style web interfaces for demonstrating gasless transactions.
 
-## Two Versions
+## Three Versions
 
-### 1. `index.html` - Transaction Replay
-Shows a replay of a past transaction with step-by-step animation.
-- No backend needed
-- Just proof-of-concept demonstration
-- Links to actual on-chain transaction
+### 1. `demo.html` - **RECOMMENDED** Full Value Prop Demo 🌟
+Shows the complete business value of Sorted.fund with two-panel view.
+- **Left side (Developer):** Gas station balance, integration code, metrics
+- **Right side (User):** Multiple use cases (game actions, social posts)
+- Shows how developers fund once, users pay zero forever
+- Live metrics showing gas saved and transactions sponsored
+- Best for showing to stakeholders, investors, potential users
 
-### 2. `live.html` - LIVE Execution ⚡
+### 2. `live.html` - Technical Live Execution ⚡
 Executes REAL gasless transactions when you click!
 - Requires backend running
 - Actually submits to blockchain
@@ -18,6 +20,14 @@ Executes REAL gasless transactions when you click!
 - Built-in nonce collision protection
 - 10-second cooldown between transactions
 - Diagnostic "Check Nonce" button for troubleshooting
+- Best for developers who want to see the technical details
+
+### 3. `index.html` - Transaction Replay
+Shows a replay of a past transaction with step-by-step animation.
+- No backend needed
+- Just proof-of-concept demonstration
+- Links to actual on-chain transaction
+- Best for quick offline demos
 
 ## Quick Start
 
@@ -32,8 +42,9 @@ cd ..
 ```
 
 **Then open:**
-- Replay demo: http://localhost:8080/index.html
-- Live demo: http://localhost:8080/live.html
+- 🌟 **Value prop demo (RECOMMENDED):** http://localhost:8080/demo.html
+- 🔧 Technical live demo: http://localhost:8080/live.html
+- 📺 Replay demo: http://localhost:8080/index.html
 
 ## Requirements
 
