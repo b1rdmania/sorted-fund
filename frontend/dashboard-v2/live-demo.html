@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Demo - Sorted.fund</title>
   <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/buttons.css">
   <style>
     .demo-container {
       max-width: 900px;
@@ -77,22 +78,6 @@
     .execute-button-container {
       text-align: center;
       margin: var(--spacing-xl) 0;
-    }
-
-    .execute-button {
-      font-size: var(--font-size-sm);
-      padding: var(--spacing-xs) var(--spacing-md);
-      background: var(--color-text-primary);
-      color: var(--color-bg-primary);
-      border: var(--border-primary);
-      font-family: var(--font-mono);
-      font-weight: normal;
-      cursor: pointer;
-    }
-
-    .execute-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
 
     .terminal {
@@ -173,7 +158,7 @@
       </div>
       <div class="header-right">
         <button class="btn-add-funds" onclick="window.location.href='add-funds.html'">
-          + Add Funds
+          Add Funds
         </button>
       </div>
     </header>
@@ -237,8 +222,8 @@
 
           <!-- EXECUTE BUTTON -->
           <div class="execute-button-container">
-            <button class="execute-button" id="executeBtn" onclick="executeTransaction()">
-              🚀 Execute Gasless Transaction
+            <button class="btn-primary" id="executeBtn" onclick="executeTransaction()">
+              Execute Gasless Transaction
             </button>
           </div>
 

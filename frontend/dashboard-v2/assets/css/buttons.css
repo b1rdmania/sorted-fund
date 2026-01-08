@@ -1,0 +1,77 @@
+/* ============================================
+   SORTED.FUND V2 - STANDARDIZED BUTTONS
+   All buttons match transactions page style
+   ============================================ */
+
+/* Base button - green text on black bg with border */
+button,
+.btn,
+input[type="button"],
+input[type="submit"] {
+  background: #000;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  padding: 4px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: normal;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Primary action button (rare use - only for critical actions) */
+button.btn-primary,
+.btn-primary {
+  background: #00ff00;
+  color: #000;
+}
+
+/* Danger button (delete, disable) */
+button.btn-danger,
+.btn-danger {
+  background: #000;
+  color: #ff3333;
+  border-color: #ff3333;
+}
+
+/* Secondary button (less important actions) */
+button.btn-secondary,
+.btn-secondary {
+  background: #000;
+  color: #00aa00;
+  border-color: #00aa00;
+}
+
+/* Small button */
+button.btn-sm,
+.btn-sm {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+/* Disabled state */
+button:disabled,
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Header add funds button */
+.btn-add-funds {
+  background: #00ff00;
+  color: #000;
+  border: 1px solid #00ff00;
+  padding: 4px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+/* Page action buttons (top right of page) */
+.page-actions button {
+  background: #000;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+}
