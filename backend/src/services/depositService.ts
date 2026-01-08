@@ -48,7 +48,7 @@ export function generateDepositAddress(projectIndex: number): { address: string;
  * @param projectIndex - Derivation index
  * @returns Wallet instance connected to provider
  */
-export function getDepositWallet(projectIndex: number): ethers.Wallet {
+export function getDepositWallet(projectIndex: number): ethers.HDNodeWallet {
   const masterNode = getMasterNode();
 
   // Derive child wallet at index
@@ -56,7 +56,7 @@ export function getDepositWallet(projectIndex: number): ethers.Wallet {
 
   // Connect to Sonic testnet provider
   const provider = new ethers.JsonRpcProvider(SONIC_RPC_URL);
-  return derivedWallet.connect(provider);
+  return derivedWallet.connect(provider) as ethers.HDNodeWallet;
 }
 
 /**

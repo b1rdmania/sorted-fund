@@ -181,10 +181,12 @@ export class SortedClient {
 
   /**
    * Wait for UserOperation to be included on-chain
+   * Optionally reconciles gas with backend after completion
    */
   async waitForUserOp(
     userOpHash: string,
-    timeout: number = 60000
+    timeout: number = 60000,
+    reconcileGas: boolean = true
   ): Promise<TransactionReceipt> {
     const startTime = Date.now();
     const pollInterval = 2000; // 2 seconds
@@ -194,7 +196,7 @@ export class SortedClient {
         const receipt = await this.getUserOpReceipt(userOpHash);
 
         if (receipt) {
-          return {
+          const result: TransactionReceipt = {
             userOpHash: receipt.userOpHash,
             transactionHash: receipt.receipt.transactionHash,
             blockNumber: receipt.receipt.blockNumber,
@@ -205,17 +207,50 @@ export class SortedClient {
             logs: receipt.logs,
             reason: receipt.reason,
           };
+
+          // Reconcile gas with backend if enabled
+          if (reconcileGas && result.actualGasUsed) {
+            try {
+              await this.reconcileGas({
+                userOpHash,
+                actualGas: result.actualGasUsed.toString(),
+                status: result.success ? 'success' : 'failed',
+                errorMessage: result.reason,
+              });
+            } catch (error) {
+              // Log but don't fail - reconciliation is optional
+              console.warn('Gas reconciliation failed:', error);
+            }
+          }
+
+          return result;
         }
 
         // Check status
         const status = await this.getUserOpStatus(userOpHash);
 
         if (status.status === 'rejected' || status.status === 'failed') {
-          return {
+          const failedResult: TransactionReceipt = {
             userOpHash,
             success: false,
             reason: `UserOperation ${status.status}`,
           };
+
+          // Try to reconcile failure if we have the info
+          if (reconcileGas) {
+            try {
+              await this.reconcileGas({
+                userOpHash,
+                actualGas: '0',
+                status: 'failed',
+                errorMessage: failedResult.reason,
+              });
+            } catch (error) {
+              console.warn('Gas reconciliation failed:', error);
+            }
+          }
+
+          return failedResult;
         }
 
         // Wait before next poll
@@ -227,6 +262,29 @@ export class SortedClient {
     }
 
     throw new BundlerError('UserOperation timeout - not included within timeout period');
+  }
+
+  /**
+   * Reconcile gas usage with backend after transaction completes
+   * Updates sponsorship event with actual gas used
+   */
+  async reconcileGas(params: {
+    userOpHash: string;
+    actualGas: string;
+    status: 'success' | 'failed' | 'reverted';
+    errorMessage?: string;
+  }): Promise<void> {
+    try {
+      await this.backendClient.post('/sponsor/reconcile', params);
+    } catch (error: any) {
+      if (error.response?.data) {
+        throw new AuthorizationError(
+          error.response.data.error || 'Gas reconciliation failed',
+          error.response.data
+        );
+      }
+      throw new AuthorizationError('Failed to reconcile gas', error.message);
+    }
   }
 
   /**
