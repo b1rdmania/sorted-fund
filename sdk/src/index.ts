@@ -5,6 +5,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
+import { ethers } from 'ethers';
 import {
   SortedConfig,
   AuthorizeParams,
@@ -17,19 +18,27 @@ import {
   AuthorizationError,
   BundlerError,
 } from './types';
+import { UserOperationBuilder } from './userOpBuilder';
 
 export * from './types';
+export * from './userOpBuilder';
 
 export class SortedClient {
   private config: SortedConfig;
   private backendClient: AxiosInstance;
   private pimlicoClient?: AxiosInstance;
+  private provider?: ethers.Provider;
+  private userOpBuilder?: UserOperationBuilder;
+  private entryPointAddress: string;
 
   constructor(config: SortedConfig) {
     this.config = {
       chainId: 14601, // Sonic testnet default
+      entryPointAddress: '0x0000000071727de22e5e9d8baf0edac6f37da032', // EntryPoint v0.7
       ...config,
     };
+
+    this.entryPointAddress = this.config.entryPointAddress!;
 
     // Backend API client
     this.backendClient = axios.create({
@@ -51,6 +60,12 @@ export class SortedClient {
         },
         timeout: 30000,
       });
+    }
+
+    // Provider and UserOperation builder (if provider is provided)
+    if (this.config.provider) {
+      this.provider = this.config.provider;
+      this.userOpBuilder = new UserOperationBuilder(this.provider);
     }
   }
 
@@ -217,15 +232,70 @@ export class SortedClient {
   /**
    * High-level helper: Send a sponsored transaction
    * Handles the full flow: authorize → build UserOp → submit → wait for receipt
+   *
+   * This implementation works with SimpleAccount (ERC-4337 v0.7)
    */
   async sendSponsoredTx(params: SponsoredTxParams): Promise<TransactionReceipt> {
-    // This is a simplified implementation
-    // In a real SDK, you'd integrate with a smart account library like permissionless.js
-    // For now, this demonstrates the flow
-    throw new Error(
-      'sendSponsoredTx requires smart account integration (e.g., permissionless.js). ' +
-      'Use authorize() + submitUserOperation() directly with your account abstraction library.'
+    if (!this.userOpBuilder) {
+      throw new Error('Provider not configured. Pass provider in SortedConfig to use sendSponsoredTx()');
+    }
+
+    if (!this.pimlicoClient) {
+      throw new Error('Pimlico API key not configured. Pass pimlicoApiKey in SortedConfig.');
+    }
+
+    // Step 1: Get nonce for smart account
+    const nonce = params.nonce ?? await this.userOpBuilder.getNonce(
+      this.entryPointAddress,
+      params.account
     );
+
+    // Step 2: Encode execute call for SimpleAccount
+    // execute(address dest, uint256 value, bytes calldata func)
+    const callData = this.userOpBuilder.encodeExecuteCall(
+      params.target,
+      params.value ?? BigInt(0),
+      params.data
+    );
+
+    // Step 3: Authorize sponsorship with backend
+    const authResponse = await this.authorize({
+      projectId: params.projectId,
+      user: params.account,
+      target: params.target,
+      selector: params.selector,
+      estimatedGas: params.estimatedGas ?? 500000,
+      clientNonce: Date.now().toString(),
+    });
+
+    // Step 4: Build UserOperation with paymaster data
+    let userOp = await this.userOpBuilder.buildUserOp({
+      sender: params.account,
+      nonce,
+      callData,
+      paymasterAndData: authResponse.paymasterAndData,
+      callGasLimit: BigInt(200000),
+      verificationGasLimit: BigInt(300000),
+      preVerificationGas: BigInt(50000),
+    });
+
+    // Step 5: Sign UserOperation
+    const signature = await this.userOpBuilder.signUserOp(
+      userOp,
+      params.accountSigner,
+      this.entryPointAddress,
+      this.config.chainId!
+    );
+
+    userOp.signature = signature;
+
+    // Step 6: Submit to Pimlico bundler
+    const userOpHash = await this.submitUserOperation(userOp);
+
+    // Step 7: Wait for confirmation
+    const receipt = await this.waitForUserOp(userOpHash);
+
+    return receipt;
   }
 
   /**

@@ -1,54 +1,108 @@
 # @sorted/sdk
 
-Official TypeScript SDK for [Sorted.fund](https://sorted.fund) - Gasless transactions on Sonic testnet.
+Official TypeScript SDK for [Sorted.fund](https://github.com/b1rdmania/sorted-fund) - Gasless transactions on Sonic testnet using ERC-4337 Account Abstraction.
+
+## Features
+
+- ✅ **High-level API** - Send gasless transactions with one function call (`sendSponsoredTx`)
+- ✅ **Low-level API** - Full control with `authorize()` + manual UserOperation building
+- ✅ **ERC-4337 v0.7** - Complete support for latest Account Abstraction standard
+- ✅ **Pimlico Integration** - Built-in bundler support with status polling
+- ✅ **UserOperation Builder** - Helper class for building and signing UserOperations
+- ✅ **Type-Safe** - Full TypeScript support with comprehensive types
+- ✅ **Error Handling** - Custom error classes with detailed information
 
 ## Installation
 
 ```bash
-npm install @sorted/sdk
+npm install @sorted/sdk ethers
 # or
-yarn add @sorted/sdk
+yarn add @sorted/sdk ethers
 ```
 
 ## Quick Start
 
+### High-Level API (Easiest)
+
 ```typescript
+import { ethers } from 'ethers';
 import { SortedClient } from '@sorted/sdk';
 
-// Initialize the client
+// 1. Setup provider and account owner
+const provider = new ethers.JsonRpcProvider('https://rpc.testnet.soniclabs.com');
+const accountOwner = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+
+// 2. Initialize SDK
 const sorted = new SortedClient({
-  apiKey: 'sk_sorted_your_api_key_here',
-  backendUrl: 'http://localhost:3000', // or your backend URL
-  pimlicoApiKey: 'your_pimlico_api_key', // optional for bundler operations
-  chainId: 14601, // Sonic testnet (default)
+  apiKey: process.env.SORTED_API_KEY!,
+  backendUrl: 'http://localhost:3000',
+  pimlicoApiKey: process.env.PIMLICO_API_KEY!,
+  chainId: 14601,
+  provider, // Required for sendSponsoredTx()
 });
 
-// Authorize a sponsorship
-const authorization = await sorted.authorize({
-  projectId: 'my-game',
-  user: '0xUserSmartAccountAddress',
-  target: '0xTargetContractAddress',
-  selector: '0x12345678', // function selector
-  estimatedGas: 200000,
-  clientNonce: '0x1',
+// 3. Prepare your transaction
+const targetContract = '0xYourContractAddress';
+const iface = new ethers.Interface(['function yourFunction()']);
+const callData = iface.encodeFunctionData('yourFunction');
+
+// 4. Send gasless transaction - handles everything!
+const receipt = await sorted.sendSponsoredTx({
+  projectId: 'your-project-id',
+  account: '0xYourSmartAccountAddress',
+  accountSigner: accountOwner,
+  target: targetContract,
+  selector: '0xYourFunctionSelector',
+  data: callData,
 });
 
-console.log('paymasterAndData:', authorization.paymasterAndData);
-// Use this in your UserOperation!
+console.log(`✅ Transaction confirmed: ${receipt.transactionHash}`);
+console.log(`Gas sponsored: ${receipt.actualGasCost} wei`);
 ```
 
-## Features
+### Low-Level API (Advanced)
 
-✅ **Authorization** - Get signed `paymasterAndData` from Sorted backend
-✅ **Pimlico Integration** - Submit UserOperations to bundler
-✅ **Receipt Tracking** - Wait for transaction confirmation
-✅ **Gas Estimation** - Estimate UserOp gas via Pimlico
-✅ **Error Handling** - Custom error types with details
-✅ **TypeScript** - Full type safety
+For more control, build UserOperations manually:
+
+```typescript
+import { SortedClient, UserOperationBuilder } from '@sorted/sdk';
+
+const sorted = new SortedClient({
+  apiKey: 'sk_sorted_your_api_key_here',
+  backendUrl: 'http://localhost:3000',
+  pimlicoApiKey: 'your_pimlico_api_key',
+});
+
+// Step 1: Authorize sponsorship
+const auth = await sorted.authorize({
+  projectId: 'my-game',
+  user: '0xSmartAccountAddress',
+  target: '0xTargetContract',
+  selector: '0x12345678',
+  estimatedGas: 200000,
+  clientNonce: Date.now().toString(),
+});
+
+// Step 2: Build and sign UserOperation with your smart account library
+// (using permissionless.js, ethers, etc.)
+const userOp = {
+  // ... build UserOperation
+  paymasterAndData: auth.paymasterAndData, // ⭐ From Sorted!
+};
+
+// Step 3: Submit to bundler
+const userOpHash = await sorted.submitUserOperation(userOp);
+
+// Step 4: Wait for confirmation
+const receipt = await sorted.waitForUserOp(userOpHash);
+console.log(`Transaction hash: ${receipt.transactionHash}`);
+```
 
 ## API Reference
 
-### Constructor
+### SortedClient
+
+#### Constructor
 
 ```typescript
 new SortedClient(config: SortedConfig)
@@ -57,14 +111,80 @@ new SortedClient(config: SortedConfig)
 **Config:**
 ```typescript
 interface SortedConfig {
-  apiKey: string;          // Your Sorted API key
-  backendUrl: string;      // Sorted backend URL
-  pimlicoApiKey?: string;  // Pimlico bundler API key (optional)
-  chainId?: number;        // Chain ID (default: 14601 for Sonic testnet)
+  apiKey: string;                // Your Sorted API key
+  backendUrl: string;            // Sorted backend URL
+  pimlicoApiKey?: string;        // Pimlico bundler API key (optional)
+  chainId?: number;              // Chain ID (default: 14601 for Sonic testnet)
+  provider?: ethers.Provider;    // Optional: for sendSponsoredTx() and UserOpBuilder
+  entryPointAddress?: string;    // Optional: EntryPoint v0.7 address
 }
 ```
 
 ### Methods
+
+#### `sendSponsoredTx(params: SponsoredTxParams): Promise<TransactionReceipt>`
+
+**High-level helper** that handles the complete gasless transaction flow:
+1. Fetches account nonce from EntryPoint
+2. Encodes execute call for SimpleAccount
+3. Authorizes with backend
+4. Builds UserOperation
+5. Signs with account owner
+6. Submits to Pimlico bundler
+7. Waits for confirmation
+
+**Requirements:**
+- `provider` must be set in config
+- `pimlicoApiKey` must be set in config
+
+**Params:**
+```typescript
+interface SponsoredTxParams {
+  projectId: string;                 // Your project ID
+  account: string;                   // Smart account address
+  accountSigner: ethers.Signer;      // EOA that owns the smart account
+  target: string;                    // Contract address to call
+  selector: string;                  // Function selector (e.g., "0xd09de08a")
+  data: string;                      // Encoded function call data
+  value?: bigint;                    // ETH value to send (default: 0n)
+  nonce?: bigint;                    // Optional: account nonce (fetched if not provided)
+  estimatedGas?: number;             // Optional: for authorization (default: 500000)
+}
+```
+
+**Returns:**
+```typescript
+interface TransactionReceipt {
+  userOpHash: string;
+  transactionHash?: string;
+  blockNumber?: number;
+  blockHash?: string;
+  success: boolean;
+  actualGasCost?: bigint;           // Gas cost in wei
+  actualGasUsed?: bigint;           // Gas units used
+  logs?: any[];
+  reason?: string;                  // If failed
+}
+```
+
+**Example:**
+```typescript
+const targetContract = '0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3';
+const iface = new ethers.Interface(['function increment()']);
+const callData = iface.encodeFunctionData('increment');
+
+const receipt = await sorted.sendSponsoredTx({
+  projectId: 'test-game',
+  account: '0x4BEfFA7558375a0f8e55a4eABbE9a53F661E5506',
+  accountSigner: wallet,
+  target: targetContract,
+  selector: '0xd09de08a', // increment()
+  data: callData,
+});
+
+console.log(`Confirmed in block ${receipt.blockNumber}`);
+console.log(`Gas sponsored: ${receipt.actualGasCost} wei`);
+```
 
 #### `authorize(params: AuthorizeParams): Promise<AuthorizeResponse>`
 

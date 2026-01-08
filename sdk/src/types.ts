@@ -2,12 +2,16 @@
  * SDK Type Definitions
  */
 
+import { ethers } from 'ethers';
+
 // Configuration
 export interface SortedConfig {
   apiKey: string;
   backendUrl: string;
   pimlicoApiKey?: string;
   chainId?: number;
+  provider?: ethers.Provider; // Optional: RPC provider for on-chain operations
+  entryPointAddress?: string; // Optional: EntryPoint contract address (defaults to v0.7)
 }
 
 // Authorization
@@ -42,11 +46,15 @@ export interface UserOperation {
 
 // Sponsored Transaction
 export interface SponsoredTxParams {
+  projectId: string; // Project ID for authorization
   account: string; // Smart account address
+  accountSigner: ethers.Signer; // Signer for the smart account (EOA that owns it)
   target: string; // Contract to call
+  selector: string; // Function selector (e.g., "0xd09de08a")
   value?: bigint; // ETH value (usually 0)
   data: string; // Call data
   nonce?: bigint; // Optional nonce (fetched if not provided)
+  estimatedGas?: number; // Optional: estimated gas for authorization
 }
 
 // Transaction Receipt
