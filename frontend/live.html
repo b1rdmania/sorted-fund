@@ -195,7 +195,7 @@
         <button id="executeBtn" onclick="executeGaslessTransaction()">
           ► EXECUTE GASLESS TRANSACTION NOW
         </button>
-        <div style="margin-top: 15px; font-size: 0.9em; color: #00aa00;">
+        <div id="statusMessage" style="margin-top: 15px; font-size: 0.9em; color: #00aa00;">
           This will increment the counter on-chain WITHOUT you paying gas
         </div>
       </div>
@@ -314,10 +314,17 @@
 
     // Execute gasless transaction
     async function executeGaslessTransaction() {
-      if (isExecuting) return;
+      if (isExecuting) {
+        log('> Transaction already in progress, please wait...', 'info');
+        return;
+      }
 
       isExecuting = true;
-      document.getElementById('executeBtn').disabled = true;
+      const btn = document.getElementById('executeBtn');
+      const statusMsg = document.getElementById('statusMessage');
+      btn.disabled = true;
+      btn.textContent = '⏳ TRANSACTION IN PROGRESS...';
+      statusMsg.innerHTML = '<span style="color: #ffaa00;">⚠ Please wait, transaction processing (~30 seconds)...</span>';
 
       try {
         log('═══════════════════════════════════════════════════', 'prompt');
@@ -474,16 +481,41 @@
         log('', 'info');
         log('═══════════════════════════════════════════════════', 'prompt');
 
+        // Update status message
+        statusMsg.innerHTML = '<span style="color: #00ff00;">✓ Transaction successful! Counter incremented with ZERO gas cost!</span>';
+
         // Reload state
-        setTimeout(() => loadState(), 2000);
+        setTimeout(() => {
+          loadState();
+          statusMsg.innerHTML = '<span style="color: #00aa00;">Ready to execute another transaction</span>';
+        }, 3000);
 
       } catch (error) {
         log('', 'info');
         log(`✗ Transaction failed: ${error.message}`, 'error');
+
+        // Check for specific error
+        if (error.message.includes('AA25') || error.message.includes('same sender and nonce')) {
+          log('', 'info');
+          log('💡 TIP: Another transaction is still processing.', 'info');
+          log('   Wait for it to complete, then refresh the page.', 'info');
+          statusMsg.innerHTML = '<span style="color: #ff6600;">⚠ Please refresh the page and try again</span>';
+        } else {
+          statusMsg.innerHTML = '<span style="color: #ff0000;">✗ Transaction failed - check terminal for details</span>';
+        }
+
         log('═══════════════════════════════════════════════════', 'prompt');
       } finally {
         isExecuting = false;
-        document.getElementById('executeBtn').disabled = false;
+        btn.disabled = false;
+        btn.textContent = '► EXECUTE GASLESS TRANSACTION NOW';
+
+        // If success, add cooldown
+        if (!btn.textContent.includes('PROGRESS')) {
+          setTimeout(() => {
+            statusMsg.innerHTML = '<span style="color: #00aa00;">Ready to execute another transaction</span>';
+          }, 2000);
+        }
       }
     }
 
