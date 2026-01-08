@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Keys - Sorted.fund</title>
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">⛽ SORTED.FUND</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="api-keys.html" class="active">API Keys</a></li>
+      <li><a href="analytics.html">Analytics</a></li>
+      <li><a href="funding.html">Funding</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Project Selector -->
+    <div class="project-selector">
+      <span class="project-selector-label">PROJECT:</span>
+      <select id="projectSelector">
+        <option value="">Loading...</option>
+      </select>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">API Keys</h1>
+        <p class="page-subtitle">Manage authentication keys for your project</p>
+      </div>
+      <div class="page-actions">
+        <button onclick="openGenerateKeyModal()">🔑 Generate New Key</button>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <div class="info-box-title">🔐 API Key Security</div>
+      <div>
+        API keys authenticate your application to the Sorted.fund backend.
+        Keep them secret! Never commit keys to git or expose them in client-side code.
+        Keys are only shown once at creation - save them securely.
+      </div>
+    </div>
+
+    <!-- API Keys Table -->
+    <div class="panel">
+      <div class="panel-header">🔑 YOUR API KEYS</div>
+      <div class="panel-content p-0">
+        <div id="apiKeysContainer">
+          <div class="loading" style="padding: var(--spacing-lg);">Loading API keys</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Info Panel -->
+    <div class="panel">
+      <div class="panel-header">📖 HOW TO USE API KEYS</div>
+      <div class="panel-content">
+        <h3>Authorization Header</h3>
+        <p class="text-muted">Include your API key in the Authorization header:</p>
+        <div class="code-block">
+fetch('http://localhost:3000/sponsor/authorize', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY_HERE'
+  },
+  body: JSON.stringify({
+    projectId: '<span id="exampleProjectId">test-game</span>',
+    user: '0x...',
+    target: '0x...',
+    selector: '0x...',
+    estimatedGas: 500000,
+    clientNonce: '0x...',
+    chainId: 14601
+  })
+})
+        </div>
+
+        <h3 style="margin-top: var(--spacing-lg);">Rate Limits</h3>
+        <p class="text-muted">
+          Each API key has a rate limit (requests per minute). Default is 100 req/min.
+          If you exceed the limit, you'll receive a 429 error.
+        </p>
+
+        <h3 style="margin-top: var(--spacing-lg);">Security Best Practices</h3>
+        <ul style="margin-left: var(--spacing-lg); color: var(--color-text-secondary);">
+          <li>Store keys in environment variables (.env file)</li>
+          <li>Never commit keys to version control</li>
+          <li>Rotate keys regularly (every 90 days)</li>
+          <li>Use different keys for dev/staging/production</li>
+          <li>Revoke compromised keys immediately</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate Key Modal -->
+  <div id="generateKeyModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Generate New API Key</h2>
+        <button class="modal-close" onclick="closeGenerateKeyModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="rateLimitInput">Rate Limit (requests per minute)</label>
+          <input type="number" id="rateLimitInput" value="100" min="1" max="1000">
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-box-title">⚠️ Important</div>
+          <div>
+            The API key will only be shown <strong>once</strong>.
+            Make sure to copy and save it securely before closing this window.
+          </div>
+        </div>
+
+        <div id="generatedKeyDisplay" class="hidden" style="margin-top: var(--spacing-lg);">
+          <div class="alert alert-success">
+            ✓ API key generated successfully!
+          </div>
+
+          <div class="form-group">
+            <label>Your API Key</label>
+            <div style="display: flex; gap: var(--spacing-sm);">
+              <input type="text" id="generatedKeyValue" readonly style="margin-bottom: 0; font-family: var(--font-mono); font-size: 12px;">
+              <button onclick="copyApiKey()" class="btn-secondary" style="white-space: nowrap;">
+                📋 Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="warning-box" style="margin-top: var(--spacing-md);">
+            <strong>Save this key now!</strong> You won't be able to see it again.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeGenerateKeyModal()" class="btn-secondary">Close</button>
+        <button id="generateKeyBtn" onclick="generateApiKey()">Generate Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revoke Key Modal -->
+  <div id="revokeKeyModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Revoke API Key</h2>
+        <button class="modal-close" onclick="closeRevokeKeyModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-error">
+          ⚠️ This action cannot be undone!
+        </div>
+        <p>
+          Are you sure you want to revoke this API key?
+        </p>
+        <div class="code-block">
+          Key: <span id="revokeKeyPreview">--</span>
+        </div>
+        <p class="text-muted">
+          Applications using this key will immediately stop working.
+          You'll need to generate a new key and update your applications.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeRevokeKeyModal()" class="btn-secondary">Cancel</button>
+        <button id="confirmRevokeBtn" onclick="confirmRevokeKey()" class="btn-danger">Revoke Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    const CONFIG = {
+      DEFAULT_PROJECT_ID: 'test-game',
+    };
+
+    let currentProjectId = CONFIG.DEFAULT_PROJECT_ID;
+    let currentRevokeKeyId = null;
+
+    // Initialize
+    async function init() {
+      try {
+        await loadProjects();
+        await loadApiKeys();
+      } catch (error) {
+        console.error('Initialization error:', error);
+        showError('Failed to initialize page: ' + error.message);
+      }
+    }
+
+    // Load projects
+    async function loadProjects() {
+      try {
+        const projects = await api.getAllProjects();
+        const selector = document.getElementById('projectSelector');
+
+        selector.innerHTML = projects.map(p =>
+          `<option value="${p.id}" ${p.id === currentProjectId ? 'selected' : ''}>
+            ${p.name} (${p.id})
+          </option>`
+        ).join('');
+
+        selector.addEventListener('change', (e) => {
+          currentProjectId = e.target.value;
+          loadApiKeys();
+        });
+
+        document.getElementById('exampleProjectId').textContent = currentProjectId;
+      } catch (error) {
+        console.error('Failed to load projects:', error);
+      }
+    }
+
+    // Load API keys
+    async function loadApiKeys() {
+      try {
+        const keys = await api.getApiKeys(currentProjectId);
+        displayApiKeys(keys);
+      } catch (error) {
+        console.error('Failed to load API keys:', error);
+        document.getElementById('apiKeysContainer').innerHTML =
+          '<div class="loading text-error" style="padding: var(--spacing-lg);">Failed to load API keys</div>';
+      }
+    }
+
+    // Display API keys
+    function displayApiKeys(keys) {
+      const container = document.getElementById('apiKeysContainer');
+
+      if (!keys || keys.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔑</div>
+            <div class="empty-state-message">No API keys yet</div>
+            <div class="text-muted font-small">Generate your first API key to get started</div>
+            <button onclick="openGenerateKeyModal()" style="margin-top: var(--spacing-md);">
+              Generate API Key
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHTML = `
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Key Preview</th>
+                <th>Rate Limit</th>
+                <th>Issued</th>
+                <th>Last Used</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${keys.map(key => `
+                <tr>
+                  <td><code>${key.key_preview}...</code></td>
+                  <td>${key.rate_limit} req/min</td>
+                  <td>${formatDate(key.issued_at)}</td>
+                  <td>${key.last_used_at ? formatRelativeTime(key.last_used_at) : 'Never'}</td>
+                  <td>
+                    <span class="badge ${key.revoked_at ? 'badge-error' : 'badge-success'}">
+                      ${key.revoked_at ? 'Revoked' : 'Active'}
+                    </span>
+                  </td>
+                  <td>
+                    ${!key.revoked_at ? `
+                      <button onclick="openRevokeKeyModal(${key.id}, '${key.key_preview}')"
+                              class="btn-sm btn-danger">
+                        Revoke
+                      </button>
+                    ` : '<span class="text-muted">—</span>'}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
+
+    // Generate Key Modal
+    function openGenerateKeyModal() {
+      document.getElementById('generateKeyModal').classList.remove('hidden');
+      document.getElementById('generatedKeyDisplay').classList.add('hidden');
+      document.getElementById('rateLimitInput').value = 100;
+      document.getElementById('generateKeyBtn').disabled = false;
+    }
+
+    function closeGenerateKeyModal() {
+      document.getElementById('generateKeyModal').classList.add('hidden');
+    }
+
+    // Generate API key
+    async function generateApiKey() {
+      const rateLimit = parseInt(document.getElementById('rateLimitInput').value);
+      const btn = document.getElementById('generateKeyBtn');
+
+      if (rateLimit < 1 || rateLimit > 1000) {
+        showError('Rate limit must be between 1 and 1000');
+        return;
+      }
+
+      try {
+        setButtonLoading(btn, 'Generating...');
+
+        const result = await api.generateApiKey(currentProjectId, { rateLimit });
+
+        // Show the generated key
+        document.getElementById('generatedKeyValue').value = result.apiKey;
+        document.getElementById('generatedKeyDisplay').classList.remove('hidden');
+
+        // Disable generate button (key already generated)
+        btn.disabled = true;
+        btn.textContent = 'Key Generated';
+
+        // Reload keys list
+        await loadApiKeys();
+
+        showSuccess('API key generated successfully! Make sure to copy it now.');
+      } catch (error) {
+        console.error('Failed to generate API key:', error);
+        showError('Failed to generate API key: ' + error.message);
+        unsetButtonLoading(btn);
+      }
+    }
+
+    // Copy API key
+    async function copyApiKey() {
+      const keyValue = document.getElementById('generatedKeyValue').value;
+      const success = await copyToClipboard(keyValue);
+
+      if (success) {
+        showSuccess('API key copied to clipboard!');
+      } else {
+        showError('Failed to copy to clipboard');
+      }
+    }
+
+    // Revoke Key Modal
+    function openRevokeKeyModal(keyId, keyPreview) {
+      currentRevokeKeyId = keyId;
+      document.getElementById('revokeKeyPreview').textContent = keyPreview + '...';
+      document.getElementById('revokeKeyModal').classList.remove('hidden');
+    }
+
+    function closeRevokeKeyModal() {
+      document.getElementById('revokeKeyModal').classList.add('hidden');
+      currentRevokeKeyId = null;
+    }
+
+    // Confirm revoke key
+    async function confirmRevokeKey() {
+      if (!currentRevokeKeyId) return;
+
+      const btn = document.getElementById('confirmRevokeBtn');
+
+      try {
+        setButtonLoading(btn, 'Revoking...');
+
+        // Note: Backend doesn't have revoke endpoint yet, we'll need to add it
+        // For now, just show error
+        showError('Revoke functionality coming soon - backend endpoint needed');
+
+        closeRevokeKeyModal();
+        // await loadApiKeys();
+      } catch (error) {
+        console.error('Failed to revoke key:', error);
+        showError('Failed to revoke key: ' + error.message);
+      } finally {
+        unsetButtonLoading(btn);
+      }
+    }
+
+    // Initialize on load
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>

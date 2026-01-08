@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Allowlist - Sorted.fund</title>
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">⛽ SORTED.FUND</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="api-keys.html">API Keys</a></li>
+      <li><a href="analytics.html">Analytics</a></li>
+      <li><a href="funding.html">Funding</a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Project Selector -->
+    <div class="project-selector">
+      <span class="project-selector-label">PROJECT:</span>
+      <select id="projectSelector">
+        <option value="">Loading...</option>
+      </select>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Allowlist</h1>
+        <p class="page-subtitle">Control which contracts and functions can be sponsored</p>
+      </div>
+      <div class="page-actions">
+        <button onclick="openAddEntryModal()">✅ Add Entry</button>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <div class="info-box-title">🛡️ How Allowlists Work</div>
+      <div>
+        The allowlist specifies which smart contract functions your gas station will sponsor.
+        Only transactions calling allowlisted contract addresses + function selectors will be approved.
+        This prevents abuse and controls your gas spending.
+      </div>
+    </div>
+
+    <!-- Current Allowlist -->
+    <div class="panel">
+      <div class="panel-header">✅ ALLOWLIST ENTRIES</div>
+      <div class="panel-content p-0">
+        <div id="allowlistContainer">
+          <div class="loading" style="padding: var(--spacing-lg);">Loading allowlist</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Find Selectors -->
+    <div class="panel">
+      <div class="panel-header">📖 HOW TO FIND FUNCTION SELECTORS</div>
+      <div class="panel-content">
+        <h3>Method 1: From Contract ABI</h3>
+        <p class="text-muted">If you have the contract ABI:</p>
+        <div class="code-block">
+const iface = new ethers.Interface(ABI);
+const selector = iface.getFunction('functionName').selector;
+// Returns: "0x12345678"
+        </div>
+
+        <h3 style="margin-top: var(--spacing-lg);">Method 2: Manual Calculation</h3>
+        <p class="text-muted">Function selector = first 4 bytes of keccak256 hash:</p>
+        <div class="code-block">
+import { keccak256, toUtf8Bytes } from 'ethers';
+
+const signature = 'increment()';  // Function signature
+const hash = keccak256(toUtf8Bytes(signature));
+const selector = hash.slice(0, 10);  // 0x + 8 hex chars
+// Example: "0xd09de08a"
+        </div>
+
+        <h3 style="margin-top: var(--spacing-lg);">Common Function Selectors</h3>
+        <table class="data-table" style="margin-top: var(--spacing-sm);">
+          <thead>
+            <tr>
+              <th>Function</th>
+              <th>Selector</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>transfer(address,uint256)</code></td>
+              <td><code>0xa9059cbb</code></td>
+            </tr>
+            <tr>
+              <td><code>approve(address,uint256)</code></td>
+              <td><code>0x095ea7b3</code></td>
+            </tr>
+            <tr>
+              <td><code>mint(address,uint256)</code></td>
+              <td><code>0x40c10f19</code></td>
+            </tr>
+            <tr>
+              <td><code>increment()</code></td>
+              <td><code>0xd09de08a</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Entry Modal -->
+  <div id="addEntryModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Add Allowlist Entry</h2>
+        <button class="modal-close" onclick="closeAddEntryModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="contractAddressInput">
+            Contract Address
+            <span class="text-muted">(0x + 40 hex characters)</span>
+          </label>
+          <input
+            type="text"
+            id="contractAddressInput"
+            placeholder="0x..."
+            pattern="0x[a-fA-F0-9]{40}"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="functionSelectorInput">
+            Function Selector
+            <span class="text-muted">(0x + 8 hex characters)</span>
+          </label>
+          <input
+            type="text"
+            id="functionSelectorInput"
+            placeholder="0x12345678"
+            pattern="0x[a-fA-F0-9]{8}"
+          >
+        </div>
+
+        <div class="info-box">
+          <strong>Example:</strong><br>
+          Contract: <code>0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3</code><br>
+          Selector: <code>0xd09de08a</code> (increment function)
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeAddEntryModal()" class="btn-secondary">Cancel</button>
+        <button id="addEntryBtn" onclick="addAllowlistEntry()">Add Entry</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Entry Modal -->
+  <div id="deleteEntryModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Delete Allowlist Entry</h2>
+        <button class="modal-close" onclick="closeDeleteEntryModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-error">
+          ⚠️ This action cannot be undone!
+        </div>
+        <p>
+          Are you sure you want to delete this allowlist entry?
+        </p>
+        <div class="code-block">
+          Contract: <span id="deleteContractAddress">--</span><br>
+          Selector: <span id="deleteFunctionSelector">--</span>
+        </div>
+        <p class="text-muted">
+          Transactions to this contract+function will no longer be sponsored.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeDeleteEntryModal()" class="btn-secondary">Cancel</button>
+        <button id="confirmDeleteBtn" onclick="confirmDeleteEntry()" class="btn-danger">Delete Entry</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    const CONFIG = {
+      DEFAULT_PROJECT_ID: 'test-game',
+    };
+
+    let currentProjectId = CONFIG.DEFAULT_PROJECT_ID;
+    let currentDeleteEntry = null;
+
+    // Initialize
+    async function init() {
+      try {
+        await loadProjects();
+        await loadAllowlist();
+      } catch (error) {
+        console.error('Initialization error:', error);
+        showError('Failed to initialize page: ' + error.message);
+      }
+    }
+
+    // Load projects
+    async function loadProjects() {
+      try {
+        const projects = await api.getAllProjects();
+        const selector = document.getElementById('projectSelector');
+
+        selector.innerHTML = projects.map(p =>
+          `<option value="${p.id}" ${p.id === currentProjectId ? 'selected' : ''}>
+            ${p.name} (${p.id})
+          </option>`
+        ).join('');
+
+        selector.addEventListener('change', (e) => {
+          currentProjectId = e.target.value;
+          loadAllowlist();
+        });
+      } catch (error) {
+        console.error('Failed to load projects:', error);
+      }
+    }
+
+    // Load allowlist
+    async function loadAllowlist() {
+      try {
+        const entries = await api.getAllowlist(currentProjectId);
+        displayAllowlist(entries);
+      } catch (error) {
+        console.error('Failed to load allowlist:', error);
+        document.getElementById('allowlistContainer').innerHTML =
+          '<div class="loading text-error" style="padding: var(--spacing-lg);">Failed to load allowlist</div>';
+      }
+    }
+
+    // Display allowlist
+    function displayAllowlist(entries) {
+      const container = document.getElementById('allowlistContainer');
+
+      if (!entries || entries.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">✅</div>
+            <div class="empty-state-message">No allowlist entries yet</div>
+            <div class="text-muted font-small">Add your first contract and function to start sponsoring gas</div>
+            <button onclick="openAddEntryModal()" style="margin-top: var(--spacing-md);">
+              Add Entry
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHTML = `
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Contract Address</th>
+                <th>Function Selector</th>
+                <th>Status</th>
+                <th>Added</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${entries.map(entry => `
+                <tr>
+                  <td>
+                    <code>${shortenAddress(entry.target_contract)}</code>
+                    <a href="https://testnet.soniclabs.com/address/${entry.target_contract}"
+                       target="_blank"
+                       class="text-info"
+                       style="margin-left: var(--spacing-xs);">
+                      ↗
+                    </a>
+                  </td>
+                  <td><code>${entry.function_selector}</code></td>
+                  <td>
+                    <span class="badge ${entry.enabled ? 'badge-success' : 'badge-warning'}">
+                      ${entry.enabled ? 'Enabled' : 'Disabled'}
+                    </span>
+                  </td>
+                  <td>${formatDate(entry.created_at)}</td>
+                  <td>
+                    <button onclick="openDeleteEntryModal('${entry.target_contract}', '${entry.function_selector}')"
+                            class="btn-sm btn-danger">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
+
+    // Add Entry Modal
+    function openAddEntryModal() {
+      document.getElementById('addEntryModal').classList.remove('hidden');
+      document.getElementById('contractAddressInput').value = '';
+      document.getElementById('functionSelectorInput').value = '';
+    }
+
+    function closeAddEntryModal() {
+      document.getElementById('addEntryModal').classList.add('hidden');
+    }
+
+    // Add allowlist entry
+    async function addAllowlistEntry() {
+      const contractAddress = document.getElementById('contractAddressInput').value.trim();
+      const functionSelector = document.getElementById('functionSelectorInput').value.trim();
+      const btn = document.getElementById('addEntryBtn');
+
+      // Validate inputs
+      if (!isValidAddress(contractAddress)) {
+        showError('Invalid contract address');
+        return;
+      }
+
+      if (!isValidSelector(functionSelector)) {
+        showError('Invalid function selector (must be 0x + 8 hex characters)');
+        return;
+      }
+
+      try {
+        setButtonLoading(btn, 'Adding...');
+
+        await api.addAllowlistEntry(currentProjectId, {
+          targetContract: contractAddress,
+          functionSelector: functionSelector
+        });
+
+        showSuccess('Allowlist entry added successfully!');
+        closeAddEntryModal();
+        await loadAllowlist();
+      } catch (error) {
+        console.error('Failed to add allowlist entry:', error);
+        showError('Failed to add entry: ' + error.message);
+      } finally {
+        unsetButtonLoading(btn);
+      }
+    }
+
+    // Delete Entry Modal
+    function openDeleteEntryModal(contractAddress, functionSelector) {
+      currentDeleteEntry = {
+        targetContract: contractAddress,
+        functionSelector: functionSelector
+      };
+
+      document.getElementById('deleteContractAddress').textContent = shortenAddress(contractAddress);
+      document.getElementById('deleteFunctionSelector').textContent = functionSelector;
+      document.getElementById('deleteEntryModal').classList.remove('hidden');
+    }
+
+    function closeDeleteEntryModal() {
+      document.getElementById('deleteEntryModal').classList.add('hidden');
+      currentDeleteEntry = null;
+    }
+
+    // Confirm delete entry
+    async function confirmDeleteEntry() {
+      if (!currentDeleteEntry) return;
+
+      const btn = document.getElementById('confirmDeleteBtn');
+
+      try {
+        setButtonLoading(btn, 'Deleting...');
+
+        await api.deleteAllowlistEntry(currentProjectId, currentDeleteEntry);
+
+        showSuccess('Allowlist entry deleted successfully!');
+        closeDeleteEntryModal();
+        await loadAllowlist();
+      } catch (error) {
+        console.error('Failed to delete entry:', error);
+        showError('Failed to delete entry: ' + error.message);
+      } finally {
+        unsetButtonLoading(btn);
+      }
+    }
+
+    // Initialize on load
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
