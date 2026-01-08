@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SORTED.FUND - Gasless Transactions</title>
+  <title>Sorted.fund - Demo Index</title>
   <style>
     * {
       margin: 0;
@@ -15,311 +15,166 @@
       background: #0a0a0a;
       color: #00ff00;
       font-family: 'Courier New', monospace;
-      padding: 20px;
+      padding: 40px;
       line-height: 1.6;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 800px;
       margin: 0 auto;
       border: 2px solid #00ff00;
       background: #000;
+      padding: 40px;
       box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
     }
 
-    .header {
-      background: #00ff00;
-      color: #000;
-      padding: 15px 20px;
-      font-weight: bold;
-      border-bottom: 2px solid #00ff00;
-    }
-
-    .content {
-      padding: 20px;
-    }
-
-    .status-bar {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-      padding: 15px;
-      border: 1px solid #00ff00;
-      background: rgba(0, 255, 0, 0.05);
-    }
-
-    .status-item {
-      padding: 10px;
-    }
-
-    .status-label {
-      color: #00aa00;
-      font-size: 0.9em;
-      margin-bottom: 5px;
-    }
-
-    .status-value {
-      font-size: 1.3em;
-      font-weight: bold;
-    }
-
-    .action-section {
-      margin: 20px 0;
-      padding: 15px;
-      border: 1px solid #00ff00;
-    }
-
-    button {
-      background: #00ff00;
-      color: #000;
-      border: none;
-      padding: 12px 30px;
-      font-family: 'Courier New', monospace;
-      font-size: 1em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-transform: uppercase;
-    }
-
-    button:hover {
-      background: #00aa00;
-      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-    }
-
-    button:disabled {
-      background: #333;
-      color: #666;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .terminal {
-      background: #000;
-      border: 1px solid #00ff00;
-      padding: 15px;
-      height: 400px;
-      overflow-y: auto;
-      font-size: 0.9em;
-      margin-top: 20px;
-    }
-
-    .terminal-line {
-      margin: 3px 0;
-      animation: fadeIn 0.3s;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .terminal-prompt {
+    h1 {
       color: #00ff00;
+      margin-bottom: 10px;
+      font-size: 32px;
     }
 
-    .terminal-info {
+    h2 {
       color: #00aaff;
-    }
-
-    .terminal-success {
-      color: #00ff00;
-      font-weight: bold;
-    }
-
-    .terminal-error {
-      color: #ff0000;
-      font-weight: bold;
-    }
-
-    .terminal-link {
-      color: #00aaff;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    .terminal-link:hover {
-      color: #00ff00;
-    }
-
-    .blink {
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-      0%, 49% { opacity: 1; }
-      50%, 100% { opacity: 0; }
-    }
-
-    .footer {
-      padding: 15px 20px;
-      border-top: 1px solid #00ff00;
-      font-size: 0.8em;
-      text-align: center;
-      color: #00aa00;
-    }
-
-    .warning {
-      color: #ffaa00;
-      padding: 10px;
-      border: 1px solid #ffaa00;
+      margin-top: 30px;
       margin-bottom: 15px;
-      background: rgba(255, 170, 0, 0.1);
+      font-size: 20px;
+    }
+
+    p {
+      color: #00aa00;
+      margin-bottom: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 15px;
+      padding: 15px;
+      background: rgba(0, 255, 0, 0.05);
+      border: 1px solid #00ff00;
+      transition: all 0.2s;
+    }
+
+    li:hover {
+      background: rgba(0, 255, 0, 0.1);
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    }
+
+    a {
+      color: #00ff00;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: bold;
+      display: block;
+    }
+
+    a:hover {
+      color: #00aaff;
+    }
+
+    .description {
+      color: #00aa00;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 12px;
+      margin-left: 10px;
+      background: #00ff00;
+      color: #000;
+      border-radius: 2px;
+    }
+
+    .badge-warning {
+      background: #ffaa00;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #00ff00;
+      margin: 30px 0;
+    }
+
+    .section {
+      margin-bottom: 30px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      █ SORTED.FUND - GASLESS TRANSACTION TERMINAL
+    <h1>⛽ SORTED.FUND</h1>
+    <p>Gas Station for Web3 Apps - Demo Index</p>
+
+    <hr>
+
+    <div class="section">
+      <h2>📊 Dashboard Pages (Completed)</h2>
+      <ul>
+        <li>
+          <a href="dashboard/index.html">🏠 Overview Dashboard <span class="badge">Phase 1</span></a>
+          <div class="description">Main dashboard with metrics, gas tank balance, and recent activity</div>
+        </li>
+        <li>
+          <a href="dashboard/api-keys.html">🔑 API Keys <span class="badge">Phase 2</span></a>
+          <div class="description">Generate and manage API keys for authentication</div>
+        </li>
+        <li>
+          <a href="dashboard/allowlist.html">✅ Allowlist <span class="badge">Phase 2</span></a>
+          <div class="description">Control which contracts and functions can be sponsored</div>
+        </li>
+      </ul>
     </div>
 
-    <div class="content">
-      <div class="warning" style="background: rgba(0, 170, 255, 0.1); border-color: #00aaff; color: #00aaff;">
-        💡 This shows a REAL gasless transaction that already happened on Sonic testnet
-      </div>
-
-      <div class="status-bar">
-        <div class="status-item">
-          <div class="status-label">WHAT HAPPENED</div>
-          <div class="status-value">Counter: 0 → 1</div>
-        </div>
-        <div class="status-item">
-          <div class="status-label">USER PAID</div>
-          <div class="status-value" style="color: #00ff00;">0.0 S (ZERO!)</div>
-        </div>
-      </div>
-
-      <div class="action-section">
-        <button id="viewTxBtn" onclick="viewTransaction()">
-          🔗 VIEW PROOF ON BLOCKCHAIN EXPLORER
-        </button>
-        <div style="margin-top: 15px; font-size: 0.9em; color: #00aa00;">
-          Click to see the actual transaction on Sonic testnet
-        </div>
-      </div>
-
-      <div class="terminal" id="terminal">
-        <div class="terminal-line terminal-prompt">
-          > Terminal initialized...<span class="blink">_</span>
-        </div>
-      </div>
+    <div class="section">
+      <h2>🚧 Coming Soon</h2>
+      <ul>
+        <li>
+          <a href="dashboard/funding.html">💰 Funding <span class="badge badge-warning">Phase 3</span></a>
+          <div class="description">Wallet integration and on-chain deposits</div>
+        </li>
+        <li>
+          <a href="dashboard/analytics.html">📈 Analytics <span class="badge badge-warning">Phase 4</span></a>
+          <div class="description">Detailed metrics with ASCII charts</div>
+        </li>
+        <li>
+          <a href="dashboard/projects.html">📁 Projects <span class="badge badge-warning">Phase 5</span></a>
+          <div class="description">Manage multiple projects</div>
+        </li>
+      </ul>
     </div>
 
-    <div class="footer">
+    <hr>
+
+    <div class="section">
+      <h2>🎮 Original Demos</h2>
+      <ul>
+        <li>
+          <a href="demo.html">🌟 Value Prop Demo</a>
+          <div class="description">Shows the business value (Developer + User sides)</div>
+        </li>
+        <li>
+          <a href="live.html">⚡ Live Execution Demo</a>
+          <div class="description">Execute real gasless transactions</div>
+        </li>
+        <li>
+          <a href="index-old.html">📺 Transaction Replay</a>
+          <div class="description">Replay of a past transaction</div>
+        </li>
+      </ul>
+    </div>
+
+    <hr>
+
+    <p style="text-align: center; color: #00aa00; font-size: 14px;">
       SONIC TESTNET | ERC-4337 v0.7 | POWERED BY PIMLICO
-    </div>
+    </p>
   </div>
-
-  <script>
-    // Configuration
-    const TX_HASH = '0xef679dfc09206f4c6b8358715ddc519353ce7d5a5b29fa18bf11141bb927cc2c';
-    const EXPLORER_URL = `https://testnet.soniclabs.com/tx/${TX_HASH}`;
-
-    // Terminal logging
-    function log(message, type = 'info') {
-      const terminal = document.getElementById('terminal');
-      const line = document.createElement('div');
-      line.className = `terminal-line terminal-${type}`;
-
-      const timestamp = new Date().toLocaleTimeString();
-      line.innerHTML = `<span class="terminal-prompt">[${timestamp}]</span> ${message}`;
-
-      terminal.appendChild(line);
-      terminal.scrollTop = terminal.scrollHeight;
-    }
-
-    function logLink(message, url) {
-      const terminal = document.getElementById('terminal');
-      const line = document.createElement('div');
-      line.className = 'terminal-line';
-
-      const timestamp = new Date().toLocaleTimeString();
-      line.innerHTML = `<span class="terminal-prompt">[${timestamp}]</span> ${message} <a href="${url}" target="_blank" class="terminal-link">${url}</a>`;
-
-      terminal.appendChild(line);
-      terminal.scrollTop = terminal.scrollHeight;
-    }
-
-    // View the actual transaction
-    function viewTransaction() {
-      window.open(EXPLORER_URL, '_blank');
-      log('> Opening blockchain explorer...', 'info');
-      log('🔗 Transaction: ' + TX_HASH, 'success');
-    }
-
-    // Show the transaction flow
-    function showTransactionFlow() {
-      log('═══════════════════════════════════════════════════', 'prompt');
-      log('📋 GASLESS TRANSACTION REPLAY', 'info');
-      log('═══════════════════════════════════════════════════', 'prompt');
-      log('', 'info');
-
-      setTimeout(() => {
-        log('STEP 1: User wants to increment counter', 'info');
-        log('> Counter before: 0', 'info');
-        log('> User balance: 0.01 S', 'info');
-      }, 500);
-
-      setTimeout(() => {
-        log('', 'info');
-        log('STEP 2: Request gas sponsorship from backend', 'info');
-        log('> Sending request to Sorted.fund...', 'info');
-      }, 1500);
-
-      setTimeout(() => {
-        log('✓ Sponsorship APPROVED!', 'success');
-        log('> Backend signed paymasterAndData', 'success');
-      }, 2500);
-
-      setTimeout(() => {
-        log('', 'info');
-        log('STEP 3: Build and sign UserOperation', 'info');
-        log('> Creating UserOperation...', 'info');
-      }, 3500);
-
-      setTimeout(() => {
-        log('✓ UserOperation signed by user', 'success');
-      }, 4500);
-
-      setTimeout(() => {
-        log('', 'info');
-        log('STEP 4: Submit to Pimlico bundler', 'info');
-        log('> Sending to bundler...', 'info');
-      }, 5500);
-
-      setTimeout(() => {
-        log('✓ UserOp accepted by bundler', 'success');
-        log('> Waiting for on-chain execution...', 'info');
-      }, 6500);
-
-      setTimeout(() => {
-        log('', 'info');
-        log('🎉 TRANSACTION CONFIRMED ON-CHAIN!', 'success');
-        log('', 'info');
-        log('RESULTS:', 'info');
-        log('  Counter: 0 → 1 ✓', 'success');
-        log('  User balance: 0.01 S → 0.01 S (NO CHANGE!)', 'success');
-        log('  User paid: 0.0 S (ZERO GAS!)', 'success');
-        log('  Gas used: 203,944', 'info');
-        log('  Gas cost: 0.000203944 S (paid by Sorted.fund)', 'success');
-        log('', 'info');
-        logLink('📋 Proof on blockchain:', EXPLORER_URL);
-        log('', 'info');
-        log('═══════════════════════════════════════════════════', 'prompt');
-      }, 7500);
-    }
-
-    // Initialize on load
-    window.addEventListener('load', () => {
-      log('> Ready to view gasless transaction proof', 'success');
-      log('> Click button above to view on blockchain explorer', 'info');
-      log('', 'info');
-
-      // Auto-play the transaction flow after 2 seconds
-      setTimeout(showTransactionFlow, 2000);
-    });
-  </script>
 </body>
 </html>

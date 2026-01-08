@@ -5,9 +5,8 @@
 
 :root {
   /* Colors */
-  --color-bg-primary: #0a0a0a;
+  --color-bg-primary: #000;
   --color-bg-secondary: #000;
-  --color-bg-tertiary: #1a1a1a;
   --color-text-primary: #00ff00;
   --color-text-secondary: #00aa00;
   --color-text-muted: #666;
@@ -17,32 +16,30 @@
   --color-warning: #ffaa00;
   --color-error: #ff3333;
 
-  /* Borders & Effects */
-  --border-primary: 2px solid var(--color-text-primary);
+  /* Borders */
+  --border-primary: 1px solid var(--color-text-primary);
   --border-secondary: 1px solid var(--color-text-secondary);
   --border-muted: 1px solid #333;
-  --glow-primary: 0 0 20px rgba(0, 255, 0, 0.3);
-  --glow-hover: 0 0 30px rgba(0, 255, 0, 0.5);
 
   /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
 
   /* Layout Dimensions */
-  --sidebar-width: 250px;
-  --header-height: 70px;
+  --sidebar-width: 200px;
+  --header-height: 50px;
 
   /* Typography */
   --font-mono: 'Courier New', monospace;
-  --font-size-xs: 12px;
-  --font-size-sm: 14px;
-  --font-size-base: 16px;
-  --font-size-lg: 18px;
-  --font-size-xl: 24px;
-  --font-size-2xl: 32px;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-lg: 14px;
+  --font-size-xl: 16px;
+  --font-size-2xl: 18px;
 }
 
 /* ============================================
@@ -89,9 +86,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--spacing-xl);
+  padding: 0 var(--spacing-md);
   z-index: 100;
-  box-shadow: var(--glow-primary);
 }
 
 .header-left {
@@ -101,18 +97,13 @@ body {
 }
 
 .header-brand {
-  font-size: var(--font-size-xl);
-  font-weight: bold;
+  font-size: var(--font-size-base);
+  font-weight: normal;
   color: var(--color-text-primary);
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-}
-
-.header-brand:hover {
-  color: var(--color-accent-cyan);
-  text-shadow: var(--glow-primary);
 }
 
 .header-balance {
@@ -134,9 +125,9 @@ body {
 }
 
 .balance-value {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   color: var(--color-text-primary);
-  font-weight: bold;
+  font-weight: normal;
 }
 
 .balance-value.warning {
@@ -156,19 +147,12 @@ body {
 .btn-add-funds {
   background: var(--color-text-primary);
   color: var(--color-bg-primary);
-  border: none;
-  padding: var(--spacing-sm) var(--spacing-lg);
+  border: var(--border-primary);
+  padding: var(--spacing-xs) var(--spacing-md);
   font-family: var(--font-mono);
-  font-size: var(--font-size-base);
-  font-weight: bold;
+  font-size: var(--font-size-sm);
+  font-weight: normal;
   cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-add-funds:hover {
-  background: var(--color-accent-cyan);
-  box-shadow: var(--glow-hover);
-  transform: scale(1.05);
 }
 
 /* ============================================
@@ -215,25 +199,16 @@ body {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
   color: var(--color-text-secondary);
   text-decoration: none;
-  font-size: var(--font-size-base);
-  transition: all 0.2s;
-  border-left: 3px solid transparent;
-}
-
-.sidebar-item:hover {
-  background: rgba(0, 255, 0, 0.05);
-  color: var(--color-text-primary);
-  border-left-color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  border-left: 2px solid transparent;
 }
 
 .sidebar-item.active {
-  background: rgba(0, 255, 0, 0.1);
   color: var(--color-text-primary);
   border-left-color: var(--color-text-primary);
-  font-weight: bold;
 }
 
 .sidebar-divider {
@@ -250,7 +225,7 @@ body {
 .content {
   flex: 1;
   margin-left: var(--sidebar-width);
-  padding: var(--spacing-xl);
+  padding: var(--spacing-md);
   min-height: calc(100vh - var(--header-height));
 }
 
@@ -259,19 +234,20 @@ body {
    ============================================ */
 
 .page-header {
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
   border-bottom: var(--border-muted);
 }
 
 .page-title {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-lg);
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  font-weight: normal;
 }
 
 .page-subtitle {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
