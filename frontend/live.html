@@ -334,6 +334,19 @@
         // Step 2: Request authorization
         log('', 'info');
         log('STEP 2: Requesting gas sponsorship from backend...', 'info');
+
+        // Get current gas price to estimate costs properly
+        const feeData = await provider.getFeeData();
+        const gasPrice = feeData.maxFeePerGas || ethers.BigNumber.from('2000000001');
+
+        // Estimate total gas needed (account + paymaster verification)
+        // Total = verificationGas + callGas + preVerificationGas + paymasterVerificationGas + paymasterPostOpGas
+        // = 100k + 200k + 50k + 30k + 30k = 410k, add 50% buffer
+        const estimatedGas = 600000;
+
+        log(`> Gas price: ${ethers.utils.formatUnits(gasPrice, 'gwei')} gwei`, 'info');
+        log(`> Estimated gas: ${estimatedGas}`, 'info');
+
         const authResponse = await fetch(`${CONFIG.backendUrl}/sponsor/authorize`, {
           method: 'POST',
           headers: {
@@ -345,7 +358,7 @@
             user: CONFIG.simpleAccount,
             target: CONFIG.testCounter,
             selector: CONFIG.incrementSelector,
-            estimatedGas: 450000,
+            estimatedGas: estimatedGas,
             clientNonce: ethers.utils.hexlify(nonce),
             chainId: 14601
           })
@@ -370,7 +383,6 @@
           incrementCallData
         ]);
 
-        const feeData = await provider.getFeeData();
         const userOp = {
           sender: CONFIG.simpleAccount,
           nonce: nonce,
