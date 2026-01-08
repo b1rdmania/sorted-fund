@@ -64,11 +64,15 @@ export interface GasTankRefuel {
   amount: string; // bigint as string
   timestamp: Date;
   note: string | null;
+  tx_hash: string | null; // On-chain deposit transaction hash
+  forwarded_tx_hash: string | null; // Transaction hash when forwarded to paymaster
+  status: 'pending' | 'confirmed' | 'forwarded' | 'failed';
 }
 
 export interface RefuelRequest {
   amount: string; // in wei as string
   note?: string;
+  txHash?: string; // Optional: on-chain transaction hash for tracking
 }
 
 // Sponsorship Event types

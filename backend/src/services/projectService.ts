@@ -96,10 +96,16 @@ export class ProjectService {
     try {
       // Add refuel record
       const refuelResult = await query<GasTankRefuel>(
-        `INSERT INTO gas_tank_refuels (project_id, amount, note)
-         VALUES ($1, $2, $3)
+        `INSERT INTO gas_tank_refuels (project_id, amount, note, tx_hash, status)
+         VALUES ($1, $2, $3, $4, $5)
          RETURNING *`,
-        [projectId, refuel.amount, refuel.note || null]
+        [
+          projectId,
+          refuel.amount,
+          refuel.note || null,
+          refuel.txHash || null,
+          'confirmed'
+        ]
       );
 
       // Update project balance
