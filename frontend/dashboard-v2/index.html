@@ -201,9 +201,17 @@
     </main>
   </div>
 
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
   <script>
-    // Auto-redirect to dashboard
-    window.location.href = 'gas-station.html';
+    // Check authentication and redirect
+    if (Auth.isAuthenticated()) {
+      // Already logged in - go to dashboard
+      window.location.href = 'dashboard.html';
+    } else {
+      // Not logged in - go to login page
+      window.location.href = 'login.html';
+    }
   </script>
 </body>
 </html>

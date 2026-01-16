@@ -3,18 +3,22 @@
  * REST API wrapper for backend communication
  */
 
-// Configuration
-const API_CONFIG = {
-  BASE_URL: 'http://localhost:3000',
-  TIMEOUT: 30000, // 30 seconds
-};
-
 /**
  * API Client class
  */
 class ApiClient {
-  constructor(baseUrl = API_CONFIG.BASE_URL) {
-    this.baseUrl = baseUrl;
+  constructor() {
+    // Use CONFIG from config.js if available, otherwise fallback
+    this.baseUrl = (typeof CONFIG !== 'undefined') ? CONFIG.API_BASE_URL : 'http://localhost:3000';
+    this.timeout = 30000; // 30 seconds
+  }
+
+  /**
+   * Get session token from localStorage
+   * @private
+   */
+  _getSessionToken() {
+    return localStorage.getItem('session_token');
   }
 
   /**
@@ -23,17 +27,28 @@ class ApiClient {
    */
   async _request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
+
+    // Auto-inject session token if available (unless Authorization header already provided)
+    const sessionToken = this._getSessionToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+
+    // Add session token if available and no Authorization header provided
+    if (sessionToken && !headers['Authorization']) {
+      headers['Authorization'] = `Bearer ${sessionToken}`;
+    }
+
     const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-      },
-      ...options
+      ...options,
+      headers,
+      credentials: 'include', // Include cookies
     };
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
       const response = await fetch(url, {
         ...config,
@@ -41,6 +56,20 @@ class ApiClient {
       });
 
       clearTimeout(timeoutId);
+
+      // Handle 401 Unauthorized - redirect to login
+      if (response.status === 401) {
+        // Clear session
+        localStorage.removeItem('session_token');
+        localStorage.removeItem('developer');
+
+        // Redirect to login (avoid redirect loop if already on login page)
+        if (!window.location.pathname.includes('login.html')) {
+          window.location.href = 'login.html';
+        }
+
+        throw new Error('Session expired. Please login again.');
+      }
 
       // Handle non-OK responses
       if (!response.ok) {

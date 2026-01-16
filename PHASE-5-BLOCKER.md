@@ -1,4 +1,4 @@
-# Phase 5 Blocker: EntryPoint Version Mismatch
+so # Phase 5 Blocker: EntryPoint Version Mismatch
 
 **Date:** 2026-01-07
 **Status:** ⚠️ BLOCKED - Incompatibility between our contracts and Pimlico bundler

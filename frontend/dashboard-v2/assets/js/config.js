@@ -2,9 +2,14 @@
  * Sorted.fund Dashboard V2 - Configuration
  */
 
+// Detect environment
+const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
 const CONFIG = {
-  // Backend API
-  API_BASE_URL: 'http://localhost:3000',
+  // Backend API (auto-detect environment)
+  API_BASE_URL: isProduction
+    ? 'https://sorted-backend-production.up.railway.app'  // Update this after Railway deployment
+    : 'http://localhost:3000',
 
   // Default project (single project mode for demo)
   DEFAULT_PROJECT_ID: 'test-game',

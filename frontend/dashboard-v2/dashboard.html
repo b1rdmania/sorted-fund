@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Sorted.fund</title>
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <style>
+    .dashboard-header {
+      background: var(--color-bg-secondary);
+      border-bottom: var(--border-primary);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .developer-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .developer-name {
+      font-size: var(--font-size-lg);
+      color: var(--color-text-primary);
+      text-shadow: var(--glow-primary);
+    }
+
+    .developer-email {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .btn-logout {
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid #ff0000;
+      color: #ff6666;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: var(--font-size-sm);
+      transition: all 0.3s;
+    }
+
+    .btn-logout:hover {
+      background: rgba(255, 0, 0, 0.2);
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    }
+
+    .credit-balance {
+      background: rgba(0, 255, 0, 0.1);
+      border: var(--border-primary);
+      padding: var(--spacing-xl);
+      text-align: center;
+      box-shadow: var(--glow-primary);
+    }
+
+    .credit-balance-label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-sm);
+      text-transform: uppercase;
+    }
+
+    .credit-balance-value {
+      font-size: 48px;
+      color: var(--color-text-primary);
+      font-weight: bold;
+      margin-bottom: var(--spacing-xs);
+      text-shadow: var(--glow-primary);
+      font-family: var(--font-mono);
+    }
+
+    .credit-balance-usd {
+      font-size: var(--font-size-lg);
+      color: var(--color-text-secondary);
+    }
+
+    .credit-balance-actions {
+      margin-top: var(--spacing-md);
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: center;
+    }
+
+    .btn-add-credits {
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--color-text-primary);
+      color: var(--color-bg-primary);
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: var(--font-size-md);
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .btn-add-credits:hover {
+      background: var(--color-accent-green);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--spacing-lg);
+      margin-top: var(--spacing-xl);
+    }
+
+    .action-card {
+      background: var(--color-bg-secondary);
+      border: var(--border-secondary);
+      padding: var(--spacing-xl);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: block;
+    }
+
+    .action-card:hover {
+      border-color: var(--color-accent-green);
+      box-shadow: var(--glow-primary);
+      transform: translateY(-5px);
+    }
+
+    .action-icon {
+      font-size: 48px;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .action-title {
+      font-size: var(--font-size-lg);
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-sm);
+      font-weight: bold;
+    }
+
+    .action-description {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-xl);
+    }
+
+    .stat-card {
+      background: var(--color-bg-secondary);
+      border: var(--border-secondary);
+      padding: var(--spacing-md);
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-xs);
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: var(--font-size-xl);
+      color: var(--color-text-primary);
+      font-weight: bold;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 255, 0, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--color-accent-green);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 50vh;
+      gap: var(--spacing-lg);
+    }
+
+    .loading-text {
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- LOADING STATE -->
+    <div id="loading" class="loading-container">
+      <div class="loading"></div>
+      <div class="loading-text">Loading dashboard...</div>
+    </div>
+
+    <!-- DASHBOARD CONTENT (Hidden until loaded) -->
+    <div id="dashboard-content" style="display: none;">
+      <!-- HEADER -->
+      <div class="dashboard-header">
+        <div class="header-top">
+          <div class="developer-info">
+            <div>
+              <div class="developer-name" id="developer-name">Loading...</div>
+              <div class="developer-email" id="developer-email"></div>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="btn-logout" onclick="logout()">
+              Logout
+            </button>
+          </div>
+        </div>
+
+        <!-- CREDIT BALANCE -->
+        <div class="credit-balance">
+          <div class="credit-balance-label">Your Credit Balance</div>
+          <div class="credit-balance-value" id="credit-balance">0.0000 ETH</div>
+          <div class="credit-balance-usd" id="credit-balance-usd">$0.00</div>
+          <div class="credit-balance-actions">
+            <button class="btn-add-credits" onclick="window.location.href='add-funds.html'">
+              + Add Credits
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <main style="padding: var(--spacing-xl);">
+        <h1 style="font-size: var(--font-size-xxl); color: var(--color-text-primary); margin-bottom: var(--spacing-xl);">
+          Dashboard
+        </h1>
+
+        <!-- QUICK ACTIONS -->
+        <div class="quick-actions">
+          <a href="gas-station.html" class="action-card">
+            <div class="action-icon">⛽</div>
+            <div class="action-title">Gas Station</div>
+            <div class="action-description">Manage projects and gas tanks</div>
+          </a>
+
+          <a href="access-keys.html" class="action-card">
+            <div class="action-icon">🔑</div>
+            <div class="action-title">API Keys</div>
+            <div class="action-description">Generate and manage API keys</div>
+          </a>
+
+          <a href="allowlist.html" class="action-card">
+            <div class="action-icon">✅</div>
+            <div class="action-title">Allowlist</div>
+            <div class="action-description">Control which contracts can be sponsored</div>
+          </a>
+
+          <a href="transactions.html" class="action-card">
+            <div class="action-icon">📊</div>
+            <div class="action-title">Transactions</div>
+            <div class="action-description">View transaction history and analytics</div>
+          </a>
+
+          <a href="live-demo.html" class="action-card">
+            <div class="action-icon">🎮</div>
+            <div class="action-title">Live Demo</div>
+            <div class="action-description">Test gasless transactions</div>
+          </a>
+        </div>
+
+        <!-- STATS -->
+        <h2 style="font-size: var(--font-size-xl); color: var(--color-text-primary); margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">
+          Account Stats
+        </h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Projects</div>
+            <div class="stat-value" id="total-projects">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Transactions</div>
+            <div class="stat-value" id="total-transactions">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Spent</div>
+            <div class="stat-value" id="total-spent">0 ETH</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Account Status</div>
+            <div class="stat-value" style="color: var(--color-success);" id="account-status">Active</div>
+          </div>
+        </div>
+
+        <!-- RECENT ACTIVITY -->
+        <h2 style="font-size: var(--font-size-xl); color: var(--color-text-primary); margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">
+          Recent Credit Transactions
+        </h2>
+        <div style="background: var(--color-bg-secondary); border: var(--border-secondary); padding: var(--spacing-lg);">
+          <div id="recent-transactions">
+            <p style="color: var(--color-text-muted); text-align: center;">No recent transactions</p>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    let developer = null;
+
+    // Initialize dashboard
+    async function initDashboard() {
+      // Require authentication
+      const isAuth = await Auth.requireAuth();
+      if (!isAuth) return;
+
+      // Get developer data
+      developer = Auth.getDeveloper();
+
+      // Display developer info
+      document.getElementById('developer-name').textContent = developer.name;
+      document.getElementById('developer-email').textContent = developer.email;
+
+      // Display credit balance
+      const balanceETH = Auth.formatCredits(developer.credit_balance);
+      document.getElementById('credit-balance').textContent = `${balanceETH} ETH`;
+
+      // Calculate USD (example: $2000/ETH)
+      const balanceUSD = (parseFloat(balanceETH) * 2000).toFixed(2);
+      document.getElementById('credit-balance-usd').textContent = `≈ $${balanceUSD}`;
+
+      // Display account status
+      document.getElementById('account-status').textContent = developer.status.toUpperCase();
+
+      // Load stats (placeholder for now)
+      // TODO: Add API endpoints to get these stats
+      document.getElementById('total-projects').textContent = '1';
+      document.getElementById('total-transactions').textContent = '0';
+      document.getElementById('total-spent').textContent = '0.0000 ETH';
+
+      // Hide loading, show content
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('dashboard-content').style.display = 'block';
+    }
+
+    // Logout
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        Auth.logout();
+      }
+    }
+
+    // Initialize on page load
+    initDashboard();
+  </script>
+</body>
+</html>

@@ -2,10 +2,12 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { initializeDatabase, closeDatabase } from './db/database';
 
 // Import routes
+import authRoutes from './routes/auth';
 import projectRoutes from './routes/projects';
 import sponsorRoutes from './routes/sponsor';
 import allowlistRoutes from './routes/allowlist';
@@ -20,8 +22,12 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:8081', 'http://localhost:3000'],
+  credentials: true, // Allow cookies
+})); // Enable CORS
 app.use(express.json()); // Parse JSON bodies
+app.use(cookieParser()); // Parse cookies
 app.use(morgan('combined')); // Request logging
 
 // Health check endpoint
@@ -35,6 +41,7 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // API Routes
+app.use('/auth', authRoutes);
 app.use('/projects', projectRoutes);
 app.use('/sponsor', sponsorRoutes);
 app.use('/projects', allowlistRoutes); // Allowlist routes under /projects/:id/allowlist

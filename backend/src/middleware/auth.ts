@@ -10,6 +10,7 @@ import projectService from '../services/projectService';
 export interface AuthenticatedRequest extends Request {
   apiKey?: any;
   project?: any;
+  developerId?: number; // Developer ID from project
 }
 
 /**
@@ -71,6 +72,7 @@ export async function authenticateApiKey(
     // Attach to request
     req.apiKey = validatedKey;
     req.project = project;
+    req.developerId = project.developer_id;
 
     next();
   } catch (error: any) {

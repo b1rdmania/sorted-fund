@@ -4,6 +4,8 @@
  */
 
 import { query } from '../db/database';
+import creditService from './creditService';
+import { ethers } from 'ethers';
 
 export interface ReconcileGasParams {
   userOpHash: string;
@@ -23,7 +25,7 @@ export interface GasEstimationStats {
 
 export class GasReconciliationService {
   /**
-   * Update sponsorship event with actual gas used
+   * Update sponsorship event with actual gas used and refund unused credits
    */
   async reconcileGas(params: ReconcileGasParams): Promise<void> {
     const { userOpHash, actualGas, status, errorMessage } = params;
@@ -36,7 +38,7 @@ export class GasReconciliationService {
            completed_at = NOW(),
            error_message = $3
        WHERE user_op_hash = $4
-       RETURNING id, project_id, estimated_gas, actual_gas`,
+       RETURNING id, project_id, developer_id, estimated_gas, actual_gas, max_cost`,
       [actualGas, status, errorMessage || null, userOpHash]
     );
 
@@ -47,10 +49,50 @@ export class GasReconciliationService {
     const event = result.rows[0];
     const estimatedGas = BigInt(event.estimated_gas);
     const actualGasBigInt = BigInt(event.actual_gas);
+    const maxCost = BigInt(event.max_cost);
 
     // Calculate estimation accuracy
     const difference = actualGasBigInt - estimatedGas;
     const percentDifference = Number((difference * 100n) / estimatedGas);
+
+    // Calculate actual cost (get gas price from chain)
+    let actualCost = 0n;
+    let refundAmount = 0n;
+
+    try {
+      // Get gas price at time of execution
+      const provider = new ethers.JsonRpcProvider(process.env.SONIC_RPC_URL);
+      const feeData = await provider.getFeeData();
+      const gasPrice = feeData.maxFeePerGas || feeData.gasPrice || BigInt(2000000000);
+
+      // Calculate actual cost
+      actualCost = actualGasBigInt * gasPrice;
+
+      // Calculate refund (max cost reserved - actual cost)
+      refundAmount = maxCost - actualCost;
+
+      // Refund unused credits to developer if developer_id exists and refund > 0
+      if (event.developer_id && refundAmount > 0n) {
+        await creditService.refund(
+          event.developer_id,
+          refundAmount,
+          'sponsorship_event',
+          event.id,
+          `Gas refund for ${userOpHash}: Reserved ${maxCost}, Used ${actualCost}`
+        );
+
+        console.log('Credits refunded:', {
+          userOpHash,
+          developerId: event.developer_id,
+          maxCost: maxCost.toString(),
+          actualCost: actualCost.toString(),
+          refunded: refundAmount.toString(),
+        });
+      }
+    } catch (error: any) {
+      console.error('Failed to refund credits:', error);
+      // Don't throw - reconciliation should still complete even if refund fails
+    }
 
     // Log significant discrepancies (>20% off)
     if (Math.abs(percentDifference) > 20) {
@@ -61,6 +103,9 @@ export class GasReconciliationService {
         actual: actualGasBigInt.toString(),
         difference: difference.toString(),
         percentDifference: `${percentDifference.toFixed(2)}%`,
+        maxCost: maxCost.toString(),
+        actualCost: actualCost.toString(),
+        refunded: refundAmount.toString(),
       });
     } else {
       console.log('Gas reconciled:', {
@@ -68,6 +113,9 @@ export class GasReconciliationService {
         estimated: estimatedGas.toString(),
         actual: actualGasBigInt.toString(),
         accuracy: `${(100 - Math.abs(percentDifference)).toFixed(2)}%`,
+        maxCost: maxCost.toString(),
+        actualCost: actualCost.toString(),
+        refunded: refundAmount.toString(),
       });
     }
   }

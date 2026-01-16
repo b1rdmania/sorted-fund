@@ -12,6 +12,7 @@ import {
   Allowlist,
 } from '../types';
 import projectService from './projectService';
+import creditService from './creditService';
 
 export class AuthorizationService {
   private backendSigner: ethers.Wallet;
@@ -36,8 +37,10 @@ export class AuthorizationService {
 
   /**
    * Authorize a sponsorship and generate signed paymasterAndData
+   * @param request Authorization request
+   * @param developerId Developer ID (for credit deduction)
    */
-  async authorize(request: AuthorizeRequest): Promise<AuthorizeResponse> {
+  async authorize(request: AuthorizeRequest, developerId: number): Promise<AuthorizeResponse> {
     const {
       projectId,
       chainId,
@@ -83,23 +86,22 @@ export class AuthorizationService {
     // Add 10% buffer to maxCost to account for gas price fluctuations
     const maxCost = (gasWithBuffer * gasPrice * BigInt(110)) / BigInt(100);
 
-    // Check gas tank has sufficient balance
-    const balance = await projectService.getGasTankBalance(projectId);
-    if (BigInt(balance) < maxCost) {
-      throw new Error('Insufficient gas tank balance');
+    // Check developer has sufficient credits
+    const creditBalance = await creditService.getBalance(developerId);
+    if (creditBalance < maxCost) {
+      throw new Error(
+        `Insufficient credits. Required: ${maxCost}, Available: ${creditBalance}`
+      );
     }
 
-    // Check daily cap
-    const withinCap = await projectService.checkDailyCap(projectId, maxCost.toString());
-    if (!withinCap) {
-      throw new Error('Daily cap exceeded');
-    }
-
-    // Reserve funds
-    const reserved = await projectService.reserveFunds(projectId, maxCost.toString());
-    if (!reserved) {
-      throw new Error('Failed to reserve funds from gas tank');
-    }
+    // Deduct credits from developer balance (will be refunded after reconciliation)
+    const { newBalance } = await creditService.deduct(
+      developerId,
+      maxCost,
+      'sponsorship_event',
+      undefined, // Will update with sponsorship event ID later
+      `Gas sponsorship for ${projectId}: ${target}.${selector}`
+    );
 
     // Generate expiry (1 hour from now)
     const expiry = Math.floor(Date.now() / 1000) + 3600; // 1 hour
@@ -132,6 +134,7 @@ export class AuthorizationService {
     // Record sponsorship event
     await this.recordSponsorshipEvent({
       project_id: projectId,
+      developer_id: developerId,
       sender: user,
       target,
       selector,
@@ -141,9 +144,6 @@ export class AuthorizationService {
       policy_hash: policyHash,
       expiry: new Date(expiry * 1000),
     });
-
-    // Record daily spending
-    await projectService.recordDailySpending(projectId, maxCost.toString());
 
     return {
       paymasterAndData,
@@ -289,14 +289,15 @@ export class AuthorizationService {
   /**
    * Record sponsorship event in database
    */
-  private async recordSponsorshipEvent(event: Partial<SponsorshipEvent>): Promise<void> {
+  private async recordSponsorshipEvent(event: Partial<SponsorshipEvent> & { developer_id?: number }): Promise<void> {
     await query(
       `INSERT INTO sponsorship_events
-       (project_id, sender, target, selector, estimated_gas, max_cost,
+       (project_id, developer_id, sender, target, selector, estimated_gas, max_cost,
         status, paymaster_signature, policy_hash, expiry)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         event.project_id,
+        event.developer_id || null,
         event.sender,
         event.target,
         event.selector,
