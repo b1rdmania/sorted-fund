@@ -1,11 +1,14 @@
+[variables]
+NODE_ENV = "production"
+
 [phases.setup]
-nixPkgs = ["nodejs_20", "postgresql"]
+nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["npm install"]
+cmds = ["npm ci"]
 
 [phases.build]
 cmds = ["npm run build"]
 
 [start]
-cmd = "npm start"
+cmd = "node dist/index.js"
