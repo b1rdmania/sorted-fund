@@ -23,7 +23,6 @@ services:
           name: sorted-postgres
           property: connectionString
       - key: BACKEND_SIGNER_PRIVATE_KEY
-        generateValue: true
         sync: false
       - key: ALLOWED_ORIGINS
         value: https://sorted-fund.vercel.app,http://localhost:8081
