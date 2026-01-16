@@ -80,7 +80,8 @@ export class AuthorizationService {
 
     // Add 20% buffer to gas estimate
     const gasWithBuffer = BigInt(Math.floor(estimatedGas * 1.2));
-    const maxCost = gasWithBuffer * gasPrice;
+    // Add 10% buffer to maxCost to account for gas price fluctuations
+    const maxCost = (gasWithBuffer * gasPrice * BigInt(110)) / BigInt(100);
 
     // Check gas tank has sufficient balance
     const balance = await projectService.getGasTankBalance(projectId);
