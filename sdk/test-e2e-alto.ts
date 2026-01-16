@@ -8,7 +8,7 @@ import { SortedClient } from './src/index';
 import axios from 'axios';
 
 // Configuration
-const API_KEY = 'sk_sorted_c2b9e0ece64c3e988dcad47b170dd19b5041ac1dc7e5ddd1ed33aa9e2f988271';
+const API_KEY = 'sk_sorted_e579aea9ba39f0ba7fd2098d4180ccfcc6ab70810f16dfc8c5d9dcc1f3a22a44';
 const PROJECT_ID = 'test-game';
 const BACKEND_URL = 'http://localhost:3000';
 const ALTO_BUNDLER_URL = 'http://localhost:4337'; // Local Alto bundler
@@ -186,7 +186,7 @@ async function main() {
   console.log('   4. ✅ On-chain execution (gasless!)');
   console.log('   5. ✅ Gas reconciliation');
   console.log('\n🌐 Explorer:');
-  console.log(`   https://testnet.soniclabs.com/tx/${receipt.transactionHash}\n`);
+  console.log(`   https://testnet.sonicscan.org/tx/${receipt.transactionHash}\n`);
 }
 
 main().catch((error) => {

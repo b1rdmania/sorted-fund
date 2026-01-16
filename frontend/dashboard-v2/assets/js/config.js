@@ -17,7 +17,7 @@ const CONFIG = {
   CHAIN_ID: 14601,
   CHAIN_NAME: 'Sonic Testnet',
   RPC_URL: 'https://rpc.testnet.soniclabs.com',
-  EXPLORER_URL: 'https://testnet.soniclabs.com',
+  EXPLORER_URL: 'https://testnet.sonicscan.org',
 
   // Contracts
   ENTRYPOINT_ADDRESS: '0x0000000071727De22E5E9d8BAf0edAc6f37da032',

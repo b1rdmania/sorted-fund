@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Gasless TX Test</title>
+  <style>
+    body {
+      font-family: monospace;
+      max-width: 800px;
+      margin: 50px auto;
+      background: #1a1a1a;
+      color: #0f0;
+      padding: 20px;
+    }
+    button {
+      background: #0f0;
+      color: #000;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 20px 0;
+    }
+    button:hover { background: #0c0; }
+    #output {
+      border: 1px solid #0f0;
+      padding: 15px;
+      min-height: 200px;
+      margin-top: 20px;
+    }
+    .success { color: #0f0; }
+    .error { color: #f00; }
+  </style>
+</head>
+<body>
+  <h1>🚀 Simple Gasless Transaction Test</h1>
+  <button onclick="runTest()">Execute Gasless Transaction</button>
+  <div id="output"></div>
+
+  <script>
+    const API_KEY = 'sk_sorted_e579aea9ba39f0ba7fd2098d4180ccfcc6ab70810f16dfc8c5d9dcc1f3a22a44';
+    const BACKEND_URL = 'http://localhost:3000';
+
+    function log(msg, className = '') {
+      const output = document.getElementById('output');
+      const line = document.createElement('div');
+      line.className = className;
+      line.textContent = '> ' + msg;
+      output.appendChild(line);
+    }
+
+    async function runTest() {
+      document.getElementById('output').innerHTML = '';
+
+      try {
+        log('Starting test...', 'success');
+
+        // Step 1: Get counter value
+        log('Fetching counter value...');
+        const counterResp = await fetch(`${BACKEND_URL}/blockchain/counter/0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3/0x4BEfFA7558375a0f8e55a4eABbE9a53F661E5506`);
+        const counterData = await counterResp.json();
+        log(`Current counter: ${counterData.counter}`, 'success');
+
+        // Step 2: Request authorization
+        log('Requesting authorization...');
+        const authRequest = {
+          projectId: 'test-game',
+          chainId: 14601,
+          user: '0x4BEfFA7558375a0f8e55a4eABbE9a53F661E5506',
+          target: '0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3',
+          selector: '0xd09de08a',
+          estimatedGas: 500000,
+          clientNonce: Date.now().toString()
+        };
+
+        console.log('Auth request:', authRequest);
+
+        const authResp = await fetch(`${BACKEND_URL}/sponsor/authorize`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(authRequest)
+        });
+
+        if (!authResp.ok) {
+          const error = await authResp.json();
+          throw new Error(JSON.stringify(error));
+        }
+
+        const authData = await authResp.json();
+        console.log('Auth response:', authData);
+        log('✓ Authorization received!', 'success');
+        log(`PaymasterAndData: ${authData.paymasterAndData.substring(0, 40)}...`);
+        log(`Expires: ${authData.expiresAt}`);
+
+        log('', '');
+        log('✓ TEST PASSED! Backend is working correctly.', 'success');
+        log('The frontend demo might have a caching issue.', 'success');
+
+      } catch (error) {
+        log(`✗ ERROR: ${error.message}`, 'error');
+        console.error('Full error:', error);
+      }
+    }
+  </script>
+</body>
+</html>

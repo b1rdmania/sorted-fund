@@ -273,12 +273,12 @@
   </div>
 
   <!-- Scripts -->
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/utils.js"></script>
-  <script src="assets/js/api.js"></script>
+  <script src="assets/js/config.js?v=3"></script>
+  <script src="assets/js/utils.js?v=3"></script>
+  <script src="assets/js/api.js?v=3"></script>
   <script>
     // Constants from .env (hardcoded for demo)
-    const API_KEY = 'sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092';
+    const API_KEY = 'sk_sorted_e579aea9ba39f0ba7fd2098d4180ccfcc6ab70810f16dfc8c5d9dcc1f3a22a44';
     const INCREMENT_SELECTOR = '0xd09de08a';
 
     let executing = false;
@@ -353,11 +353,29 @@
           user: CONFIG.TEST_ACCOUNT_ADDRESS,
           target: CONFIG.TEST_COUNTER_ADDRESS,
           selector: INCREMENT_SELECTOR,
-          estimatedGas: '500000',
+          estimatedGas: 500000,
           clientNonce: Date.now().toString()
         };
 
-        const authResponse = await api.requestSponsorship(authRequest, API_KEY);
+        console.log('Authorization Request:', authRequest);
+
+        // Direct fetch to bypass cached api.js
+        const authResp = await fetch(`${CONFIG.API_BASE_URL}/sponsor/authorize`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(authRequest)
+        });
+
+        if (!authResp.ok) {
+          const error = await authResp.json();
+          throw new Error(`Authorization failed: ${JSON.stringify(error)}`);
+        }
+
+        const authResponse = await authResp.json();
+        console.log('Authorization Response:', authResponse);
         addTerminalLine('✓ Authorization received', 'success');
         addTerminalLine(`PaymasterAndData: ${authResponse.paymasterAndData.substring(0, 20)}...`);
 
