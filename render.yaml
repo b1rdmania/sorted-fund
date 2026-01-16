@@ -7,11 +7,9 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install && npm run build
-    startCommand: npm start
+    startCommand: NODE_ENV=production npm start
     healthCheckPath: /health
     envVars:
-      - key: NODE_ENV
-        value: production
       - key: SONIC_RPC_URL
         value: https://rpc.testnet.soniclabs.com
       - key: SONIC_CHAIN_ID
