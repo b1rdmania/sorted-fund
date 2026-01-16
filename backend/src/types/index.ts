@@ -14,6 +14,7 @@ export interface Project {
   daily_reset_at: Date;
   created_at: Date;
   updated_at: Date;
+  developer_id?: number; // Developer who owns this project (optional for backward compatibility)
 }
 
 export interface CreateProjectRequest {
