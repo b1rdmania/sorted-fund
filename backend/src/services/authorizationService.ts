@@ -150,6 +150,7 @@ export class AuthorizationService {
       expiresAt: new Date(expiry * 1000).toISOString(),
       maxCost: '0x' + maxCost.toString(16),
       policyHash,
+      paymasterSignature: signature,
     };
   }
 

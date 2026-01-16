@@ -103,9 +103,24 @@ export class SortedClient {
   }
 
   /**
+   * Link userOpHash to sponsorship event after submission
+   */
+  async linkUserOpHash(userOpHash: string, paymasterSignature: string): Promise<void> {
+    try {
+      await this.backendClient.post('/sponsor/link', {
+        userOpHash,
+        paymasterSignature,
+      });
+    } catch (error: any) {
+      // Log but don't throw - linking is best-effort for reconciliation
+      console.warn('Failed to link userOpHash:', error.response?.data || error.message);
+    }
+  }
+
+  /**
    * Submit a UserOperation to Pimlico bundler
    */
-  async submitUserOperation(userOp: UserOperation): Promise<string> {
+  async submitUserOperation(userOp: UserOperation, paymasterSignature?: string): Promise<string> {
     if (!this.pimlicoClient) {
       throw new BundlerError('Pimlico API key not configured');
     }
@@ -128,7 +143,14 @@ export class SortedClient {
         );
       }
 
-      return response.data.result; // userOpHash
+      const userOpHash = response.data.result; // userOpHash
+
+      // Link userOpHash to sponsorship event if signature provided
+      if (paymasterSignature) {
+        await this.linkUserOpHash(userOpHash, paymasterSignature);
+      }
+
+      return userOpHash;
     } catch (error: any) {
       if (error instanceof BundlerError) throw error;
       throw new BundlerError('Failed to submit UserOperation', error.message);
@@ -348,7 +370,7 @@ export class SortedClient {
     userOp.signature = signature;
 
     // Step 6: Submit to Pimlico bundler
-    const userOpHash = await this.submitUserOperation(userOp);
+    const userOpHash = await this.submitUserOperation(userOp, authResponse.paymasterSignature);
 
     // Step 7: Wait for confirmation
     const receipt = await this.waitForUserOp(userOpHash);

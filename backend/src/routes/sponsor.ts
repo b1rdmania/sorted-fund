@@ -6,6 +6,7 @@ import { Router } from 'express';
 import { authenticateApiKey, AuthenticatedRequest } from '../middleware/auth';
 import authorizationService from '../services/authorizationService';
 import gasReconciliationService from '../services/gasReconciliationService';
+import { query } from '../db/database';
 import { AuthorizeRequest } from '../types';
 
 const router = Router();
@@ -90,6 +91,54 @@ router.post('/authorize', authenticateApiKey, async (req: AuthenticatedRequest, 
     res.status(500).json({
       error: 'Authorization failed',
       code: 'AUTHORIZATION_ERROR',
+      details: error.message,
+    });
+  }
+});
+
+/**
+ * POST /sponsor/link
+ * Link userOpHash to a sponsorship event after submission to bundler
+ */
+router.post('/link', authenticateApiKey, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { userOpHash, paymasterSignature } = req.body;
+
+    // Validate required fields
+    if (!userOpHash || !paymasterSignature) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        code: 'INVALID_REQUEST',
+        required: ['userOpHash', 'paymasterSignature'],
+      });
+    }
+
+    // Update sponsorship event with userOpHash
+    const result = await query(
+      `UPDATE sponsorship_events
+       SET user_op_hash = $1,
+           status = 'pending'
+       WHERE paymaster_signature = $2
+       RETURNING id`,
+      [userOpHash, paymasterSignature]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Sponsorship event not found for provided signature',
+        code: 'NOT_FOUND',
+      });
+    }
+
+    res.json({
+      message: 'UserOpHash linked successfully',
+      userOpHash,
+    });
+  } catch (error: any) {
+    console.error('Link userOpHash error:', error);
+    res.status(500).json({
+      error: 'Failed to link userOpHash',
+      code: 'LINK_ERROR',
       details: error.message,
     });
   }

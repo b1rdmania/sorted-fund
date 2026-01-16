@@ -29,6 +29,7 @@ export interface AuthorizeResponse {
   expiresAt: string;
   maxCost: string;
   policyHash: string;
+  paymasterSignature: string;
 }
 
 // UserOperation (ERC-4337 v0.7)

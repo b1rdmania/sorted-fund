@@ -111,6 +111,7 @@ export interface AuthorizeResponse {
   expiresAt: string; // ISO timestamp
   maxCost: string; // hex string
   policyHash: string; // hex string
+  paymasterSignature: string; // for linking userOpHash later
 }
 
 // Rate Limit types
