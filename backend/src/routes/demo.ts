@@ -10,7 +10,7 @@ const router = Router();
 
 // Rate limiting - store last request time per IP
 const rateLimitMap = new Map<string, number>();
-const RATE_LIMIT_WINDOW = 120000; // 2 minutes in milliseconds
+const RATE_LIMIT_WINDOW = 30000; // 30 seconds in milliseconds
 
 // Demo configuration
 const DEMO_CONFIG = {
