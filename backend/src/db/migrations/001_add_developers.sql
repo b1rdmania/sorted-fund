@@ -101,22 +101,28 @@ VALUES (
 ON CONFLICT (email) DO NOTHING;
 
 -- =====================================================
--- 8. LINK EXISTING TEST PROJECT TO DEMO DEVELOPER
+-- 8. LINK EXISTING TEST PROJECT TO DEMO DEVELOPER (if exists)
 -- =====================================================
 DO $$
 DECLARE
     demo_dev_id INTEGER;
+    project_exists BOOLEAN;
 BEGIN
     -- Get demo developer ID
     SELECT id INTO demo_dev_id FROM developers WHERE email = 'demo@sorted.fund';
 
-    -- Update test-game project to belong to demo developer
-    UPDATE projects
-    SET developer_id = demo_dev_id
-    WHERE id = 'test-game' AND developer_id IS NULL;
+    -- Check if test-game project exists
+    SELECT EXISTS(SELECT 1 FROM projects WHERE id = 'test-game') INTO project_exists;
 
-    -- Create developer_projects link
-    INSERT INTO developer_projects (developer_id, project_id, role)
-    VALUES (demo_dev_id, 'test-game', 'owner')
-    ON CONFLICT (developer_id, project_id) DO NOTHING;
+    IF project_exists THEN
+        -- Update test-game project to belong to demo developer
+        UPDATE projects
+        SET developer_id = demo_dev_id
+        WHERE id = 'test-game' AND developer_id IS NULL;
+
+        -- Create developer_projects link
+        INSERT INTO developer_projects (developer_id, project_id, role)
+        VALUES (demo_dev_id, 'test-game', 'owner')
+        ON CONFLICT (developer_id, project_id) DO NOTHING;
+    END IF;
 END $$;
