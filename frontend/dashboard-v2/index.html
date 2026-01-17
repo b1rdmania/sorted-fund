@@ -3,215 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorted.fund - Gas Station for Web3 Apps</title>
-  <link rel="stylesheet" href="assets/css/layout.css">
-  <style>
-    .landing-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: calc(100vh - var(--header-height));
-      padding: var(--spacing-xl);
-      text-align: center;
-    }
-
-    .landing-logo {
-      font-size: 80px;
-      margin-bottom: var(--spacing-xl);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-      50% {
-        transform: scale(1.1);
-        opacity: 0.8;
-      }
-    }
-
-    .landing-title {
-      font-size: 64px;
-      color: var(--color-text-primary);
-      margin-bottom: var(--spacing-md);
-      text-shadow: var(--glow-primary);
-    }
-
-    .landing-subtitle {
-      font-size: var(--font-size-xl);
-      color: var(--color-text-secondary);
-      margin-bottom: var(--spacing-xl);
-    }
-
-    .landing-cta {
-      display: flex;
-      gap: var(--spacing-lg);
-      margin-top: var(--spacing-xl);
-    }
-
-    .cta-button {
-      padding: var(--spacing-lg) var(--spacing-xl);
-      font-size: var(--font-size-lg);
-      font-family: var(--font-mono);
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    .cta-primary {
-      background: var(--color-text-primary);
-      color: var(--color-bg-primary);
-    }
-
-    .cta-primary:hover {
-      background: var(--color-accent-cyan);
-      box-shadow: 0 0 40px rgba(0, 170, 255, 0.8);
-      transform: scale(1.1);
-    }
-
-    .cta-secondary {
-      background: transparent;
-      color: var(--color-text-primary);
-      border: var(--border-primary);
-    }
-
-    .cta-secondary:hover {
-      background: rgba(0, 255, 0, 0.1);
-      box-shadow: var(--glow-primary);
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: var(--spacing-lg);
-      margin-top: var(--spacing-xl);
-      max-width: 1000px;
-    }
-
-    .feature-card {
-      background: var(--color-bg-secondary);
-      border: var(--border-secondary);
-      padding: var(--spacing-xl);
-      text-align: center;
-      transition: all 0.3s;
-    }
-
-    .feature-card:hover {
-      border-color: var(--color-text-primary);
-      box-shadow: var(--glow-primary);
-      transform: translateY(-5px);
-    }
-
-    .feature-icon {
-      font-size: 48px;
-      margin-bottom: var(--spacing-md);
-    }
-
-    .feature-title {
-      font-size: var(--font-size-lg);
-      color: var(--color-text-primary);
-      margin-bottom: var(--spacing-sm);
-      font-weight: bold;
-    }
-
-    .feature-description {
-      font-size: var(--font-size-sm);
-      color: var(--color-text-secondary);
-    }
-  </style>
+  <title>Sorted.fund - Gasless Transactions for Web3 Games</title>
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
 </head>
 <body>
-  <div class="app-container">
-    <!-- HEADER (Simplified for landing) -->
-    <header class="app-header">
-      <div class="header-left">
-        <a href="index.html" class="header-brand">⛽ SORTED.FUND</a>
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-logo">⛽</div>
+        <a href="index.html" class="sidebar-brand-text">SORTED.FUND</a>
       </div>
-      <div class="header-right">
-        <button class="btn-add-funds" onclick="window.location.href='gas-station.html'" style="background: var(--color-accent-cyan);">
-          Launch Dashboard
-        </button>
-      </div>
-    </header>
 
-    <!-- LANDING CONTENT -->
-    <main style="flex: 1;">
-      <div class="landing-container">
-        <!-- HERO -->
-        <div class="landing-logo">⛽</div>
-        <h1 class="landing-title">SORTED.FUND</h1>
-        <p class="landing-subtitle">Gas Station for Web3 Apps</p>
-        <p style="font-size: var(--font-size-lg); color: var(--color-text-muted); max-width: 600px; margin-bottom: var(--spacing-xl);">
-          Delight your users with zero gas fees. Sponsor transactions for your dApp with simple API integration.
+      <nav class="sidebar-nav">
+        <ul class="sidebar-nav-list">
+          <li class="sidebar-nav-item">
+            <a href="index.html" class="sidebar-nav-link active">Home</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="demo.html" class="sidebar-nav-link">Live Demo</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="login.html" class="sidebar-nav-link">Login / Register</a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div style="max-width: 900px; padding: var(--spacing-xl) 0;">
+        <h1 style="font-size: 48px; color: var(--color-primary); margin-bottom: var(--spacing-md);">
+          Gasless Transactions for Web3 Games
+        </h1>
+        <p style="font-size: 24px; color: #888; margin-bottom: var(--spacing-xl);">
+          One API call. Zero wallet friction. Pure gameplay.
         </p>
 
-        <!-- CTA BUTTONS -->
-        <div class="landing-cta">
-          <a href="gas-station.html" class="cta-button cta-primary">
-            🚀 Get Started
-          </a>
-          <a href="live-demo.html" class="cta-button cta-secondary">
-            🎮 View Live Demo
-          </a>
+        <div style="margin-bottom: var(--spacing-xl); line-height: 1.8; color: #aaa;">
+          <p style="margin-bottom: var(--spacing-md);">
+            Let your players interact with the blockchain <strong style="color: var(--color-primary);">without ever touching a wallet</strong>.
+            No seed phrases. No gas fees. No transaction popups.
+          </p>
+          <p>
+            Just <strong style="color: var(--color-primary);">one click</strong> → instant on-chain transaction.
+          </p>
         </div>
 
-        <!-- FEATURES -->
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <div class="feature-title">Instant Setup</div>
-            <div class="feature-description">
-              Generate API keys and start sponsoring transactions in minutes
-            </div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🛡️</div>
-            <div class="feature-title">Secure Control</div>
-            <div class="feature-description">
-              Allowlist contracts and functions to prevent abuse
-            </div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <div class="feature-title">Real-time Analytics</div>
-            <div class="feature-description">
-              Monitor usage, costs, and performance in your dashboard
-            </div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">💰</div>
-            <div class="feature-title">Simple Pricing</div>
-            <div class="feature-description">
-              Pay only for the gas you use. No hidden fees.
-            </div>
-          </div>
+        <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-xxl);">
+          <button onclick="window.location.href='demo.html'" style="padding: 18px 40px; font-size: 18px;">
+            🚀 Watch Live Demo
+          </button>
+          <button onclick="window.location.href='login.html'" class="btn-secondary" style="padding: 18px 40px; font-size: 18px;">
+            🔑 Login / Get Started
+          </button>
         </div>
 
-        <!-- TECH STACK -->
-        <div style="margin-top: var(--spacing-xl); padding-top: var(--spacing-xl); border-top: var(--border-muted); color: var(--color-text-muted); font-size: var(--font-size-sm);">
-          SONIC TESTNET | ERC-4337 v0.7 | POWERED BY PIMLICO
+        <!-- Features Grid -->
+        <div class="grid grid-3" style="margin-top: var(--spacing-xxl);">
+          <div class="panel" style="text-align: center;">
+            <div class="panel-content">
+              <div style="font-size: 40px; margin-bottom: var(--spacing-md);">⚡</div>
+              <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">One-Line Integration</h3>
+              <p class="text-muted">Single API call. No complex wallet integrations.</p>
+            </div>
+          </div>
+
+          <div class="panel" style="text-align: center;">
+            <div class="panel-content">
+              <div style="font-size: 40px; margin-bottom: var(--spacing-md);">🎮</div>
+              <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">Zero User Friction</h3>
+              <p class="text-muted">Players just click. No wallets. No gas.</p>
+            </div>
+          </div>
+
+          <div class="panel" style="text-align: center;">
+            <div class="panel-content">
+              <div style="font-size: 40px; margin-bottom: var(--spacing-md);">🔒</div>
+              <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">You Control Spending</h3>
+              <p class="text-muted">Set limits. Fund once. We handle refunds.</p>
+            </div>
+          </div>
         </div>
       </div>
     </main>
   </div>
-
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/auth.js"></script>
-  <script>
-    // Check authentication and redirect
-    if (Auth.isAuthenticated()) {
-      // Already logged in - go to dashboard
-      window.location.href = 'dashboard.html';
-    } else {
-      // Not logged in - go to login page
-      window.location.href = 'login.html';
-    }
-  </script>
 </body>
 </html>

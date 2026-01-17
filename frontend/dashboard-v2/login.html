@@ -4,69 +4,62 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Sorted.fund</title>
-  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
   <style>
     .auth-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: var(--spacing-xl);
+      width: 100%;
+      max-width: 450px;
+      margin: 60px auto;
     }
 
     .auth-box {
-      background: var(--color-bg-secondary);
-      border: var(--border-primary);
+      background: #1a1a1a;
+      border: 1px solid #00ff00;
       border-radius: 8px;
-      padding: var(--spacing-xl);
-      width: 100%;
-      max-width: 450px;
-      box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+      padding: 40px;
     }
 
     .auth-logo {
       font-size: 48px;
       text-align: center;
-      margin-bottom: var(--spacing-lg);
+      margin-bottom: 20px;
     }
 
     .auth-title {
-      font-size: var(--font-size-xl);
-      color: var(--color-text-primary);
+      font-size: 24px;
+      color: #00ff00;
       text-align: center;
-      margin-bottom: var(--spacing-xl);
-      text-shadow: var(--glow-primary);
+      margin-bottom: 30px;
     }
 
     .auth-tabs {
       display: flex;
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-xl);
+      gap: 10px;
+      margin-bottom: 30px;
     }
 
     .tab-button {
       flex: 1;
-      padding: var(--spacing-md);
+      padding: 12px;
       background: transparent;
-      border: var(--border-secondary);
-      color: var(--color-text-secondary);
+      border: 1px solid #333;
+      color: #666;
       cursor: pointer;
       transition: all 0.3s;
-      font-family: var(--font-mono);
-      font-size: var(--font-size-md);
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
     }
 
     .tab-button.active {
       background: rgba(0, 255, 0, 0.1);
-      border: var(--border-primary);
-      color: var(--color-text-primary);
-      box-shadow: var(--glow-primary);
+      border: 1px solid #00ff00;
+      color: #00ff00;
     }
 
     .tab-button:hover:not(.active) {
       background: rgba(0, 255, 0, 0.05);
-      border-color: var(--color-accent-green);
+      border-color: #00ff00;
     }
 
     .tab-content {
@@ -78,69 +71,65 @@
     }
 
     .form-group {
-      margin-bottom: var(--spacing-lg);
+      margin-bottom: 20px;
     }
 
     .form-label {
       display: block;
-      color: var(--color-text-primary);
-      margin-bottom: var(--spacing-sm);
-      font-family: var(--font-mono);
-      font-size: var(--font-size-sm);
+      color: #00ff00;
+      margin-bottom: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
     }
 
     .form-input {
       width: 100%;
-      padding: var(--spacing-md);
-      background: var(--color-bg-primary);
-      border: var(--border-secondary);
-      color: var(--color-text-primary);
-      font-family: var(--font-mono);
-      font-size: var(--font-size-md);
+      padding: 12px;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
       transition: all 0.3s;
       box-sizing: border-box;
     }
 
     .form-input:focus {
       outline: none;
-      border-color: var(--color-accent-green);
-      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+      border-color: #00ff00;
     }
 
     .form-button {
       width: 100%;
-      padding: var(--spacing-md);
-      background: var(--color-text-primary);
-      color: var(--color-bg-primary);
+      padding: 12px;
+      background: #00ff00;
+      color: #000;
       border: none;
-      font-family: var(--font-mono);
-      font-size: var(--font-size-md);
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s;
-      margin-top: var(--spacing-md);
+      margin-top: 10px;
     }
 
     .form-button:hover {
-      background: var(--color-accent-green);
-      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
-      transform: translateY(-2px);
+      background: #00cc00;
     }
 
     .form-button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      transform: none;
     }
 
     .error-message {
       background: rgba(255, 0, 0, 0.1);
       border: 1px solid #ff0000;
       color: #ff6666;
-      padding: var(--spacing-md);
-      margin-bottom: var(--spacing-lg);
-      font-family: var(--font-mono);
-      font-size: var(--font-size-sm);
+      padding: 12px;
+      margin-bottom: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
       display: none;
     }
 
@@ -150,12 +139,12 @@
 
     .success-message {
       background: rgba(0, 255, 0, 0.1);
-      border: var(--border-primary);
-      color: var(--color-accent-green);
-      padding: var(--spacing-md);
-      margin-bottom: var(--spacing-lg);
-      font-family: var(--font-mono);
-      font-size: var(--font-size-sm);
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
       display: none;
     }
 
@@ -164,20 +153,21 @@
     }
 
     .helper-text {
-      font-size: var(--font-size-xs);
-      color: var(--color-text-secondary);
-      margin-top: var(--spacing-sm);
+      font-size: 11px;
+      color: #666;
+      margin-top: 8px;
     }
 
     .loading {
       display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(0, 255, 0, 0.3);
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(0, 255, 0, 0.3);
       border-radius: 50%;
-      border-top-color: var(--color-accent-green);
+      border-top-color: #00ff00;
       animation: spin 1s linear infinite;
-      margin-left: var(--spacing-sm);
+      margin-left: 8px;
+      vertical-align: middle;
     }
 
     @keyframes spin {
@@ -186,10 +176,43 @@
   </style>
 </head>
 <body>
-  <div class="auth-container">
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-logo">⛽</div>
+        <a href="index.html" class="sidebar-brand-text">SORTED.FUND</a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="sidebar-nav-list">
+          <li class="sidebar-nav-item">
+            <a href="index.html" class="sidebar-nav-link">Home</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="demo.html" class="sidebar-nav-link">Live Demo</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="login.html" class="sidebar-nav-link active">Login / Register</a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="auth-container">
     <div class="auth-box">
       <div class="auth-logo">⛽</div>
-      <h1 class="auth-title">Sorted.fund</h1>
+      <h1 class="auth-title">SORTED.FUND</h1>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">
+        Gasless Transactions for Web3 Games
+      </p>
+      <p style="text-align: center; margin-bottom: 20px;">
+        <a href="demo.html" style="color: #00ff00; text-decoration: none; border: 1px solid #00ff00; padding: 8px 16px; display: inline-block; transition: all 0.3s;">
+          🚀 Watch Live Demo
+        </a>
+      </p>
 
       <!-- Tab Buttons -->
       <div class="auth-tabs">
@@ -205,7 +228,7 @@
       <div id="login-tab" class="tab-content active">
         <form id="login-form">
           <div class="form-group">
-            <label class="form-label">Email</label>
+            <label class="form-label">EMAIL</label>
             <input
               type="email"
               id="login-email"
@@ -216,7 +239,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Password</label>
+            <label class="form-label">PASSWORD</label>
             <input
               type="password"
               id="login-password"
@@ -227,11 +250,11 @@
           </div>
 
           <button type="submit" class="form-button" id="login-button">
-            Login
+            LOGIN
           </button>
         </form>
 
-        <p class="helper-text" style="text-align: center; margin-top: var(--spacing-lg);">
+        <p class="helper-text" style="text-align: center; margin-top: 20px;">
           Demo account: demo@sorted.fund / demo123
         </p>
       </div>
@@ -240,7 +263,7 @@
       <div id="register-tab" class="tab-content">
         <form id="register-form">
           <div class="form-group">
-            <label class="form-label">Name</label>
+            <label class="form-label">NAME</label>
             <input
               type="text"
               id="register-name"
@@ -251,7 +274,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Email</label>
+            <label class="form-label">EMAIL</label>
             <input
               type="email"
               id="register-email"
@@ -262,7 +285,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Password</label>
+            <label class="form-label">PASSWORD</label>
             <input
               type="password"
               id="register-password"
@@ -275,14 +298,16 @@
           </div>
 
           <button type="submit" class="form-button" id="register-button">
-            Create Account
+            CREATE ACCOUNT
           </button>
         </form>
       </div>
     </div>
+      </div>
+    </main>
   </div>
 
-  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
   <script>
     let currentTab = 'login';
 
@@ -329,9 +354,10 @@
       button.disabled = isLoading;
 
       if (isLoading) {
-        button.innerHTML = button.textContent + ' <span class="loading"></span>';
+        const originalText = button.textContent.trim();
+        button.innerHTML = originalText + ' <span class="loading"></span>';
       } else {
-        button.innerHTML = button.textContent.replace(/<span.*<\/span>/, '');
+        button.innerHTML = button.textContent.replace(/<span.*?<\/span>/, '').trim();
       }
     }
 
@@ -345,22 +371,22 @@
       const password = document.getElementById('login-password').value;
 
       try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login`, {
+        const response = await fetch(`${api.baseUrl}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
-          credentials: 'include', // Include cookies
+          credentials: 'include',
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || 'Login failed');
+          throw new Error(data.error || data.message || 'Login failed');
         }
 
         // Store session token
-        localStorage.setItem('session_token', data.sessionToken);
-        localStorage.setItem('developer', JSON.stringify(data.developer));
+        localStorage.setItem('sorted_session_token', data.sessionToken);
+        localStorage.setItem('sorted_developer', JSON.stringify(data.developer));
 
         showSuccess('Login successful! Redirecting...');
 
@@ -386,22 +412,22 @@
       const password = document.getElementById('register-password').value;
 
       try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/auth/register`, {
+        const response = await fetch(`${api.baseUrl}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password, name }),
-          credentials: 'include', // Include cookies
+          credentials: 'include',
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || 'Registration failed');
+          throw new Error(data.error || data.message || 'Registration failed');
         }
 
         // Store session token
-        localStorage.setItem('session_token', data.sessionToken);
-        localStorage.setItem('developer', JSON.stringify(data.developer));
+        localStorage.setItem('sorted_session_token', data.sessionToken);
+        localStorage.setItem('sorted_developer', JSON.stringify(data.developer));
 
         showSuccess('Account created! Redirecting...');
 
@@ -417,7 +443,7 @@
     });
 
     // Check if already logged in
-    if (localStorage.getItem('session_token')) {
+    if (localStorage.getItem('sorted_session_token')) {
       window.location.href = 'dashboard.html';
     }
   </script>

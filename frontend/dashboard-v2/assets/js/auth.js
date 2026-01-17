@@ -1,177 +1,155 @@
 /**
- * Authentication Utilities
- * Handles session management and auth checks
+ * Sorted.fund Dashboard - Authentication Utility
+ * Session management and auth state handling
  */
 
-const Auth = {
-  /**
-   * Check if user is authenticated
-   */
-  isAuthenticated() {
-    const token = localStorage.getItem('session_token');
-    const developer = localStorage.getItem('developer');
-    return !!(token && developer);
-  },
+class Auth {
+  static TOKEN_KEY = 'sorted_session_token';
+  static DEVELOPER_KEY = 'sorted_developer';
 
   /**
-   * Get current developer
+   * Get session token from localStorage
    */
-  getDeveloper() {
-    const developerJson = localStorage.getItem('developer');
-    if (!developerJson) return null;
+  static getToken() {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  /**
+   * Store session token in localStorage
+   */
+  static setToken(token) {
+    localStorage.setItem(this.TOKEN_KEY, token);
+  }
+
+  /**
+   * Remove session token from localStorage
+   */
+  static clearToken() {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.DEVELOPER_KEY);
+  }
+
+  /**
+   * Get developer info from localStorage
+   */
+  static getDeveloper() {
+    const dev = localStorage.getItem(this.DEVELOPER_KEY);
+    return dev ? JSON.parse(dev) : null;
+  }
+
+  /**
+   * Check if user is authenticated by verifying token with backend
+   */
+  static async isAuthenticated() {
+    const token = this.getToken();
+    if (!token) return false;
 
     try {
-      return JSON.parse(developerJson);
-    } catch (error) {
-      console.error('Failed to parse developer data:', error);
-      return null;
-    }
-  },
-
-  /**
-   * Get session token
-   */
-  getToken() {
-    return localStorage.getItem('session_token');
-  },
-
-  /**
-   * Require authentication (redirect to login if not authenticated)
-   */
-  async requireAuth() {
-    if (!this.isAuthenticated()) {
-      window.location.href = 'login.html';
-      return false;
-    }
-
-    // Validate session with backend
-    try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/auth/me`, {
+      const response = await fetch(`${api.baseUrl}/auth/me`, {
+        method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.getToken()}`,
+          'Authorization': `Bearer ${token}`
         },
+        credentials: 'include'
       });
 
       if (!response.ok) {
-        // Session expired or invalid
-        this.logout();
-        window.location.href = 'login.html';
+        // Token invalid or expired
+        this.clearToken();
         return false;
       }
 
-      const data = await response.json();
-
-      // Update stored developer data
-      localStorage.setItem('developer', JSON.stringify(data.developer));
-
       return true;
     } catch (error) {
-      console.error('Failed to validate session:', error);
-      this.logout();
-      window.location.href = 'login.html';
+      console.error('Auth check failed:', error);
       return false;
     }
-  },
+  }
+
+  /**
+   * Redirect to login if not authenticated
+   * Call this at the top of every dashboard page
+   */
+  static async requireAuth() {
+    const isAuth = await this.isAuthenticated();
+    if (!isAuth) {
+      window.location.href = '/login.html';
+      throw new Error('Authentication required'); // Stop execution
+    }
+  }
 
   /**
    * Login with email and password
    */
-  async login(email, password) {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login`, {
+  static async login(email, password) {
+    const response = await fetch(`${api.baseUrl}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
-      credentials: 'include',
+      credentials: 'include'
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new Error(data.message || 'Login failed');
+      const error = await response.json();
+      throw new Error(error.error || error.message || 'Login failed');
     }
 
-    // Store session
-    localStorage.setItem('session_token', data.sessionToken);
-    localStorage.setItem('developer', JSON.stringify(data.developer));
+    const data = await response.json();
+    this.setToken(data.sessionToken);
+    localStorage.setItem(this.DEVELOPER_KEY, JSON.stringify(data.developer));
 
-    return data.developer;
-  },
+    return data;
+  }
 
   /**
-   * Register new account
+   * Register new developer account
    */
-  async register(name, email, password) {
-    const response = await fetch(`${CONFIG.API_BASE_URL}/auth/register`, {
+  static async register(email, password, name) {
+    const response = await fetch(`${api.baseUrl}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name }),
-      credentials: 'include',
+      credentials: 'include'
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new Error(data.message || 'Registration failed');
+      const error = await response.json();
+      throw new Error(error.error || error.message || 'Registration failed');
     }
 
-    // Store session
-    localStorage.setItem('session_token', data.sessionToken);
-    localStorage.setItem('developer', JSON.stringify(data.developer));
+    const data = await response.json();
+    this.setToken(data.sessionToken);
+    localStorage.setItem(this.DEVELOPER_KEY, JSON.stringify(data.developer));
 
-    return data.developer;
-  },
+    return data;
+  }
 
   /**
-   * Logout
+   * Logout and redirect to login page
    */
-  async logout() {
-    try {
-      const token = this.getToken();
-      if (token) {
-        await fetch(`${CONFIG.API_BASE_URL}/auth/logout`, {
+  static async logout() {
+    const token = this.getToken();
+
+    if (token) {
+      try {
+        await fetch(`${api.baseUrl}/auth/logout`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`
           },
-          credentials: 'include',
+          credentials: 'include'
         });
+      } catch (error) {
+        console.error('Logout request failed:', error);
       }
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Clear local storage
-      localStorage.removeItem('session_token');
-      localStorage.removeItem('developer');
-
-      // Redirect to login
-      window.location.href = 'login.html';
     }
-  },
 
-  /**
-   * Format credit balance (convert wei to ether with formatting)
-   */
-  formatCredits(credits) {
-    if (!credits) return '0';
-
-    const ether = BigInt(credits) / BigInt(10 ** 18);
-    const remainder = BigInt(credits) % BigInt(10 ** 18);
-
-    // Format with 4 decimal places
-    const decimal = (Number(remainder) / 10 ** 18).toFixed(4).slice(2);
-
-    return `${ether}.${decimal}`;
-  },
-
-  /**
-   * Format credit balance in USD (assuming $2000/ETH for example)
-   */
-  formatCreditsUSD(credits) {
-    const ether = this.formatCredits(credits);
-    const usd = parseFloat(ether) * 2000; // Example rate
-    return `$${usd.toFixed(2)}`;
+    this.clearToken();
+    window.location.href = '/login.html';
   }
-};
+}
 
-// Make available globally
-window.Auth = Auth;
+// Make Auth available globally
+if (typeof window !== 'undefined') {
+  window.Auth = Auth;
+}

@@ -3,22 +3,20 @@
  * REST API wrapper for backend communication
  */
 
+// Configuration - Auto-detect environment
+const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
+const API_CONFIG = {
+  BASE_URL: isProduction ? 'https://sorted-backend.onrender.com' : 'http://localhost:3000',
+  TIMEOUT: 30000, // 30 seconds
+};
+
 /**
  * API Client class
  */
 class ApiClient {
-  constructor() {
-    // Use CONFIG from config.js if available, otherwise fallback
-    this.baseUrl = (typeof CONFIG !== 'undefined') ? CONFIG.API_BASE_URL : 'http://localhost:3000';
-    this.timeout = 30000; // 30 seconds
-  }
-
-  /**
-   * Get session token from localStorage
-   * @private
-   */
-  _getSessionToken() {
-    return localStorage.getItem('session_token');
+  constructor(baseUrl = API_CONFIG.BASE_URL) {
+    this.baseUrl = baseUrl;
   }
 
   /**
@@ -28,27 +26,22 @@ class ApiClient {
   async _request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
 
-    // Auto-inject session token if available (unless Authorization header already provided)
-    const sessionToken = this._getSessionToken();
-    const headers = {
-      'Content-Type': 'application/json',
-      ...options.headers
-    };
-
-    // Add session token if available and no Authorization header provided
-    if (sessionToken && !headers['Authorization']) {
-      headers['Authorization'] = `Bearer ${sessionToken}`;
-    }
+    // Get session token
+    const token = localStorage.getItem('sorted_session_token');
 
     const config = {
-      ...options,
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+        ...options.headers
+      },
       credentials: 'include', // Include cookies
+      ...options
     };
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
 
       const response = await fetch(url, {
         ...config,
@@ -57,17 +50,11 @@ class ApiClient {
 
       clearTimeout(timeoutId);
 
-      // Handle 401 Unauthorized - redirect to login
+      // Handle 401 Unauthorized (session expired)
       if (response.status === 401) {
-        // Clear session
-        localStorage.removeItem('session_token');
-        localStorage.removeItem('developer');
-
-        // Redirect to login (avoid redirect loop if already on login page)
-        if (!window.location.pathname.includes('login.html')) {
-          window.location.href = 'login.html';
-        }
-
+        localStorage.removeItem('sorted_session_token');
+        localStorage.removeItem('sorted_developer');
+        window.location.href = '/login.html';
         throw new Error('Session expired. Please login again.');
       }
 
@@ -272,35 +259,6 @@ class ApiClient {
     return this._post('/sponsor/authorize', request, {
       'Authorization': `Bearer ${apiKey}`
     });
-  }
-
-  // ===== Blockchain =====
-
-  /**
-   * Get counter value for user
-   * @param {string} contractAddress - Counter contract address
-   * @param {string} userAddress - User address
-   * @returns {Promise<Object>} Counter data
-   */
-  async getCounterValue(contractAddress, userAddress) {
-    return this._get(`/blockchain/counter/${contractAddress}/${userAddress}`);
-  }
-
-  /**
-   * Get account balance
-   * @param {string} address - Account address
-   * @returns {Promise<Object>} Balance data
-   */
-  async getAccountBalance(address) {
-    return this._get(`/blockchain/balance/${address}`);
-  }
-
-  /**
-   * Get current block number
-   * @returns {Promise<Object>} Block number
-   */
-  async getCurrentBlock() {
-    return this._get('/blockchain/block');
   }
 
   // ===== Health Check =====
