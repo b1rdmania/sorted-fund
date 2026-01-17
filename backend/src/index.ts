@@ -61,6 +61,26 @@ app.get('/admin/demo-check', async (req: Request, res: Response) => {
   }
 });
 
+// Endpoint to fix demo account password
+app.post('/admin/fix-demo-password', async (req: Request, res: Response) => {
+  try {
+    const { query } = await import('./db/database');
+    const correctHash = '$2b$10$3v/4nWZWzbx9moXvNY4jnOs2Y3TE4pW4ycebf8xk6i0tcoXtnIpGK'; // demo123
+
+    await query(
+      'UPDATE developers SET password_hash = $1 WHERE email = $2',
+      [correctHash, 'demo@sorted.fund']
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Demo account password updated'
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Temporary migration endpoint (remove after initial setup)
 app.post('/admin/migrate', async (req: Request, res: Response) => {
   try {
