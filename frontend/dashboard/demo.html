@@ -682,66 +682,39 @@ paymaster_data = response.json()['paymasterAndData']
         addTerminalLine('   • Function: increment()', '');
         await sleep(1000);
 
-        // Step 3: Authorization
+        // Step 3: Execute demo transaction
         addTerminalLine('', '');
-        addTerminalLine('<span class="spinner"></span> Step 1/4: Requesting authorization from Sorted.fund...', 'terminal-info');
+        addTerminalLine('<span class="spinner"></span> Executing gasless transaction...', 'terminal-info');
         await sleep(800);
 
-        const authResponse = await fetch(`${api.baseUrl}/sponsor/authorize`, {
+        const demoResponse = await fetch(`${api.baseUrl}/demo/execute`, {
           method: 'POST',
           headers: {
-            'Authorization': 'Bearer sk_sorted_e579aea9ba39f0ba7fd2098d4180ccfcc6ab70810f16dfc8c5d9dcc1f3a22a44',
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            projectId: 'test-game',
-            chainId: 14601,
-            user: '0x4BEfFA7558375a0f8e55a4eABbE9a53F661E5506',
-            target: '0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3',
-            selector: '0xd09de08a',
-            estimatedGas: 500000,
-            clientNonce: '0x' + Date.now().toString(16)
-          })
+          }
         });
 
-        if (!authResponse.ok) {
-          throw new Error('Authorization failed: ' + (await authResponse.text()));
+        if (!demoResponse.ok) {
+          const errorData = await demoResponse.json();
+          throw new Error(errorData.message || errorData.error || 'Demo execution failed');
         }
 
-        const authData = await authResponse.json();
-        addTerminalLine('   ✓ Authorization granted!', 'terminal-success');
-        addTerminalLine(`   • Paymaster: ${authData.paymasterAndData.substring(0, 20)}...`, 'terminal-muted');
-        addTerminalLine(`   • Expires: ${authData.expiresAt}`, 'terminal-muted');
-        await sleep(800);
-
-        // Step 4: Build UserOperation
-        addTerminalLine('', '');
-        addTerminalLine('<span class="spinner"></span> Step 2/4: Building UserOperation...', 'terminal-info');
-        await sleep(600);
-        addTerminalLine('   ✓ UserOp constructed', 'terminal-success');
-        addTerminalLine('   • Gas estimated: 500,000', 'terminal-muted');
-        addTerminalLine('   • Paymaster attached', 'terminal-muted');
-        await sleep(600);
-
-        // Step 5: Submit to Bundler
-        addTerminalLine('', '');
-        addTerminalLine('<span class="spinner"></span> Step 3/4: Submitting to bundler...', 'terminal-info');
-        await sleep(1200);
+        const demoData = await demoResponse.json();
         addTerminalLine('   ✓ Transaction submitted!', 'terminal-success');
-        addTerminalLine('   • UserOpHash: 0x' + Math.random().toString(16).substring(2, 66), 'terminal-muted');
-        await sleep(800);
+        await sleep(1000);
 
-        // Step 6: Wait for confirmation
         addTerminalLine('', '');
-        addTerminalLine('<span class="spinner"></span> Step 4/4: Waiting for confirmation...', 'terminal-info');
-        await sleep(2000);
+        addTerminalLine('<span class="spinner"></span> Waiting for blockchain confirmation...', 'terminal-info');
+        await sleep(1500);
 
-        const txHash = '0xe45d93f5e1b4fceb9debf583e45aa21e963a669869831a97b9ae1507de0b2dd7';
         addTerminalLine('   ✓ Transaction confirmed!', 'terminal-success');
-        addTerminalLine(`   • Tx Hash: ${txHash}`, 'terminal-muted');
-        addTerminalLine('   • Gas Used: 140,674 (actual)', 'terminal-muted');
+        addTerminalLine(`   • Tx Hash: ${demoData.transactionHash}`, 'terminal-muted');
+        addTerminalLine(`   • Block: ${demoData.blockNumber}`, 'terminal-muted');
+        addTerminalLine(`   • Gas Used: ${parseInt(demoData.gasUsed).toLocaleString()}`, 'terminal-muted');
         addTerminalLine('   • User Paid: 0 S (gasless!)', 'terminal-success');
         await sleep(500);
+
+        const txHash = demoData.transactionHash;
 
         // Step 7: Result
         addTerminalLine('', '');

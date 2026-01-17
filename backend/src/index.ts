@@ -13,6 +13,7 @@ import sponsorRoutes from './routes/sponsor';
 import allowlistRoutes from './routes/allowlist';
 import analyticsRoutes from './routes/analytics';
 import blockchainRoutes from './routes/blockchain';
+import demoRoutes from './routes/demo';
 
 // Load environment variables
 dotenv.config();
@@ -144,6 +145,7 @@ app.use('/sponsor', sponsorRoutes);
 app.use('/projects', allowlistRoutes); // Allowlist routes under /projects/:id/allowlist
 app.use('/analytics', analyticsRoutes);
 app.use('/blockchain', blockchainRoutes);
+app.use('/demo', demoRoutes); // Public demo endpoint (no auth required)
 
 // 404 handler
 app.use((req: Request, res: Response) => {
