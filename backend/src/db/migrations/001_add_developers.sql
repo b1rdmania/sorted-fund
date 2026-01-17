@@ -104,12 +104,12 @@ CREATE TRIGGER update_developers_updated_at
 INSERT INTO developers (email, password_hash, name, credit_balance, status)
 VALUES (
     'demo@sorted.fund',
-    '$2b$10$8K1p/YLvLtgVbQ.ZJmB.qO6T9X3Z0QYJ5zVQ6mK0Z8bJ0ZqK0Z0Z0', -- "demo123"
+    '$2b$10$3v/4nWZWzbx9moXvNY4jnOs2Y3TE4pW4ycebf8xk6i0tcoXtnIpGK', -- "demo123"
     'Demo Developer',
     1000000000000000000, -- 1 ether worth of credits
     'active'
 )
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash;
 
 -- =====================================================
 -- 8. LINK EXISTING TEST PROJECT TO DEMO DEVELOPER (if exists)
