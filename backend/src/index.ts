@@ -40,6 +40,27 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+// Debug endpoint to check demo account
+app.get('/admin/demo-check', async (req: Request, res: Response) => {
+  try {
+    const { query } = await import('./db/database');
+    const result = await query('SELECT id, email, name, credit_balance, password_hash FROM developers WHERE email = $1', ['demo@sorted.fund']);
+
+    res.status(200).json({
+      exists: result.rows.length > 0,
+      account: result.rows[0] ? {
+        id: result.rows[0].id,
+        email: result.rows[0].email,
+        name: result.rows[0].name,
+        credits: result.rows[0].credit_balance,
+        hash_preview: result.rows[0].password_hash?.substring(0, 20) + '...'
+      } : null
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Temporary migration endpoint (remove after initial setup)
 app.post('/admin/migrate', async (req: Request, res: Response) => {
   try {
