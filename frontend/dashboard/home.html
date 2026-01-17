@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorted.fund - Gasless Transactions for Web3 Games</title>
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: linear-gradient(180deg, rgba(0, 255, 0, 0.03) 0%, transparent 50%, rgba(0, 255, 0, 0.03) 100%);
+    }
+
+    .landing-container {
+      max-width: 900px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .main-title {
+      font-size: 48px;
+      color: var(--color-primary);
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: 24px;
+      color: #888;
+      margin-bottom: 40px;
+      font-weight: normal;
+    }
+
+    .description {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #aaa;
+      margin-bottom: 50px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 60px;
+    }
+
+    .cta-button {
+      padding: 18px 40px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Courier New', monospace;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .cta-primary {
+      background: var(--color-primary);
+      color: #000;
+    }
+
+    .cta-primary:hover {
+      background: #00cc00;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .cta-secondary {
+      background: transparent;
+      color: var(--color-primary);
+      border: 2px solid var(--color-primary);
+    }
+
+    .cta-secondary:hover {
+      background: rgba(0, 255, 0, 0.1);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .features-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-top: 60px;
+    }
+
+    .feature {
+      padding: 20px;
+      background: rgba(0, 255, 0, 0.05);
+      border: 1px solid rgba(0, 255, 0, 0.2);
+      border-radius: 8px;
+    }
+
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      color: var(--color-primary);
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .feature-text {
+      font-size: 14px;
+      color: #888;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 32px;
+      }
+
+      .subtitle {
+        font-size: 18px;
+      }
+
+      .description {
+        font-size: 16px;
+      }
+
+      .cta-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .cta-button {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .features-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="landing-container">
+    <div class="logo">⛽</div>
+    <h1 class="main-title">SORTED.FUND</h1>
+    <p class="subtitle">Gasless Transactions for Web3 Games</p>
+
+    <div class="description">
+      <p>
+        Let your players interact with the blockchain <strong>without ever touching a wallet</strong>.
+        No seed phrases. No gas fees. No transaction popups.
+      </p>
+      <p style="margin-top: 20px;">
+        Just <strong>one click</strong> → instant on-chain transaction.
+      </p>
+    </div>
+
+    <div class="cta-container">
+      <a href="demo.html" class="cta-button cta-primary">
+        🚀 Watch Live Demo
+      </a>
+      <a href="login.html" class="cta-button cta-secondary">
+        🔑 Login / Get Started
+      </a>
+    </div>
+
+    <div class="features-row">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">One-Line Integration</div>
+        <div class="feature-text">Single API call. No complex wallet integrations.</div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">🎮</div>
+        <div class="feature-title">Zero User Friction</div>
+        <div class="feature-text">Players just click. No wallets. No gas.</div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">You Control Spending</div>
+        <div class="feature-text">Set limits. Fund once. We handle refunds.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
