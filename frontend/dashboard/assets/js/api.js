@@ -3,9 +3,11 @@
  * REST API wrapper for backend communication
  */
 
-// Configuration
+// Configuration - Auto-detect environment
+const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
 const API_CONFIG = {
-  BASE_URL: 'http://localhost:3000',
+  BASE_URL: isProduction ? 'https://sorted-backend.onrender.com' : 'http://localhost:3000',
   TIMEOUT: 30000, // 30 seconds
 };
 
