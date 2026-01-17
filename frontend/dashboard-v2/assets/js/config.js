@@ -8,7 +8,7 @@ const isProduction = window.location.hostname !== 'localhost' && window.location
 const CONFIG = {
   // Backend API (auto-detect environment)
   API_BASE_URL: isProduction
-    ? 'https://sorted-backend-production.up.railway.app'  // Update this after Railway deployment
+    ? 'https://sorted-backend.onrender.com'
     : 'http://localhost:3000',
 
   // Default project (single project mode for demo)
