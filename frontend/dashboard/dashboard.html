@@ -13,10 +13,8 @@
     <a href="dashboard.html" class="navbar-brand">⛽ SORTED.FUND</a>
     <ul class="navbar-nav">
       <li><a href="dashboard.html" class="active">Overview</a></li>
-      <li><a href="projects.html">Projects</a></li>
       <li><a href="api-keys.html">API Keys</a></li>
-      <li><a href="analytics.html">Analytics</a></li>
-      <li><a href="funding.html">Funding</a></li>
+      <li><a href="allowlist.html">Allowlist</a></li>
       <li><a href="#" onclick="Auth.logout(); return false;" style="color: #ff6666;">Logout</a></li>
     </ul>
   </nav>
@@ -38,8 +36,8 @@
         <p class="page-subtitle">Real-time metrics for your gas station</p>
       </div>
       <div class="page-actions">
-        <button onclick="window.location.href='funding.html'">💰 Add Funds</button>
-        <button onclick="window.location.href='api-keys.html'" class="btn-secondary">🔑 Generate API Key</button>
+        <button onclick="window.location.href='api-keys.html'">🔑 Generate API Key</button>
+        <button onclick="window.location.href='allowlist.html'" class="btn-secondary">✅ Manage Allowlist</button>
       </div>
     </div>
 
@@ -99,17 +97,14 @@
         <div class="panel-header">⚡ QUICK ACTIONS</div>
         <div class="panel-content">
           <div class="quick-actions" style="flex-direction: column;">
-            <button onclick="window.location.href='funding.html'" class="btn-block">
-              💰 Add Funds to Gas Station
-            </button>
-            <button onclick="window.location.href='api-keys.html'" class="btn-block btn-secondary">
+            <button onclick="window.location.href='api-keys.html'" class="btn-block">
               🔑 Generate New API Key
             </button>
             <button onclick="window.location.href='allowlist.html'" class="btn-block btn-secondary">
               ✅ Manage Allowlist
             </button>
-            <button onclick="window.location.href='analytics.html'" class="btn-block btn-secondary">
-              📈 View Full Analytics
+            <button onclick="window.location.href='demo.html'" class="btn-block btn-secondary">
+              🚀 View Live Demo
             </button>
           </div>
 

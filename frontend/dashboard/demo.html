@@ -7,6 +7,56 @@
   <link rel="stylesheet" href="assets/css/global.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <style>
+    body {
+      padding: var(--spacing-xl);
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .demo-header h1 {
+      font-size: 36px;
+      color: var(--color-primary);
+      margin-bottom: var(--spacing-sm);
+      text-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+
+    .demo-header p {
+      font-size: 18px;
+      color: #888;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .back-link {
+      display: inline-block;
+      color: var(--color-primary);
+      text-decoration: none;
+      margin-bottom: var(--spacing-lg);
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .back-link:hover {
+      color: #00cc00;
+      transform: translateX(-4px);
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: center;
+      margin-top: var(--spacing-lg);
+    }
+
+    .cta-buttons button {
+      padding: 12px 32px;
+      font-size: 16px;
+    }
+
     .terminal {
       background: #000;
       padding: var(--spacing-lg);
@@ -64,41 +114,15 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-
-    .demo-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--spacing-md);
-    }
   </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar">
-    <a href="dashboard.html" class="navbar-brand">⛽ SORTED.FUND</a>
-    <ul class="navbar-nav">
-      <li><a href="dashboard.html">Overview</a></li>
-      <li><a href="projects.html">Projects</a></li>
-      <li><a href="api-keys.html">API Keys</a></li>
-      <li><a href="analytics.html">Analytics</a></li>
-      <li><a href="demo.html" class="active">Live Demo</a></li>
-      <li><a href="login.html" style="color: var(--color-primary);">Login</a></li>
-    </ul>
-  </nav>
+  <a href="index.html" class="back-link">← Back to Home</a>
 
-  <!-- Main Content -->
-  <div class="container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Live Gasless Transaction Demo</h1>
-        <p class="page-subtitle">Watch a real transaction execute on Sonic testnet without any wallet interaction</p>
-      </div>
-      <div class="page-actions">
-        <button onclick="window.location.href='login.html'">🚀 Get Started</button>
-      </div>
-    </div>
+  <div class="demo-header">
+    <h1>⛽ Live Gasless Transaction Demo</h1>
+    <p>Watch a real transaction execute on Sonic testnet without any wallet interaction</p>
+  </div>
 
     <!-- Demo Terminal -->
     <div class="panel">
