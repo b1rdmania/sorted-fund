@@ -1,13 +1,4 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/home.html",
-      "permanent": false
-    }
-  ],
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -21,8 +12,8 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/$1.html"
+      "source": "/",
+      "destination": "/home.html"
     }
   ]
 }
