@@ -40,6 +40,39 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+// Temporary migration endpoint (remove after initial setup)
+app.post('/admin/migrate', async (req: Request, res: Response) => {
+  try {
+    const fs = await import('fs');
+    const path = await import('path');
+    const { query } = await import('./db/database');
+
+    const migrationsDir = path.join(__dirname, 'db/migrations');
+    const files = fs.readdirSync(migrationsDir)
+      .filter(file => file.endsWith('.sql'))
+      .sort();
+
+    const results = [];
+    for (const file of files) {
+      const filePath = path.join(migrationsDir, file);
+      const sql = fs.readFileSync(filePath, 'utf8');
+      await query(sql);
+      results.push(file);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Migrations completed',
+      files: results
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // API Routes
 app.use('/auth', authRoutes);
 app.use('/projects', projectRoutes);
