@@ -160,50 +160,6 @@
   }
 }
 
-/* ===== Sidebar ===== */
-.sidebar {
-  width: var(--sidebar-width);
-  background: var(--color-bg-secondary);
-  border-right: var(--border-primary);
-  padding: var(--spacing-lg);
-  min-height: 100vh;
-}
-
-.sidebar-menu {
-  list-style: none;
-}
-
-.sidebar-menu li {
-  margin-bottom: var(--spacing-sm);
-}
-
-.sidebar-menu a {
-  display: block;
-  padding: var(--spacing-sm);
-  color: var(--color-text-primary);
-  text-decoration: none;
-  border-left: 3px solid transparent;
-  transition: all 0.2s;
-}
-
-.sidebar-menu a:hover {
-  background: rgba(0, 255, 0, 0.1);
-  border-left-color: var(--color-text-primary);
-}
-
-.sidebar-menu a.active {
-  background: rgba(0, 255, 0, 0.1);
-  border-left-color: var(--color-text-primary);
-  font-weight: bold;
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    min-height: auto;
-  }
-}
-
 /* ===== Metrics Card ===== */
 .metric-card {
   background: var(--color-bg-secondary);
