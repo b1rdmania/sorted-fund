@@ -52,16 +52,8 @@ router.post('/authorize', authenticateApiKey, async (req: AuthenticatedRequest, 
       });
     }
 
-    // Check developer_id exists
-    if (!req.developerId) {
-      return res.status(400).json({
-        error: 'Project is not associated with a developer account',
-        code: 'NO_DEVELOPER',
-      });
-    }
-
     // Generate authorization
-    const authorization = await authorizationService.authorize(request, req.developerId);
+    const authorization = await authorizationService.authorize(request);
 
     res.json(authorization);
   } catch (error: any) {

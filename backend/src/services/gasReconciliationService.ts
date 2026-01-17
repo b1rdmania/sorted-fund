@@ -4,7 +4,6 @@
  */
 
 import { query } from '../db/database';
-import creditService from './creditService';
 import { ethers } from 'ethers';
 
 export interface ReconcileGasParams {
@@ -38,7 +37,7 @@ export class GasReconciliationService {
            completed_at = NOW(),
            error_message = $3
        WHERE user_op_hash = $4
-       RETURNING id, project_id, developer_id, estimated_gas, actual_gas, max_cost`,
+       RETURNING id, project_id, estimated_gas, actual_gas, max_cost`,
       [actualGas, status, errorMessage || null, userOpHash]
     );
 
@@ -71,19 +70,16 @@ export class GasReconciliationService {
       // Calculate refund (max cost reserved - actual cost)
       refundAmount = maxCost - actualCost;
 
-      // Refund unused credits to developer if developer_id exists and refund > 0
-      if (event.developer_id && refundAmount > 0n) {
-        await creditService.refund(
-          event.developer_id,
-          refundAmount,
-          'sponsorship_event',
-          event.id,
-          `Gas refund for ${userOpHash}: Reserved ${maxCost}, Used ${actualCost}`
+      // Refund unused gas to project if refund > 0
+      if (refundAmount > 0n) {
+        await query(
+          'UPDATE projects SET gas_tank_balance = gas_tank_balance + $1 WHERE id = $2',
+          [refundAmount.toString(), event.project_id]
         );
 
-        console.log('Credits refunded:', {
+        console.log('Gas refunded to project:', {
           userOpHash,
-          developerId: event.developer_id,
+          projectId: event.project_id,
           maxCost: maxCost.toString(),
           actualCost: actualCost.toString(),
           refunded: refundAmount.toString(),
