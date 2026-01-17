@@ -2,6 +2,17 @@
 -- Date: 2026-01-16
 
 -- =====================================================
+-- 0. CLEANUP: Remove orphaned developer_projects if exists
+-- =====================================================
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'developer_projects') THEN
+        DELETE FROM developer_projects
+        WHERE project_id NOT IN (SELECT id FROM projects);
+    END IF;
+END $$;
+
+-- =====================================================
 -- 1. DEVELOPERS TABLE
 -- =====================================================
 CREATE TABLE IF NOT EXISTS developers (
