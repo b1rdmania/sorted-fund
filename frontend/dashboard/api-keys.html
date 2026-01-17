@@ -17,6 +17,7 @@
       <li><a href="api-keys.html" class="active">API Keys</a></li>
       <li><a href="analytics.html">Analytics</a></li>
       <li><a href="funding.html">Funding</a></li>
+      <li><a href="#" onclick="Auth.logout(); return false;" style="color: #ff6666;">Logout</a></li>
     </ul>
   </nav>
 
@@ -184,52 +185,46 @@ fetch('http://localhost:3000/sponsor/authorize', {
   <!-- Scripts -->
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/projectSwitcher.js"></script>
   <script>
-    const CONFIG = {
-      DEFAULT_PROJECT_ID: 'test-game',
-    };
-
-    let currentProjectId = CONFIG.DEFAULT_PROJECT_ID;
+    let currentProject = null;
     let currentRevokeKeyId = null;
 
     // Initialize
     async function init() {
       try {
-        await loadProjects();
+        // Require authentication
+        await Auth.requireAuth();
+
+        // Load project selector
+        await ProjectSwitcher.renderSelector('projectSelector');
+        currentProject = await ProjectSwitcher.getCurrentProject();
+
+        if (!currentProject) {
+          showError('No projects found. Please create a project first.');
+          return;
+        }
+
+        // Update example project ID
+        document.getElementById('exampleProjectId').textContent = currentProject.id;
+
+        // Load API keys for current project
         await loadApiKeys();
       } catch (error) {
         console.error('Initialization error:', error);
-        showError('Failed to initialize page: ' + error.message);
-      }
-    }
-
-    // Load projects
-    async function loadProjects() {
-      try {
-        const projects = await api.getAllProjects();
-        const selector = document.getElementById('projectSelector');
-
-        selector.innerHTML = projects.map(p =>
-          `<option value="${p.id}" ${p.id === currentProjectId ? 'selected' : ''}>
-            ${p.name} (${p.id})
-          </option>`
-        ).join('');
-
-        selector.addEventListener('change', (e) => {
-          currentProjectId = e.target.value;
-          loadApiKeys();
-        });
-
-        document.getElementById('exampleProjectId').textContent = currentProjectId;
-      } catch (error) {
-        console.error('Failed to load projects:', error);
+        if (!error.message.includes('Authentication required')) {
+          showError('Failed to initialize page: ' + error.message);
+        }
       }
     }
 
     // Load API keys
     async function loadApiKeys() {
       try {
-        const keys = await api.getApiKeys(currentProjectId);
+        if (!currentProject) return;
+
+        const keys = await api.getApiKeys(currentProject.id);
         displayApiKeys(keys);
       } catch (error) {
         console.error('Failed to load API keys:', error);
@@ -321,10 +316,15 @@ fetch('http://localhost:3000/sponsor/authorize', {
         return;
       }
 
+      if (!currentProject) {
+        showError('No project selected');
+        return;
+      }
+
       try {
         setButtonLoading(btn, 'Generating...');
 
-        const result = await api.generateApiKey(currentProjectId, { rateLimit });
+        const result = await api.generateApiKey(currentProject.id, { rateLimit });
 
         // Show the generated key
         document.getElementById('generatedKeyValue').value = result.apiKey;

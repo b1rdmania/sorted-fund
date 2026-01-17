@@ -17,6 +17,7 @@
       <li><a href="api-keys.html">API Keys</a></li>
       <li><a href="analytics.html">Analytics</a></li>
       <li><a href="funding.html">Funding</a></li>
+      <li><a href="#" onclick="Auth.logout(); return false;" style="color: #ff6666;">Logout</a></li>
     </ul>
   </nav>
 
@@ -149,22 +150,34 @@ fetch('/sponsor/authorize', {
   <!-- Scripts -->
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/projectSwitcher.js"></script>
   <script>
     // Configuration
     const CONFIG = {
-      DEMO_MODE: true,
-      DEFAULT_PROJECT_ID: 'test-game',
       REFRESH_INTERVAL: 30000, // 30 seconds
     };
 
-    let currentProjectId = CONFIG.DEFAULT_PROJECT_ID;
+    let currentProject = null;
     let refreshTimer = null;
 
     // Initialize dashboard
     async function init() {
       try {
+        // Require authentication first
+        await Auth.requireAuth();
+
         // Load projects for selector
-        await loadProjects();
+        await ProjectSwitcher.renderSelector('projectSelector');
+
+        // Get current project
+        currentProject = await ProjectSwitcher.getCurrentProject();
+
+        if (!currentProject) {
+          // No projects - show create project prompt
+          showCreateProjectPrompt();
+          return;
+        }
 
         // Load dashboard data
         await loadDashboard();
@@ -173,31 +186,24 @@ fetch('/sponsor/authorize', {
         startAutoRefresh();
       } catch (error) {
         console.error('Initialization error:', error);
-        showError('Failed to initialize dashboard: ' + error.message);
+        // Don't show error if redirecting to login
+        if (!error.message.includes('Authentication required')) {
+          showError('Failed to initialize dashboard: ' + error.message);
+        }
       }
     }
 
-    // Load projects for selector
-    async function loadProjects() {
-      try {
-        const projects = await api.getAllProjects();
-
-        const selector = document.getElementById('projectSelector');
-        selector.innerHTML = projects.map(p =>
-          `<option value="${p.id}" ${p.id === currentProjectId ? 'selected' : ''}>
-            ${p.name} (${p.id})
-          </option>`
-        ).join('');
-
-        selector.addEventListener('change', (e) => {
-          currentProjectId = e.target.value;
-          loadDashboard();
-        });
-      } catch (error) {
-        console.error('Failed to load projects:', error);
-        document.getElementById('projectSelector').innerHTML =
-          `<option value="${currentProjectId}">${currentProjectId}</option>`;
-      }
+    // Show create project prompt
+    function showCreateProjectPrompt() {
+      document.querySelector('.container').innerHTML = `
+        <div style="text-align: center; padding: 60px 20px;">
+          <h1>Welcome to Sorted.fund</h1>
+          <p style="margin: 20px 0;">Create your first project to get started</p>
+          <button onclick="ProjectSwitcher.showCreateModal()" style="padding: 12px 24px; font-size: 16px;">
+            Create Project
+          </button>
+        </div>
+      `;
     }
 
     // Load all dashboard data
@@ -212,14 +218,18 @@ fetch('/sponsor/authorize', {
     // Load project info (gas tank balance)
     async function loadProjectInfo() {
       try {
-        const project = await api.getProject(currentProjectId);
+        if (!currentProject) return;
 
-        // Display gas tank balance
-        const balance = formatWeiWithUnit(project.gasTankBalance || '0');
+        // Get gas tank balance
+        const balanceData = await ProjectSwitcher.getBalance(currentProject.id);
+        const balance = formatWeiWithUnit(balanceData.balance || '0');
         document.getElementById('gasTankBalance').textContent = balance;
 
-        // Display deposit address
-        const depositAddr = project.depositAddress || 'Not set';
+        // Get full project details
+        const project = await api.getProject(currentProject.id);
+
+        // Display deposit address (or placeholder)
+        const depositAddr = project.deposit_address || '0x' + project.id.substring(0, 40).padStart(40, '0');
         document.getElementById('depositAddress').textContent =
           `Deposit Address: ${shortenAddress(depositAddr)}`;
 
@@ -227,14 +237,16 @@ fetch('/sponsor/authorize', {
         document.getElementById('quickProjectId').textContent = project.id;
       } catch (error) {
         console.error('Failed to load project info:', error);
-        document.getElementById('gasTankBalance').textContent = 'Error';
+        document.getElementById('gasTankBalance').textContent = 'Error loading balance';
       }
     }
 
     // Load analytics overview
     async function loadAnalytics() {
       try {
-        const analytics = await api.getAnalyticsOverview(currentProjectId);
+        if (!currentProject) return;
+
+        const analytics = await api.getAnalyticsOverview(currentProject.id);
 
         // Update metrics
         document.getElementById('totalSponsored').textContent =
@@ -285,7 +297,9 @@ fetch('/sponsor/authorize', {
     // Load recent events
     async function loadRecentEvents() {
       try {
-        const eventsData = await api.getAnalyticsEvents(currentProjectId, {
+        if (!currentProject) return;
+
+        const eventsData = await api.getAnalyticsEvents(currentProject.id, {
           limit: 10,
           offset: 0
         });

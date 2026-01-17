@@ -25,11 +25,17 @@ class ApiClient {
    */
   async _request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
+
+    // Get session token
+    const token = localStorage.getItem('sorted_session_token');
+
     const config = {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers
       },
+      credentials: 'include', // Include cookies
       ...options
     };
 
@@ -43,6 +49,14 @@ class ApiClient {
       });
 
       clearTimeout(timeoutId);
+
+      // Handle 401 Unauthorized (session expired)
+      if (response.status === 401) {
+        localStorage.removeItem('sorted_session_token');
+        localStorage.removeItem('sorted_developer');
+        window.location.href = '/login.html';
+        throw new Error('Session expired. Please login again.');
+      }
 
       // Handle non-OK responses
       if (!response.ok) {
