@@ -3,178 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorted.fund - Demo Index</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: #0a0a0a;
-      color: #00ff00;
-      font-family: 'Courier New', monospace;
-      padding: 40px;
-      line-height: 1.6;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      border: 2px solid #00ff00;
-      background: #000;
-      padding: 40px;
-      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-    }
-
-    h1 {
-      color: #00ff00;
-      margin-bottom: 10px;
-      font-size: 32px;
-    }
-
-    h2 {
-      color: #00aaff;
-      margin-top: 30px;
-      margin-bottom: 15px;
-      font-size: 20px;
-    }
-
-    p {
-      color: #00aa00;
-      margin-bottom: 20px;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      margin-bottom: 15px;
-      padding: 15px;
-      background: rgba(0, 255, 0, 0.05);
-      border: 1px solid #00ff00;
-      transition: all 0.2s;
-    }
-
-    li:hover {
-      background: rgba(0, 255, 0, 0.1);
-      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-    }
-
-    a {
-      color: #00ff00;
-      text-decoration: none;
-      font-size: 18px;
-      font-weight: bold;
-      display: block;
-    }
-
-    a:hover {
-      color: #00aaff;
-    }
-
-    .description {
-      color: #00aa00;
-      font-size: 14px;
-      margin-top: 5px;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      font-size: 12px;
-      margin-left: 10px;
-      background: #00ff00;
-      color: #000;
-      border-radius: 2px;
-    }
-
-    .badge-warning {
-      background: #ffaa00;
-    }
-
-    hr {
-      border: none;
-      border-top: 1px solid #00ff00;
-      margin: 30px 0;
-    }
-
-    .section {
-      margin-bottom: 30px;
-    }
-  </style>
+  <title>Sorted.fund - Gasless Transactions for Web3 Games</title>
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
 </head>
 <body>
-  <div class="container">
-    <h1>⛽ SORTED.FUND</h1>
-    <p>Gas Station for Web3 Apps - Demo Index</p>
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-logo">⛽</div>
+        <a href="index.html" class="sidebar-brand-text">SORTED.FUND</a>
+      </div>
 
-    <hr>
+      <nav class="sidebar-nav">
+        <ul class="sidebar-nav-list">
+          <li class="sidebar-nav-item">
+            <a href="index.html" class="sidebar-nav-link active">Home</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="demo.html" class="sidebar-nav-link">Live Demo</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="login.html" class="sidebar-nav-link">Login / Register</a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
 
-    <div class="section">
-      <h2>📊 Dashboard Pages (Completed)</h2>
-      <ul>
-        <li>
-          <a href="dashboard/index.html">🏠 Overview Dashboard <span class="badge">Phase 1</span></a>
-          <div class="description">Main dashboard with metrics, gas tank balance, and recent activity</div>
-        </li>
-        <li>
-          <a href="dashboard/api-keys.html">🔑 API Keys <span class="badge">Phase 2</span></a>
-          <div class="description">Generate and manage API keys for authentication</div>
-        </li>
-        <li>
-          <a href="dashboard/allowlist.html">✅ Allowlist <span class="badge">Phase 2</span></a>
-          <div class="description">Control which contracts and functions can be sponsored</div>
-        </li>
-      </ul>
-    </div>
+    <!-- Main Content -->
+    <main class="main-content">
+      <div style="max-width: 900px; padding: var(--spacing-xl) 0;">
+        <h1 style="font-size: 48px; color: var(--color-primary); margin-bottom: var(--spacing-md);">
+          Gasless Transactions for Web3 Games
+        </h1>
+        <p style="font-size: 24px; color: #888; margin-bottom: var(--spacing-xl);">
+          One API call. Zero wallet friction. Pure gameplay.
+        </p>
 
-    <div class="section">
-      <h2>🚧 Coming Soon</h2>
-      <ul>
-        <li>
-          <a href="dashboard/funding.html">💰 Funding <span class="badge badge-warning">Phase 3</span></a>
-          <div class="description">Wallet integration and on-chain deposits</div>
-        </li>
-        <li>
-          <a href="dashboard/analytics.html">📈 Analytics <span class="badge badge-warning">Phase 4</span></a>
-          <div class="description">Detailed metrics with ASCII charts</div>
-        </li>
-        <li>
-          <a href="dashboard/projects.html">📁 Projects <span class="badge badge-warning">Phase 5</span></a>
-          <div class="description">Manage multiple projects</div>
-        </li>
-      </ul>
-    </div>
+        <div style="margin-bottom: var(--spacing-xl); line-height: 1.8; color: #aaa;">
+          <p style="margin-bottom: var(--spacing-md);">
+            Let your players interact with the blockchain <strong style="color: var(--color-primary);">without ever touching a wallet</strong>.
+            No seed phrases. No gas fees. No transaction popups.
+          </p>
+          <p>
+            Just <strong style="color: var(--color-primary);">one click</strong> → instant on-chain transaction.
+          </p>
+        </div>
 
-    <hr>
+        <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-xxl);">
+          <button onclick="window.location.href='demo.html'" style="padding: 18px 40px; font-size: 18px;">
+            🚀 Watch Live Demo
+          </button>
+          <button onclick="window.location.href='login.html'" class="btn-secondary" style="padding: 18px 40px; font-size: 18px;">
+            🔑 Login / Get Started
+          </button>
+        </div>
 
-    <div class="section">
-      <h2>🎮 Original Demos</h2>
-      <ul>
-        <li>
-          <a href="demo.html">🌟 Value Prop Demo</a>
-          <div class="description">Shows the business value (Developer + User sides)</div>
-        </li>
-        <li>
-          <a href="live.html">⚡ Live Execution Demo</a>
-          <div class="description">Execute real gasless transactions</div>
-        </li>
-        <li>
-          <a href="index-old.html">📺 Transaction Replay</a>
-          <div class="description">Replay of a past transaction</div>
-        </li>
-      </ul>
-    </div>
+        <!-- Features Grid -->
+        <div class="grid grid-3" style="margin-top: var(--spacing-xxl);">
+          <div class="panel" style="text-align: center;">
+            <div class="panel-content">
+              <div style="font-size: 40px; margin-bottom: var(--spacing-md);">⚡</div>
+              <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">One-Line Integration</h3>
+              <p class="text-muted">Single API call. No complex wallet integrations.</p>
+            </div>
+          </div>
 
-    <hr>
+          <div class="panel" style="text-align: center;">
+            <div class="panel-content">
+              <div style="font-size: 40px; margin-bottom: var(--spacing-md);">🎮</div>
+              <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">Zero User Friction</h3>
+              <p class="text-muted">Players just click. No wallets. No gas.</p>
+            </div>
+          </div>
 
-    <p style="text-align: center; color: #00aa00; font-size: 14px;">
-      SONIC TESTNET | ERC-4337 v0.7 | POWERED BY PIMLICO
-    </p>
+          <div class="panel" style="text-align: center;">
+            <div class="panel-content">
+              <div style="font-size: 40px; margin-bottom: var(--spacing-md);">🔒</div>
+              <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">You Control Spending</h3>
+              <p class="text-muted">Set limits. Fund once. We handle refunds.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 </body>
 </html>

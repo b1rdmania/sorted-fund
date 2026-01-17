@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Sorted.fund</title>
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <style>
+    .auth-container {
+      width: 100%;
+      max-width: 450px;
+      margin: 60px auto;
+    }
+
+    .auth-box {
+      background: #1a1a1a;
+      border: 1px solid #00ff00;
+      border-radius: 8px;
+      padding: 40px;
+    }
+
+    .auth-logo {
+      font-size: 48px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .auth-title {
+      font-size: 24px;
+      color: #00ff00;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid #333;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+
+    .tab-button.active {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid #00ff00;
+      color: #00ff00;
+    }
+
+    .tab-button:hover:not(.active) {
+      background: rgba(0, 255, 0, 0.05);
+      border-color: #00ff00;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      color: #00ff00;
+      margin-bottom: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      transition: all 0.3s;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #00ff00;
+    }
+
+    .form-button {
+      width: 100%;
+      padding: 12px;
+      background: #00ff00;
+      color: #000;
+      border: none;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .form-button:hover {
+      background: #00cc00;
+    }
+
+    .form-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .error-message {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid #ff0000;
+      color: #ff6666;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .success-message {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    .helper-text {
+      font-size: 11px;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(0, 255, 0, 0.3);
+      border-radius: 50%;
+      border-top-color: #00ff00;
+      animation: spin 1s linear infinite;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-logo">⛽</div>
+        <a href="index.html" class="sidebar-brand-text">SORTED.FUND</a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="sidebar-nav-list">
+          <li class="sidebar-nav-item">
+            <a href="index.html" class="sidebar-nav-link">Home</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="demo.html" class="sidebar-nav-link">Live Demo</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="login.html" class="sidebar-nav-link active">Login / Register</a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="auth-container">
+    <div class="auth-box">
+      <div class="auth-logo">⛽</div>
+      <h1 class="auth-title">SORTED.FUND</h1>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">
+        Gasless Transactions for Web3 Games
+      </p>
+      <p style="text-align: center; margin-bottom: 20px;">
+        <a href="demo.html" style="color: #00ff00; text-decoration: none; border: 1px solid #00ff00; padding: 8px 16px; display: inline-block; transition: all 0.3s;">
+          🚀 Watch Live Demo
+        </a>
+      </p>
+
+      <!-- Tab Buttons -->
+      <div class="auth-tabs">
+        <button class="tab-button active" onclick="switchTab('login')">Login</button>
+        <button class="tab-button" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Error/Success Messages -->
+      <div id="error-message" class="error-message"></div>
+      <div id="success-message" class="success-message"></div>
+
+      <!-- Login Tab -->
+      <div id="login-tab" class="tab-content active">
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label">EMAIL</label>
+            <input
+              type="email"
+              id="login-email"
+              class="form-input"
+              placeholder="developer@example.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">PASSWORD</label>
+            <input
+              type="password"
+              id="login-password"
+              class="form-input"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+
+          <button type="submit" class="form-button" id="login-button">
+            LOGIN
+          </button>
+        </form>
+
+        <p class="helper-text" style="text-align: center; margin-top: 20px;">
+          Demo account: demo@sorted.fund / demo123
+        </p>
+      </div>
+
+      <!-- Register Tab -->
+      <div id="register-tab" class="tab-content">
+        <form id="register-form">
+          <div class="form-group">
+            <label class="form-label">NAME</label>
+            <input
+              type="text"
+              id="register-name"
+              class="form-input"
+              placeholder="Your Name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">EMAIL</label>
+            <input
+              type="email"
+              id="register-email"
+              class="form-input"
+              placeholder="developer@example.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">PASSWORD</label>
+            <input
+              type="password"
+              id="register-password"
+              class="form-input"
+              placeholder="••••••••"
+              required
+              minlength="8"
+            />
+            <p class="helper-text">Minimum 8 characters</p>
+          </div>
+
+          <button type="submit" class="form-button" id="register-button">
+            CREATE ACCOUNT
+          </button>
+        </form>
+      </div>
+    </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script>
+    let currentTab = 'login';
+
+    function switchTab(tab) {
+      currentTab = tab;
+
+      // Update tab buttons
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Update tab content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`${tab}-tab`).classList.add('active');
+
+      // Clear messages
+      hideMessages();
+    }
+
+    function showError(message) {
+      const errorEl = document.getElementById('error-message');
+      errorEl.textContent = message;
+      errorEl.classList.add('show');
+      document.getElementById('success-message').classList.remove('show');
+    }
+
+    function showSuccess(message) {
+      const successEl = document.getElementById('success-message');
+      successEl.textContent = message;
+      successEl.classList.add('show');
+      document.getElementById('error-message').classList.remove('show');
+    }
+
+    function hideMessages() {
+      document.getElementById('error-message').classList.remove('show');
+      document.getElementById('success-message').classList.remove('show');
+    }
+
+    function setLoading(formId, isLoading) {
+      const button = document.getElementById(`${formId}-button`);
+      button.disabled = isLoading;
+
+      if (isLoading) {
+        const originalText = button.textContent.trim();
+        button.innerHTML = originalText + ' <span class="loading"></span>';
+      } else {
+        button.innerHTML = button.textContent.replace(/<span.*?<\/span>/, '').trim();
+      }
+    }
+
+    // Login form handler
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessages();
+      setLoading('login', true);
+
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      try {
+        const response = await fetch(`${api.baseUrl}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+          credentials: 'include',
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || data.message || 'Login failed');
+        }
+
+        // Store session token
+        localStorage.setItem('sorted_session_token', data.sessionToken);
+        localStorage.setItem('sorted_developer', JSON.stringify(data.developer));
+
+        showSuccess('Login successful! Redirecting...');
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1000);
+
+      } catch (error) {
+        showError(error.message);
+        setLoading('login', false);
+      }
+    });
+
+    // Register form handler
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessages();
+      setLoading('register', true);
+
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
+
+      try {
+        const response = await fetch(`${api.baseUrl}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, name }),
+          credentials: 'include',
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || data.message || 'Registration failed');
+        }
+
+        // Store session token
+        localStorage.setItem('sorted_session_token', data.sessionToken);
+        localStorage.setItem('sorted_developer', JSON.stringify(data.developer));
+
+        showSuccess('Account created! Redirecting...');
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1000);
+
+      } catch (error) {
+        showError(error.message);
+        setLoading('register', false);
+      }
+    });
+
+    // Check if already logged in
+    if (localStorage.getItem('sorted_session_token')) {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>
