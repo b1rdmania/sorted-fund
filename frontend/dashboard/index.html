@@ -3,357 +3,208 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorted.fund - Developer Dashboard</title>
+  <title>Sorted.fund - Gasless Transactions for Web3 Games</title>
   <link rel="stylesheet" href="assets/css/global.css">
   <link rel="stylesheet" href="assets/css/components.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: linear-gradient(180deg, rgba(0, 255, 0, 0.03) 0%, transparent 50%, rgba(0, 255, 0, 0.03) 100%);
+    }
+
+    .landing-container {
+      max-width: 900px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .main-title {
+      font-size: 48px;
+      color: var(--color-primary);
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: 24px;
+      color: #888;
+      margin-bottom: 40px;
+      font-weight: normal;
+    }
+
+    .description {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #aaa;
+      margin-bottom: 50px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 60px;
+    }
+
+    .cta-button {
+      padding: 18px 40px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Courier New', monospace;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .cta-primary {
+      background: var(--color-primary);
+      color: #000;
+    }
+
+    .cta-primary:hover {
+      background: #00cc00;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .cta-secondary {
+      background: transparent;
+      color: var(--color-primary);
+      border: 2px solid var(--color-primary);
+    }
+
+    .cta-secondary:hover {
+      background: rgba(0, 255, 0, 0.1);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .features-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-top: 60px;
+    }
+
+    .feature {
+      padding: 20px;
+      background: rgba(0, 255, 0, 0.05);
+      border: 1px solid rgba(0, 255, 0, 0.2);
+      border-radius: 8px;
+    }
+
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      color: var(--color-primary);
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .feature-text {
+      font-size: 14px;
+      color: #888;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 32px;
+      }
+
+      .subtitle {
+        font-size: 18px;
+      }
+
+      .description {
+        font-size: 16px;
+      }
+
+      .cta-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .cta-button {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .features-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar">
-    <a href="index.html" class="navbar-brand">⛽ SORTED.FUND</a>
-    <ul class="navbar-nav">
-      <li><a href="index.html" class="active">Overview</a></li>
-      <li><a href="projects.html">Projects</a></li>
-      <li><a href="api-keys.html">API Keys</a></li>
-      <li><a href="analytics.html">Analytics</a></li>
-      <li><a href="funding.html">Funding</a></li>
-      <li><a href="#" onclick="Auth.logout(); return false;" style="color: #ff6666;">Logout</a></li>
-    </ul>
-  </nav>
+  <div class="landing-container">
+    <div class="logo">⛽</div>
+    <h1 class="main-title">SORTED.FUND</h1>
+    <p class="subtitle">Gasless Transactions for Web3 Games</p>
 
-  <!-- Main Content -->
-  <div class="container">
-    <!-- Project Selector (Demo Mode) -->
-    <div class="project-selector">
-      <span class="project-selector-label">PROJECT:</span>
-      <select id="projectSelector">
-        <option value="">Loading...</option>
-      </select>
+    <div class="description">
+      <p>
+        Let your players interact with the blockchain <strong>without ever touching a wallet</strong>.
+        No seed phrases. No gas fees. No transaction popups.
+      </p>
+      <p style="margin-top: 20px;">
+        Just <strong>one click</strong> → instant on-chain transaction.
+      </p>
     </div>
 
-    <!-- Page Header -->
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Dashboard Overview</h1>
-        <p class="page-subtitle">Real-time metrics for your gas station</p>
-      </div>
-      <div class="page-actions">
-        <button onclick="window.location.href='funding.html'">💰 Add Funds</button>
-        <button onclick="window.location.href='api-keys.html'" class="btn-secondary">🔑 Generate API Key</button>
-      </div>
+    <div class="cta-container">
+      <a href="demo.html" class="cta-button cta-primary">
+        🚀 Watch Live Demo
+      </a>
+      <a href="login.html" class="cta-button cta-secondary">
+        🔑 Login / Get Started
+      </a>
     </div>
 
-    <!-- Gas Tank Balance (Prominent Display) -->
-    <div class="panel highlight">
-      <div class="panel-header">⛽ GAS STATION BALANCE</div>
-      <div class="panel-content">
-        <div class="metric-card">
-          <span class="metric-card-label">Current Balance</span>
-          <span class="metric-card-value" id="gasTankBalance">Loading...</span>
-          <span class="metric-card-subtitle" id="depositAddress">Deposit Address: Loading...</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Key Metrics Grid -->
-    <div class="stats-grid">
-      <div class="stat-box">
-        <div class="stat-box-label">Total Sponsored</div>
-        <div class="stat-box-value" id="totalSponsored">--</div>
-        <div class="stat-box-change text-muted">All-time transactions</div>
+    <div class="features-row">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">One-Line Integration</div>
+        <div class="feature-text">Single API call. No complex wallet integrations.</div>
       </div>
 
-      <div class="stat-box">
-        <div class="stat-box-label">Gas Saved</div>
-        <div class="stat-box-value" id="totalGasSaved">--</div>
-        <div class="stat-box-change text-muted">Total cost sponsored</div>
+      <div class="feature">
+        <div class="feature-icon">🎮</div>
+        <div class="feature-title">Zero User Friction</div>
+        <div class="feature-text">Players just click. No wallets. No gas.</div>
       </div>
 
-      <div class="stat-box">
-        <div class="stat-box-label">Active Users</div>
-        <div class="stat-box-value" id="activeUsers">--</div>
-        <div class="stat-box-change text-muted">Unique addresses</div>
-      </div>
-
-      <div class="stat-box">
-        <div class="stat-box-label">Today's Activity</div>
-        <div class="stat-box-value" id="todaySponsored">--</div>
-        <div class="stat-box-change" id="dailyCapStatus">--</div>
-      </div>
-    </div>
-
-    <!-- Two Column Layout -->
-    <div class="grid grid-2">
-      <!-- Top Contracts -->
-      <div class="panel">
-        <div class="panel-header">📊 TOP CONTRACTS</div>
-        <div class="panel-content">
-          <div id="topContractsContainer">
-            <div class="loading">Loading contracts data</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="panel">
-        <div class="panel-header">⚡ QUICK ACTIONS</div>
-        <div class="panel-content">
-          <div class="quick-actions" style="flex-direction: column;">
-            <button onclick="window.location.href='funding.html'" class="btn-block">
-              💰 Add Funds to Gas Station
-            </button>
-            <button onclick="window.location.href='api-keys.html'" class="btn-block btn-secondary">
-              🔑 Generate New API Key
-            </button>
-            <button onclick="window.location.href='allowlist.html'" class="btn-block btn-secondary">
-              ✅ Manage Allowlist
-            </button>
-            <button onclick="window.location.href='analytics.html'" class="btn-block btn-secondary">
-              📈 View Full Analytics
-            </button>
-          </div>
-
-          <div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: var(--border-secondary);">
-            <h3>Integration</h3>
-            <div class="code-block" style="margin-top: var(--spacing-sm);">
-<span class="text-muted">// Simple API call to sponsor gas:</span>
-fetch('/sponsor/authorize', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY'
-  },
-  body: JSON.stringify({
-    projectId: '<span id="quickProjectId">...</span>',
-    user: '0x...',
-    target: '0x...',
-    selector: '0x...',
-    estimatedGas: 500000
-  })
-})
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recent Events Log -->
-    <div class="panel">
-      <div class="panel-header">📋 RECENT ACTIVITY</div>
-      <div class="panel-content p-0">
-        <div class="event-log" id="eventsLog">
-          <div class="loading" style="padding: var(--spacing-lg);">Loading recent events</div>
-        </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">You Control Spending</div>
+        <div class="feature-text">Set limits. Fund once. We handle refunds.</div>
       </div>
     </div>
   </div>
-
-  <!-- Scripts -->
-  <script src="assets/js/utils.js"></script>
-  <script src="assets/js/api.js"></script>
-  <script src="assets/js/auth.js"></script>
-  <script src="assets/js/projectSwitcher.js"></script>
-  <script>
-    // Configuration
-    const CONFIG = {
-      REFRESH_INTERVAL: 30000, // 30 seconds
-    };
-
-    let currentProject = null;
-    let refreshTimer = null;
-
-    // Initialize dashboard
-    async function init() {
-      try {
-        // Require authentication first
-        await Auth.requireAuth();
-
-        // Load projects for selector
-        await ProjectSwitcher.renderSelector('projectSelector');
-
-        // Get current project
-        currentProject = await ProjectSwitcher.getCurrentProject();
-
-        if (!currentProject) {
-          // No projects - show create project prompt
-          showCreateProjectPrompt();
-          return;
-        }
-
-        // Load dashboard data
-        await loadDashboard();
-
-        // Set up auto-refresh
-        startAutoRefresh();
-      } catch (error) {
-        console.error('Initialization error:', error);
-        // Don't show error if redirecting to login
-        if (!error.message.includes('Authentication required')) {
-          showError('Failed to initialize dashboard: ' + error.message);
-        }
-      }
-    }
-
-    // Show create project prompt
-    function showCreateProjectPrompt() {
-      document.querySelector('.container').innerHTML = `
-        <div style="text-align: center; padding: 60px 20px;">
-          <h1>Welcome to Sorted.fund</h1>
-          <p style="margin: 20px 0;">Create your first project to get started</p>
-          <button onclick="ProjectSwitcher.showCreateModal()" style="padding: 12px 24px; font-size: 16px;">
-            Create Project
-          </button>
-        </div>
-      `;
-    }
-
-    // Load all dashboard data
-    async function loadDashboard() {
-      await Promise.all([
-        loadProjectInfo(),
-        loadAnalytics(),
-        loadRecentEvents()
-      ]);
-    }
-
-    // Load project info (gas tank balance)
-    async function loadProjectInfo() {
-      try {
-        if (!currentProject) return;
-
-        // Get gas tank balance
-        const balanceData = await ProjectSwitcher.getBalance(currentProject.id);
-        const balance = formatWeiWithUnit(balanceData.balance || '0');
-        document.getElementById('gasTankBalance').textContent = balance;
-
-        // Get full project details
-        const project = await api.getProject(currentProject.id);
-
-        // Display deposit address (or placeholder)
-        const depositAddr = project.deposit_address || '0x' + project.id.substring(0, 40).padStart(40, '0');
-        document.getElementById('depositAddress').textContent =
-          `Deposit Address: ${shortenAddress(depositAddr)}`;
-
-        // Update quick integration code
-        document.getElementById('quickProjectId').textContent = project.id;
-      } catch (error) {
-        console.error('Failed to load project info:', error);
-        document.getElementById('gasTankBalance').textContent = 'Error loading balance';
-      }
-    }
-
-    // Load analytics overview
-    async function loadAnalytics() {
-      try {
-        if (!currentProject) return;
-
-        const analytics = await api.getAnalyticsOverview(currentProject.id);
-
-        // Update metrics
-        document.getElementById('totalSponsored').textContent =
-          formatNumber(analytics.totalSponsored);
-
-        document.getElementById('totalGasSaved').textContent =
-          formatWeiWithUnit(analytics.totalGasSaved);
-
-        document.getElementById('activeUsers').textContent =
-          formatNumber(analytics.activeUsers);
-
-        document.getElementById('todaySponsored').textContent =
-          formatNumber(analytics.today.sponsored);
-
-        // Daily cap status
-        const dailyCapEl = document.getElementById('dailyCapStatus');
-        const capRemaining = formatWei(analytics.today.dailyCapRemaining);
-        dailyCapEl.textContent = `${capRemaining} S remaining today`;
-        dailyCapEl.className = 'stat-box-change text-muted';
-
-        // Display top contracts
-        displayTopContracts(analytics.topContracts);
-
-      } catch (error) {
-        console.error('Failed to load analytics:', error);
-        showError('Failed to load analytics data');
-      }
-    }
-
-    // Display top contracts
-    function displayTopContracts(contracts) {
-      const container = document.getElementById('topContractsContainer');
-
-      if (!contracts || contracts.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-message">No contract data yet</div></div>';
-        return;
-      }
-
-      container.innerHTML = contracts.map(contract => `
-        <div class="stat-box" style="margin-bottom: var(--spacing-sm);">
-          <div class="stat-box-label">${shortenAddress(contract.address)}</div>
-          <div class="stat-box-value">${formatNumber(contract.calls)}</div>
-          <div class="stat-box-change text-muted">${formatWeiWithUnit(contract.gasUsed)} gas used</div>
-        </div>
-      `).join('');
-    }
-
-    // Load recent events
-    async function loadRecentEvents() {
-      try {
-        if (!currentProject) return;
-
-        const eventsData = await api.getAnalyticsEvents(currentProject.id, {
-          limit: 10,
-          offset: 0
-        });
-
-        const logEl = document.getElementById('eventsLog');
-
-        if (!eventsData.events || eventsData.events.length === 0) {
-          logEl.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-state-icon">📭</div>
-              <div class="empty-state-message">No events yet</div>
-              <div class="text-muted font-small">Sponsored transactions will appear here</div>
-            </div>
-          `;
-          return;
-        }
-
-        logEl.innerHTML = eventsData.events.map(event => `
-          <div class="event-log-item">
-            <div class="event-log-time">${formatTime(event.created_at)}</div>
-            <div class="event-log-message">
-              <span class="text-muted">User:</span> ${shortenAddress(event.sender)}
-              <span class="text-muted">→</span> ${shortenAddress(event.target)}
-              <span class="text-muted">Gas:</span> ${formatNumber(event.actual_gas || event.estimated_gas)}
-            </div>
-            <div class="event-log-status">
-              <span class="badge ${getStatusClass(event.status)}">${event.status}</span>
-            </div>
-          </div>
-        `).join('');
-
-      } catch (error) {
-        console.error('Failed to load events:', error);
-        document.getElementById('eventsLog').innerHTML =
-          '<div class="loading text-error">Failed to load events</div>';
-      }
-    }
-
-    // Auto-refresh
-    function startAutoRefresh() {
-      if (refreshTimer) clearInterval(refreshTimer);
-
-      refreshTimer = setInterval(() => {
-        loadDashboard();
-      }, CONFIG.REFRESH_INTERVAL);
-    }
-
-    // Initialize on page load
-    window.addEventListener('load', init);
-
-    // Clean up on page unload
-    window.addEventListener('beforeunload', () => {
-      if (refreshTimer) clearInterval(refreshTimer);
-    });
-  </script>
 </body>
 </html>
