@@ -7,12 +7,6 @@
   <link rel="stylesheet" href="assets/css/global.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <style>
-    body {
-      padding: var(--spacing-xl);
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
     .demo-header {
       text-align: center;
       margin-bottom: var(--spacing-xl);
@@ -22,27 +16,12 @@
       font-size: 36px;
       color: var(--color-primary);
       margin-bottom: var(--spacing-sm);
-      text-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
     }
 
     .demo-header p {
       font-size: 18px;
       color: #888;
       margin-bottom: var(--spacing-lg);
-    }
-
-    .back-link {
-      display: inline-block;
-      color: var(--color-primary);
-      text-decoration: none;
-      margin-bottom: var(--spacing-lg);
-      font-size: 14px;
-      transition: all 0.3s;
-    }
-
-    .back-link:hover {
-      color: #00cc00;
-      transform: translateX(-4px);
     }
 
     .cta-buttons {
@@ -117,12 +96,35 @@
   </style>
 </head>
 <body>
-  <a href="index.html" class="back-link">← Back to Home</a>
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-logo">⛽</div>
+        <a href="index.html" class="sidebar-brand-text">SORTED.FUND</a>
+      </div>
 
-  <div class="demo-header">
-    <h1>⛽ Live Gasless Transaction Demo</h1>
-    <p>Watch a real transaction execute on Sonic testnet without any wallet interaction</p>
-  </div>
+      <nav class="sidebar-nav">
+        <ul class="sidebar-nav-list">
+          <li class="sidebar-nav-item">
+            <a href="index.html" class="sidebar-nav-link">Home</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="demo.html" class="sidebar-nav-link active">Live Demo</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="login.html" class="sidebar-nav-link">Login / Register</a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="demo-header">
+        <h1>⛽ Live Gasless Transaction Demo</h1>
+        <p>Watch a real transaction execute on Sonic testnet without any wallet interaction</p>
+      </div>
 
     <!-- Demo Terminal -->
     <div class="panel">
@@ -229,6 +231,7 @@ console.log('View on explorer:', explorerUrl);
         </div>
       </div>
     </div>
+    </main>
   </div>
 
   <script src="assets/js/api.js"></script>

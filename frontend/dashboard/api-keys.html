@@ -8,19 +8,36 @@
   <link rel="stylesheet" href="assets/css/components.css">
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar">
-    <a href="dashboard.html" class="navbar-brand">⛽ SORTED.FUND</a>
-    <ul class="navbar-nav">
-      <li><a href="dashboard.html">Overview</a></li>
-      <li><a href="api-keys.html" class="active">API Keys</a></li>
-      <li><a href="allowlist.html">Allowlist</a></li>
-      <li><a href="#" onclick="Auth.logout(); return false;" style="color: #ff6666;">Logout</a></li>
-    </ul>
-  </nav>
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-logo">⛽</div>
+        <a href="dashboard.html" class="sidebar-brand-text">SORTED.FUND</a>
+      </div>
 
-  <!-- Main Content -->
-  <div class="container">
+      <nav class="sidebar-nav">
+        <ul class="sidebar-nav-list">
+          <li class="sidebar-nav-item">
+            <a href="dashboard.html" class="sidebar-nav-link">Overview</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="api-keys.html" class="sidebar-nav-link active">API Keys</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="allowlist.html" class="sidebar-nav-link">Allowlist</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="#" onclick="Auth.logout(); return false;" class="sidebar-footer-link">Logout</a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="container">
     <!-- Project Selector -->
     <div class="project-selector">
       <span class="project-selector-label">PROJECT:</span>
@@ -101,6 +118,8 @@ fetch('http://localhost:3000/sponsor/authorize', {
         </ul>
       </div>
     </div>
+      </div>
+    </main>
   </div>
 
   <!-- Generate Key Modal -->
