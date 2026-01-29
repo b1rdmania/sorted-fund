@@ -10,7 +10,7 @@ import { SortedClient } from '../../dist/index';
 const CONFIG = {
   // Backend API
   backendUrl: 'http://localhost:3000',
-  apiKey: process.env.SORTED_API_KEY || 'sk_sorted_c2b9e0ece64c3e988dcad47b170dd19b5041ac1dc7e5ddd1ed33aa9e2f988271',
+  apiKey: process.env.SORTED_API_KEY || '',
   projectId: 'test-game',
 
   // Pimlico bundler
@@ -35,6 +35,12 @@ async function main() {
   console.log('🚀 Starting Sorted.fund SDK Integration Test\n');
 
   // Validate configuration
+  if (!CONFIG.apiKey) {
+    console.error('❌ Error: SORTED_API_KEY not set');
+    console.log('Set it in environment: export SORTED_API_KEY=sk_sorted_...');
+    process.exit(1);
+  }
+
   if (!CONFIG.pimlicoApiKey) {
     console.error('❌ Error: PIMLICO_API_KEY not set');
     console.log('Set it in environment: export PIMLICO_API_KEY=your_key');

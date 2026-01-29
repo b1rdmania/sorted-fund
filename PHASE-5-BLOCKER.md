@@ -1,7 +1,9 @@
-so # Phase 5 Blocker: EntryPoint Version Mismatch
+# Phase 5 Blocker: EntryPoint Version Mismatch
+
+> **RESOLVED (2026-01-16):** Switched from Pimlico hosted bundler to local Alto bundler configured for EntryPoint v0.7. Phase 5 is now complete. See CLAUDE.md for current status.
 
 **Date:** 2026-01-07
-**Status:** ⚠️ BLOCKED - Incompatibility between our contracts and Pimlico bundler
+**Status:** ✅ RESOLVED
 
 ---
 
