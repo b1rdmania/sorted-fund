@@ -2,47 +2,60 @@
 
 Last Updated: 2026-01-29
 
-## Current Status
+## What Is This?
 
-**Production-ready gasless transaction infrastructure** using ERC-4337 Account Abstraction on Sonic testnet.
+**Sorted.fund** is a gasless transaction infrastructure for Web3 games. It lets game developers sponsor gas fees so players never need tokens to play.
 
-## Production URLs
+**Tech stack:** ERC-4337 Account Abstraction on Sonic testnet with a verifying paymaster.
+
+**GitHub:** https://github.com/b1rdmania/sorted-fund
+
+## Production
 
 | Service | Platform | URL |
 |---------|----------|-----|
 | Frontend | Vercel | https://sorted-fund.vercel.app |
 | Backend | Render | https://sorted-backend.onrender.com |
-| Database | Render | PostgreSQL (auto-connected) |
+| Database | Render PostgreSQL | (auto-connected to backend) |
 
-**Demo Account:** `demo@sorted.fund` / `demo123`
+**Demo login:** `demo@sorted.fund` / `demo123`
+
+## Deployment
+
+**Frontend (Vercel):** Auto-deploys on push to master. Config in `vercel.json`.
+
+**Backend (Render):** Auto-deploys on push to master. Config in `render.yaml`.
+
+Manual deploy:
+```bash
+# Frontend
+vercel --prod
+
+# Backend (trigger webhook)
+curl https://api.render.com/deploy/srv-d5l83963jp1c73956ml0?key=p_Ch7HGhnZA
+```
 
 ## Local Development
 
-### Prerequisites
 ```bash
+# Prerequisites
 brew services start postgresql@14
-```
 
-### Run Services
-```bash
-# Terminal 1 - Backend (port 3000)
+# Backend (port 3000)
 cd backend && npm run dev
 
-# Terminal 2 - Alto Bundler (port 4337) - for local testing only
+# Frontend (port 8081)
+cd frontend/dashboard-v2 && python3 -m http.server 8081
+
+# Alto Bundler (port 4337) - only for local E2E testing
 cd bundler/alto && ./alto --config config.sonic-testnet.json --floor-max-fee-per-gas 2 --floor-max-priority-fee-per-gas 2
 
-# Terminal 3 - Frontend (port 8081)
-cd frontend/dashboard-v2 && python3 -m http.server 8081
-```
-
-### E2E Test
-```bash
+# E2E test
 cd sdk && npx ts-node test-e2e-alto.ts
 ```
 
-## Configuration
+## Contracts (Sonic Testnet - Chain 14601)
 
-### Contracts (Sonic Testnet - Chain ID 14601)
 | Contract | Address |
 |----------|---------|
 | EntryPoint v0.7 | `0x0000000071727De22E5E9d8BAf0edAc6f37da032` |
@@ -50,64 +63,65 @@ cd sdk && npx ts-node test-e2e-alto.ts
 | Test Counter | `0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3` |
 | Test Account | `0x4BEfFA7558375a0f8e55a4eABbE9a53F661E5506` |
 
-### Network
-- **RPC**: https://rpc.testnet.soniclabs.com
-- **Explorer**: https://testnet.sonicscan.org
+**RPC:** https://rpc.testnet.soniclabs.com
+**Explorer:** https://testnet.sonicscan.org
 
-### API Keys (Local Dev)
-- **Project ID**: `test-game`
-- **API Key**: `sk_sorted_e579aea9ba39f0ba7fd2098d4180ccfcc6ab70810f16dfc8c5d9dcc1f3a22a44`
+## Project Structure
+
+```
+├── backend/           # Express.js API (Render)
+│   └── src/
+│       ├── routes/    # API endpoints
+│       ├── services/  # Business logic (authorization, gas reconciliation)
+│       └── db/        # PostgreSQL schema & queries
+├── frontend/
+│   └── dashboard-v2/  # Static dashboard (Vercel)
+├── sdk/               # TypeScript SDK for game integration
+├── contracts/         # Solidity contracts (already deployed)
+├── bundler/alto/      # ERC-4337 bundler (git submodule, local dev only)
+├── vercel.json        # Vercel deployment config
+└── render.yaml        # Render deployment config
+```
 
 ## Key Files
 
-### Backend
 - `backend/src/services/authorizationService.ts` - Signs paymasterAndData
-- `backend/src/services/gasReconciliationService.ts` - Gas tracking
-- `backend/src/routes/sponsor.ts` - Sponsorship endpoints
-- `backend/src/db/schema.sql` - Database schema
+- `backend/src/routes/sponsor.ts` - `/sponsor/authorize` endpoint
+- `frontend/dashboard-v2/assets/js/config.js` - Auto-detects prod vs local
+- `sdk/src/index.ts` - SortedClient for game integration
 
-### SDK
-- `sdk/src/index.ts` - Main SDK client
-- `sdk/src/userOpBuilder.ts` - UserOperation builder
-- `sdk/test-e2e-alto.ts` - E2E test script
-
-### Frontend
-- `frontend/dashboard-v2/` - Dashboard static files
-- `frontend/dashboard-v2/assets/js/config.js` - API config (auto-detects prod/dev)
-
-## Transaction Flow
+## How It Works
 
 ```
-User Request → SDK.authorize() → Backend signs paymasterAndData
-     ↓
-SDK.submitUserOperation() → Bundler → On-chain (gasless!)
-     ↓
-SDK.waitForUserOp() → Receipt → Backend reconciles actual gas
+Game calls SDK.authorize(userOp)
+    → Backend validates & signs paymasterAndData
+    → SDK submits to bundler
+    → Bundler executes on-chain (user pays $0)
+    → Backend reconciles actual gas used
 ```
 
-## Architecture
+## API Keys (Local Dev Only)
 
-- **Backend**: Express.js API on Render, PostgreSQL database
-- **Frontend**: Static HTML/JS on Vercel, calls Render backend
-- **Bundler**: Alto (Pimlico's ERC-4337 bundler) - local for dev, hosted for prod
-- **Paymaster**: Verifying paymaster that sponsors gas based on backend signature
+- **Project ID:** `test-game`
+- **API Key:** `sk_sorted_e579aea9ba39f0ba7fd2098d4180ccfcc6ab70810f16dfc8c5d9dcc1f3a22a44`
+
+## Quick Checks
+
+```bash
+# Backend health
+curl https://sorted-backend.onrender.com/health
+
+# Test login
+curl -X POST https://sorted-backend.onrender.com/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"demo@sorted.fund","password":"demo123"}'
+```
 
 ## Troubleshooting
 
-### Backend won't start
-```bash
-brew services restart postgresql@14
-```
-
-### Frontend API errors
-- Hard refresh: Cmd+Shift+R
-- Check backend health: `curl https://sorted-backend.onrender.com/health`
-
-### Alto "transaction underpriced"
-Use floor flags: `--floor-max-fee-per-gas 2 --floor-max-priority-fee-per-gas 2`
-
-## References
-
-- [ERC-4337 Spec](https://eips.ethereum.org/EIPS/eip-4337)
-- [Alto Bundler](https://github.com/pimlicolabs/alto)
-- [Sonic Docs](https://docs.soniclabs.com/)
+| Issue | Fix |
+|-------|-----|
+| Backend won't start locally | `brew services restart postgresql@14` |
+| Frontend stale | Hard refresh: Cmd+Shift+R |
+| Render backend sleeping | First request takes ~30s to wake |
+| Alto "underpriced" error | Use `--floor-max-fee-per-gas 2` flags |
