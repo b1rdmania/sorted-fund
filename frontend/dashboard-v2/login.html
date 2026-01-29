@@ -217,8 +217,8 @@
 
       <!-- Tab Buttons -->
       <div class="auth-tabs">
-        <button class="tab-button active" onclick="switchTab('login')">Login</button>
-        <button class="tab-button" onclick="switchTab('register')">Register</button>
+        <button class="tab-button active" onclick="switchTab('login', event)">Login</button>
+        <button class="tab-button" onclick="switchTab('register', event)">Register</button>
       </div>
 
       <!-- Error/Success Messages -->
@@ -312,14 +312,19 @@
   <script>
     let currentTab = 'login';
 
-    function switchTab(tab) {
+    function switchTab(tab, event) {
       currentTab = tab;
 
       // Update tab buttons
       document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.remove('active');
       });
-      event.target.classList.add('active');
+      if (event && event.target) {
+        event.target.classList.add('active');
+      } else {
+        // Fallback: find the button by tab name
+        document.querySelector(`.tab-button[onclick*="${tab}"]`).classList.add('active');
+      }
 
       // Update tab content
       document.querySelectorAll('.tab-content').forEach(content => {
@@ -355,10 +360,12 @@
       button.disabled = isLoading;
 
       if (isLoading) {
-        const originalText = button.textContent.trim();
-        button.innerHTML = originalText + ' <span class="loading"></span>';
+        if (!button.dataset.originalText) {
+          button.dataset.originalText = button.textContent.trim();
+        }
+        button.innerHTML = button.dataset.originalText + ' <span class="loading"></span>';
       } else {
-        button.innerHTML = button.textContent.replace(/<span.*?<\/span>/, '').trim();
+        button.innerHTML = button.dataset.originalText || button.textContent.trim();
       }
     }
 
