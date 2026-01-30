@@ -7,349 +7,408 @@
   <link rel="icon" type="image/png" href="sorted-favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="assets/css/global.css">
-  <link rel="stylesheet" href="assets/css/components.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    .demo-header {
-      text-align: center;
-      margin-bottom: var(--space-xl);
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0e0e10;
+      --bg-elevated: #16151a;
+      --border: #27252b;
+      --text: #e4e1e8;
+      --text-muted: #6b6779;
+      --green: #22c55e;
+      --green-dim: #1a9d4a;
+      --red: #ef4444;
+      --blue: #60a5fa;
     }
 
-    .demo-header h1 {
-      font-size: var(--text-h1);
-      margin-bottom: var(--space-sm);
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .demo-header p {
-      font-size: var(--text-body);
+    .page {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 200px;
+      border-right: 1px solid var(--border);
+      padding: 32px 0;
+      position: fixed;
+      height: 100vh;
+      background: var(--bg);
+    }
+
+    .logo {
+      padding: 0 24px;
+      margin-bottom: 48px;
+    }
+
+    .logo img { height: 24px; }
+
+    .nav a {
+      display: block;
+      padding: 8px 24px;
       color: var(--text-muted);
-      margin-bottom: var(--space-lg);
+      text-decoration: none;
+      font-size: 14px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
     }
 
-    .terminal {
-      background: var(--bg-deep);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: var(--space-lg);
-      font-family: var(--font-mono);
-      font-size: var(--text-mono-sm);
-      min-height: 400px;
-      max-height: 600px;
-      overflow-y: auto;
-      color: var(--text-secondary);
+    .nav a:hover { color: var(--text); }
+    .nav a.active { color: var(--green); border-left-color: var(--green); }
+
+    /* Main */
+    .main {
+      flex: 1;
+      margin-left: 200px;
+      padding: 48px 64px;
+      max-width: 1000px;
     }
 
-    .terminal-line {
+    .page-header {
+      margin-bottom: 48px;
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
       margin-bottom: 8px;
-      white-space: pre-wrap;
-      word-break: break-all;
     }
 
-    .terminal-success {
-      color: var(--green);
-    }
-
-    .terminal-info {
-      color: var(--blue);
-    }
-
-    .terminal-error {
-      color: var(--red);
-    }
-
-    .terminal-muted {
+    .page-subtitle {
       color: var(--text-muted);
+      font-size: 15px;
     }
 
-    .terminal-link {
-      color: var(--green);
-      text-decoration: underline;
-      cursor: pointer;
+    /* Terminal */
+    .terminal-wrapper {
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 48px;
     }
 
-    .terminal-link:hover {
-      color: var(--text-primary);
+    .terminal-header {
+      padding: 12px 16px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .spinner {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border: 2px solid var(--border);
+    .terminal-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .terminal-title::before {
+      content: '';
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      border-top-color: var(--green);
-      animation: spin 1s linear infinite;
-      margin-right: 8px;
+      background: var(--text-muted);
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .terminal-title.live::before {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
     }
 
     .run-btn {
-      padding: var(--space-sm) var(--space-md);
       background: var(--green);
-      color: var(--bg-deep);
+      color: #000;
       border: none;
-      border-radius: var(--radius-md);
-      cursor: pointer;
+      padding: 8px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
       font-weight: 500;
-      font-size: var(--text-body-sm);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
     }
 
-    .run-btn:hover {
-      background: var(--green-dim);
+    .run-btn:hover { background: var(--green-dim); }
+    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .terminal {
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      height: 400px;
+      overflow-y: auto;
+      color: var(--text-muted);
     }
 
-    .run-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .terminal .green { color: var(--green); }
+    .terminal .red { color: var(--red); }
+    .terminal .blue { color: var(--blue); }
+    .terminal .white { color: var(--text); }
+    .terminal .dim { color: #444; }
+
+    .terminal a {
+      color: var(--green);
+      text-decoration: underline;
+    }
+
+    /* Info grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .info-block {
+      padding: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .info-block h3 {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .info-block p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .info-block p strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .info-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .info-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* CTA */
+    .cta-section {
+      margin-top: 64px;
+      padding-top: 48px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cta-text {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .cta-text span {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .cta-btn {
+      background: var(--green);
+      color: #000;
+      padding: 12px 24px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .cta-btn:hover { background: var(--green-dim); }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 32px 20px; }
+      .info-grid { grid-template-columns: 1fr; }
+      .cta-section { flex-direction: column; gap: 24px; text-align: center; }
     }
   </style>
 </head>
 <body>
-  <div class="app-layout">
-    <!-- Left Sidebar -->
+  <div class="page">
     <aside class="sidebar">
-      <div class="sidebar-brand">
-        <a href="index.html" class="sidebar-brand-text">
-          <img src="assets/img/sorted-wordmark-short.svg" alt="Sorted" style="height: 28px;">
-        </a>
+      <div class="logo">
+        <img src="assets/img/sorted-wordmark-short.svg" alt="sorted">
       </div>
-
-      <nav class="sidebar-nav">
-        <ul class="sidebar-nav-list">
-          <li class="sidebar-nav-item">
-            <a href="index.html" class="sidebar-nav-link">Home</a>
-          </li>
-          <li class="sidebar-nav-item">
-            <a href="demo.html" class="sidebar-nav-link active">Live Demo</a>
-          </li>
-          <li class="sidebar-nav-item">
-            <a href="login.html" class="sidebar-nav-link">Login / Register</a>
-          </li>
-        </ul>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="demo.html" class="active">Live Demo</a>
+        <a href="login.html">Login</a>
       </nav>
     </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <div class="demo-header">
-        <h1>Live Gasless Transaction Demo</h1>
-        <p>Watch a real transaction execute on Sonic testnet without any wallet interaction</p>
-      </div>
+    <main class="main">
+      <header class="page-header">
+        <h1 class="page-title">Live Demo</h1>
+        <p class="page-subtitle">Execute a real gasless transaction on Sonic testnet</p>
+      </header>
 
-      <!-- Demo Terminal -->
-      <div class="panel">
-        <div class="panel-header">
-          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <span>Terminal Output</span>
-            <button id="runDemoBtn" onclick="runDemo()" class="run-btn">
-              Run Demo
-            </button>
-          </div>
+      <div class="terminal-wrapper">
+        <div class="terminal-header">
+          <span class="terminal-title" id="terminalStatus">ready</span>
+          <button class="run-btn" id="runBtn" onclick="runDemo()">run</button>
         </div>
-        <div class="panel-content p-0">
-          <div id="terminal" class="terminal">
-            <div class="terminal-line terminal-muted"># Click "Run Demo" to execute a live gasless transaction on Sonic testnet</div>
-            <div class="terminal-line terminal-muted"># This will increment a counter contract without requiring any wallet interaction</div>
-          </div>
+        <div class="terminal" id="terminal">
+<span class="dim"># Click run to execute a gasless transaction</span>
+<span class="dim"># No wallet required. User pays nothing.</span>
         </div>
       </div>
 
-      <!-- How It Works -->
-      <div class="grid grid-2">
-        <div class="panel">
-          <div class="panel-header">What Happens</div>
-          <div class="panel-content">
-            <div style="display: flex; flex-direction: column; gap: var(--space-md);">
-              <div>
-                <h3 style="margin-bottom: var(--space-xs); font-size: var(--text-body);">1. User Clicks Button</h3>
-                <p class="text-muted" style="font-size: var(--text-body-sm); margin-bottom: 0;">No wallet popup. No transaction signing. Just a simple click.</p>
-              </div>
-              <div>
-                <h3 style="margin-bottom: var(--space-xs); font-size: var(--text-body);">2. Sorted.fund Sponsors Gas</h3>
-                <p class="text-muted" style="font-size: var(--text-body-sm); margin-bottom: 0;">Our backend authorizes the transaction and pays for the gas.</p>
-              </div>
-              <div>
-                <h3 style="margin-bottom: var(--space-xs); font-size: var(--text-body);">3. Transaction Executes</h3>
-                <p class="text-muted" style="font-size: var(--text-body-sm); margin-bottom: 0;">The transaction is submitted and confirmed on-chain.</p>
-              </div>
-              <div>
-                <h3 style="margin-bottom: var(--space-xs); font-size: var(--text-body);">4. User Pays Nothing</h3>
-                <p class="text-muted" style="font-size: var(--text-body-sm); margin-bottom: 0;">Zero gas fees. Zero wallet complexity.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-header">Demo Details</div>
-          <div class="panel-content">
-            <div class="stat-box" style="margin-bottom: var(--space-sm);">
-              <div class="stat-box-label">Network</div>
-              <div class="stat-box-value" style="font-size: var(--text-h3);">Sonic Testnet</div>
-              <div class="stat-box-change text-muted">Chain ID: 14601</div>
-            </div>
-            <div class="stat-box" style="margin-bottom: var(--space-sm);">
-              <div class="stat-box-label">Contract</div>
-              <div class="stat-box-value" style="font-size: var(--text-body-sm);">0xEcca...96E3</div>
-              <div class="stat-box-change text-muted">Counter Contract</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box-label">Function</div>
-              <div class="stat-box-value" style="font-size: var(--text-h3);">increment()</div>
-              <div class="stat-box-change text-muted">Increases counter by 1</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Integration Example -->
-      <div class="panel">
-        <div class="panel-header">Integration Example</div>
-        <div class="panel-content">
-          <p class="text-muted" style="margin-bottom: var(--space-md); font-size: var(--text-body-sm);">
-            This is how simple it is to add gasless transactions to your app:
+      <div class="info-grid">
+        <div class="info-block">
+          <h3>What happens</h3>
+          <p>
+            <strong>1.</strong> You click run<br>
+            <strong>2.</strong> We sponsor the gas<br>
+            <strong>3.</strong> Transaction executes on-chain<br>
+            <strong>4.</strong> You paid nothing
           </p>
-          <div class="code-block">
-<span class="text-muted">// Just one API call - we handle the rest</span>
-const response = await fetch('/demo/execute', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' }
-});
+        </div>
 
-const { transactionHash, explorerUrl } = await response.json();
-
-<span class="text-muted">// Transaction confirmed. User paid 0 gas.</span>
-console.log('View on explorer:', explorerUrl);
+        <div class="info-block">
+          <h3>Transaction details</h3>
+          <div class="info-stack">
+            <div>
+              <div class="info-value">Sonic Testnet</div>
+              <div class="info-label">Chain ID: 14601</div>
+            </div>
+            <div>
+              <div class="info-value mono" style="font-size: 14px;">increment()</div>
+              <div class="info-label">Counter contract</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- CTA Section -->
-      <div class="panel highlight">
-        <div class="panel-content" style="text-align: center; padding: var(--space-xl);">
-          <h2 style="margin-bottom: var(--space-md);">Ready to Add Gasless Transactions?</h2>
-          <p class="text-muted" style="margin-bottom: var(--space-lg);">
-            Create your account and start sponsoring transactions. Free on testnet.
-          </p>
-          <div style="display: flex; gap: var(--space-md); justify-content: center;">
-            <button onclick="window.location.href='login.html'" style="padding: var(--space-sm) var(--space-xl);">
-              Get Started Free
-            </button>
-            <button onclick="window.location.href='https://github.com/b1rdmania/sorted-fund'" class="btn-secondary" style="padding: var(--space-sm) var(--space-xl);">
-              View Docs
-            </button>
-          </div>
+      <section class="cta-section">
+        <div class="cta-text">
+          Ready to integrate? <span>Takes 10 minutes.</span>
         </div>
-      </div>
+        <a href="login.html" class="cta-btn">Get started</a>
+      </section>
     </main>
   </div>
 
   <script src="assets/js/api.js"></script>
   <script>
-    let isRunning = false;
+    let running = false;
 
-    function addTerminalLine(text, className = '') {
+    function log(text, className = '') {
       const terminal = document.getElementById('terminal');
       const line = document.createElement('div');
-      line.className = `terminal-line ${className}`;
-      line.innerHTML = text;
+      line.innerHTML = className ? `<span class="${className}">${text}</span>` : text;
       terminal.appendChild(line);
       terminal.scrollTop = terminal.scrollHeight;
     }
 
-    function clearTerminal() {
+    function clear() {
       document.getElementById('terminal').innerHTML = '';
     }
 
-    async function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+    function setStatus(status, live = false) {
+      const el = document.getElementById('terminalStatus');
+      el.textContent = status;
+      el.className = 'terminal-title' + (live ? ' live' : '');
     }
 
     async function runDemo() {
-      if (isRunning) return;
-      isRunning = true;
+      if (running) return;
+      running = true;
 
-      const btn = document.getElementById('runDemoBtn');
+      const btn = document.getElementById('runBtn');
       btn.disabled = true;
-      btn.textContent = 'Running...';
+      btn.textContent = '...';
 
-      clearTerminal();
+      clear();
+      setStatus('executing', true);
+
+      log('$ sorted execute --contract 0xEcca...96E3 --function increment', 'white');
+      log('');
+
+      await sleep(400);
+      log('→ Authorizing transaction...', 'dim');
 
       try {
-        addTerminalLine('Sorted.fund Gasless Transaction Demo', 'terminal-success');
-        addTerminalLine('-'.repeat(60), 'terminal-muted');
-        await sleep(500);
-
-        addTerminalLine('', '');
-        addTerminalLine('Setup:', 'terminal-info');
-        addTerminalLine('   Project: test-game', '');
-        addTerminalLine('   Chain: Sonic Testnet (14601)', '');
-        addTerminalLine('   Contract: Counter (0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3)', '');
-        addTerminalLine('   Function: increment()', '');
-        await sleep(1000);
-
-        addTerminalLine('', '');
-        addTerminalLine('<span class="spinner"></span> Executing gasless transaction...', 'terminal-info');
-        await sleep(800);
-
-        const demoResponse = await fetch(`${api.baseUrl}/demo/execute`, {
+        const res = await fetch(`${api.baseUrl}/demo/execute`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' }
         });
 
-        if (!demoResponse.ok) {
-          const errorData = await demoResponse.json();
-          throw new Error(errorData.message || errorData.error || 'Demo execution failed');
-        }
+        if (!res.ok) throw new Error((await res.json()).message || 'Failed');
 
-        const demoData = await demoResponse.json();
-        addTerminalLine('   Transaction submitted', 'terminal-success');
-        await sleep(1000);
+        const data = await res.json();
 
-        addTerminalLine('', '');
-        addTerminalLine('<span class="spinner"></span> Waiting for blockchain confirmation...', 'terminal-info');
-        await sleep(1500);
+        await sleep(600);
+        log('→ Submitting to bundler...', 'dim');
+        await sleep(800);
+        log('→ Waiting for confirmation...', 'dim');
+        await sleep(600);
 
-        addTerminalLine('   Transaction confirmed', 'terminal-success');
-        addTerminalLine(`   Tx Hash: ${demoData.transactionHash}`, 'terminal-muted');
-        addTerminalLine(`   Block: ${demoData.blockNumber}`, 'terminal-muted');
-        addTerminalLine(`   Gas Used: ${parseInt(demoData.gasUsed).toLocaleString()}`, 'terminal-muted');
-        addTerminalLine('   User Paid: 0 S (gasless)', 'terminal-success');
-        await sleep(500);
+        log('');
+        log('✓ Transaction confirmed', 'green');
+        log('');
+        log(`  tx:    ${data.transactionHash}`, 'dim');
+        log(`  block: ${data.blockNumber}`, 'dim');
+        log(`  gas:   ${parseInt(data.gasUsed).toLocaleString()}`, 'dim');
+        log(`  cost:  $0.00`, 'green');
+        log('');
+        log(`  <a href="https://testnet.sonicscan.org/tx/${data.transactionHash}" target="_blank">view on explorer →</a>`);
 
-        const txHash = demoData.transactionHash;
+        setStatus('done', true);
 
-        addTerminalLine('', '');
-        addTerminalLine('-'.repeat(60), 'terminal-muted');
-        addTerminalLine('Success. Counter incremented without user paying gas.', 'terminal-success');
-        addTerminalLine('', '');
-        addTerminalLine('View on Sonic Explorer:', 'terminal-info');
-        addTerminalLine(`   <a href="https://testnet.sonicscan.org/tx/${txHash}" target="_blank" class="terminal-link">https://testnet.sonicscan.org/tx/${txHash}</a>`, '');
-        addTerminalLine('', '');
-        addTerminalLine('What just happened:', 'terminal-info');
-        addTerminalLine('   1. User clicked button (no wallet popup)', '');
-        addTerminalLine('   2. Sorted.fund sponsored the gas', '');
-        addTerminalLine('   3. Transaction executed on-chain', '');
-        addTerminalLine('   4. User paid ZERO gas fees', 'terminal-success');
-        addTerminalLine('', '');
-        addTerminalLine('-'.repeat(60), 'terminal-muted');
-
-      } catch (error) {
-        addTerminalLine('', '');
-        addTerminalLine('Error: ' + error.message, 'terminal-error');
-        addTerminalLine('', '');
-        addTerminalLine('Note: This demo requires the backend to be running.', 'terminal-muted');
-        addTerminalLine('Backend: https://sorted-backend.onrender.com', 'terminal-muted');
+      } catch (err) {
+        log('');
+        log(`✗ ${err.message}`, 'red');
+        setStatus('error');
       }
 
       btn.disabled = false;
-      btn.textContent = 'Run Again';
-      isRunning = false;
+      btn.textContent = 'run again';
+      running = false;
+    }
+
+    function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms));
     }
   </script>
 </body>

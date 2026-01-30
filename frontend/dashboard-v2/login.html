@@ -7,103 +7,145 @@
   <link rel="icon" type="image/png" href="sorted-favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="assets/css/global.css">
-  <link rel="stylesheet" href="assets/css/components.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0e0e10;
+      --bg-elevated: #16151a;
+      --border: #27252b;
+      --text: #e4e1e8;
+      --text-muted: #6b6779;
+      --green: #22c55e;
+      --green-dim: #1a9d4a;
+      --red: #ef4444;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 200px;
+      border-right: 1px solid var(--border);
+      padding: 32px 0;
+      position: fixed;
+      height: 100vh;
+      background: var(--bg);
+    }
+
+    .logo {
+      padding: 0 24px;
+      margin-bottom: 48px;
+    }
+
+    .logo img { height: 24px; }
+
+    .nav a {
+      display: block;
+      padding: 8px 24px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .nav a:hover { color: var(--text); }
+    .nav a.active { color: var(--green); border-left-color: var(--green); }
+
+    /* Main */
+    .main {
+      flex: 1;
+      margin-left: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+    }
+
     .auth-container {
       width: 100%;
-      max-width: 420px;
-      margin: var(--space-2xl) auto;
+      max-width: 360px;
     }
 
-    .auth-box {
-      background: var(--bg-warm);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: var(--space-xl);
+    .auth-header {
+      margin-bottom: 32px;
     }
 
-    .auth-logo {
-      text-align: center;
-      margin-bottom: var(--space-lg);
+    .auth-header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
     }
 
-    .auth-logo img {
-      height: 40px;
-      width: auto;
-    }
-
-    .auth-title {
-      font-size: var(--text-h3);
-      color: var(--text-primary);
-      text-align: center;
-      margin-bottom: var(--space-lg);
-      font-weight: 500;
-    }
-
-    .auth-tabs {
-      display: flex;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-lg);
-    }
-
-    .tab-button {
-      flex: 1;
-      padding: var(--space-sm) var(--space-md);
-      background: transparent;
-      border: 1px solid var(--border);
+    .auth-header p {
       color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      background: var(--bg-elevated);
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 14px;
       cursor: pointer;
-      transition: all var(--transition-default);
-      font-family: var(--font-sans);
-      font-size: var(--text-body-sm);
-      border-radius: var(--radius-md);
+      border-radius: 4px;
+      transition: all 0.15s;
     }
 
-    .tab-button.active {
-      background: var(--bg-surface);
-      border-color: var(--green);
-      color: var(--green);
+    .tab:hover { color: var(--text); }
+    .tab.active {
+      background: var(--bg);
+      color: var(--text);
     }
 
-    .tab-button:hover:not(.active) {
-      background: var(--bg-surface);
-      border-color: var(--border-light);
-      color: var(--text-primary);
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
+    /* Form */
     .form-group {
-      margin-bottom: var(--space-md);
+      margin-bottom: 16px;
     }
 
     .form-label {
       display: block;
+      font-size: 12px;
+      font-weight: 500;
       color: var(--text-muted);
-      margin-bottom: var(--space-sm);
-      font-size: var(--text-label);
+      margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
     .form-input {
       width: 100%;
-      padding: var(--space-sm) var(--space-md);
-      background: var(--bg-surface);
+      padding: 10px 12px;
+      background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
-      font-size: var(--text-body-sm);
-      transition: border-color var(--transition-default);
-      box-sizing: border-box;
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      transition: border-color 0.15s;
     }
 
     .form-input:focus {
@@ -111,371 +153,259 @@
       border-color: var(--green);
     }
 
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
     .form-button {
       width: 100%;
-      padding: var(--space-sm) var(--space-md);
+      padding: 12px;
       background: var(--green);
-      color: var(--bg-deep);
       border: none;
-      border-radius: var(--radius-md);
-      font-family: var(--font-sans);
-      font-size: var(--text-body-sm);
+      border-radius: 6px;
+      color: #000;
+      font-family: inherit;
+      font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      transition: background var(--transition-default);
-      margin-top: var(--space-md);
+      transition: background 0.15s;
+      margin-top: 8px;
     }
 
-    .form-button:hover {
-      background: var(--green-dim);
-    }
+    .form-button:hover { background: var(--green-dim); }
+    .form-button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .form-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .error-message {
-      background: rgba(220, 38, 38, 0.1);
-      border: 1px solid var(--red);
-      border-radius: var(--radius-md);
-      color: var(--red);
-      padding: var(--space-sm) var(--space-md);
-      margin-bottom: var(--space-md);
-      font-size: var(--text-body-sm);
-      display: none;
-    }
-
-    .error-message.show {
-      display: block;
-    }
-
-    .success-message {
-      background: var(--green-dark);
-      border: 1px solid var(--green-dim);
-      border-radius: var(--radius-md);
-      color: var(--green);
-      padding: var(--space-sm) var(--space-md);
-      margin-bottom: var(--space-md);
-      font-size: var(--text-body-sm);
-      display: none;
-    }
-
-    .success-message.show {
-      display: block;
-    }
-
-    .helper-text {
-      font-size: var(--text-caption);
+    .form-hint {
+      font-size: 12px;
       color: var(--text-muted);
-      margin-top: var(--space-sm);
+      margin-top: 6px;
+    }
+
+    /* Messages */
+    .message {
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .message.show { display: block; }
+    .message.error { background: rgba(239, 68, 68, 0.1); color: var(--red); border: 1px solid var(--red); }
+    .message.success { background: rgba(34, 197, 94, 0.1); color: var(--green); border: 1px solid var(--green); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .demo-hint {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .demo-hint code {
+      background: var(--bg-elevated);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text);
     }
 
     .loading {
       display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid var(--border);
+      width: 12px;
+      height: 12px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
       border-radius: 50%;
-      border-top-color: var(--bg-deep);
-      animation: spin 1s linear infinite;
-      margin-left: var(--space-sm);
-      vertical-align: middle;
+      animation: spin 0.6s linear infinite;
+      margin-left: 8px;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .demo-link {
-      display: inline-block;
-      margin-top: var(--space-md);
-      padding: var(--space-sm) var(--space-md);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: var(--text-body-sm);
-      transition: all var(--transition-default);
-    }
-
-    .demo-link:hover {
-      border-color: var(--green);
-      color: var(--green);
+    @media (max-width: 600px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 24px; }
     }
   </style>
 </head>
 <body>
-  <div class="app-layout">
-    <!-- Left Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-brand">
-        <a href="index.html" class="sidebar-brand-text">
-          <img src="assets/img/sorted-wordmark-short.svg" alt="Sorted" style="height: 28px;">
-        </a>
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="assets/img/sorted-wordmark-short.svg" alt="sorted">
+    </div>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="demo.html">Live Demo</a>
+      <a href="login.html" class="active">Login</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="auth-container">
+      <header class="auth-header">
+        <h1>Welcome</h1>
+        <p>Sign in to manage your gas station</p>
+      </header>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('login')">Login</button>
+        <button class="tab" onclick="switchTab('register')">Register</button>
       </div>
 
-      <nav class="sidebar-nav">
-        <ul class="sidebar-nav-list">
-          <li class="sidebar-nav-item">
-            <a href="index.html" class="sidebar-nav-link">Home</a>
-          </li>
-          <li class="sidebar-nav-item">
-            <a href="demo.html" class="sidebar-nav-link">Live Demo</a>
-          </li>
-          <li class="sidebar-nav-item">
-            <a href="login.html" class="sidebar-nav-link active">Login / Register</a>
-          </li>
-        </ul>
-      </nav>
-    </aside>
+      <div id="error" class="message error"></div>
+      <div id="success" class="message success"></div>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <div class="auth-container">
-        <div class="auth-box">
-          <div class="auth-logo">
-            <img src="assets/img/sorted-wordmark-final.svg" alt="Sorted.fund">
+      <div id="login-tab" class="tab-content active">
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="login-email" class="form-input" placeholder="you@example.com" required>
           </div>
-          <p style="text-align: center; color: var(--text-muted); margin-bottom: var(--space-md); font-size: var(--text-body-sm);">
-            Gasless transactions for Web3 games
-          </p>
-          <p style="text-align: center; margin-bottom: var(--space-lg);">
-            <a href="demo.html" class="demo-link">
-              Watch Live Demo
-            </a>
-          </p>
-
-          <!-- Tab Buttons -->
-          <div class="auth-tabs">
-            <button class="tab-button active" onclick="switchTab('login', event)">Login</button>
-            <button class="tab-button" onclick="switchTab('register', event)">Register</button>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
           </div>
-
-          <!-- Error/Success Messages -->
-          <div id="error-message" class="error-message"></div>
-          <div id="success-message" class="success-message"></div>
-
-          <!-- Login Tab -->
-          <div id="login-tab" class="tab-content active">
-            <form id="login-form">
-              <div class="form-group">
-                <label class="form-label">Email</label>
-                <input
-                  type="email"
-                  id="login-email"
-                  class="form-input"
-                  placeholder="developer@example.com"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Password</label>
-                <input
-                  type="password"
-                  id="login-password"
-                  class="form-input"
-                  placeholder="Enter password"
-                  required
-                />
-              </div>
-
-              <button type="submit" class="form-button" id="login-button">
-                Login
-              </button>
-            </form>
-
-            <p class="helper-text" style="text-align: center; margin-top: var(--space-lg);">
-              Demo account: demo@sorted.fund / demo123
-            </p>
-          </div>
-
-          <!-- Register Tab -->
-          <div id="register-tab" class="tab-content">
-            <form id="register-form">
-              <div class="form-group">
-                <label class="form-label">Name</label>
-                <input
-                  type="text"
-                  id="register-name"
-                  class="form-input"
-                  placeholder="Your Name"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Email</label>
-                <input
-                  type="email"
-                  id="register-email"
-                  class="form-input"
-                  placeholder="developer@example.com"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Password</label>
-                <input
-                  type="password"
-                  id="register-password"
-                  class="form-input"
-                  placeholder="Enter password"
-                  required
-                  minlength="8"
-                />
-                <p class="helper-text">Minimum 8 characters</p>
-              </div>
-
-              <button type="submit" class="form-button" id="register-button">
-                Create Account
-              </button>
-            </form>
-          </div>
-        </div>
+          <button type="submit" class="form-button" id="login-btn">Sign in</button>
+        </form>
       </div>
-    </main>
-  </div>
+
+      <div id="register-tab" class="tab-content">
+        <form id="register-form" onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input type="text" id="register-name" class="form-input" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="register-email" class="form-input" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="register-password" class="form-input" placeholder="••••••••" required minlength="8">
+            <p class="form-hint">Minimum 8 characters</p>
+          </div>
+          <button type="submit" class="form-button" id="register-btn">Create account</button>
+        </form>
+      </div>
+
+      <div class="demo-hint">
+        Demo: <code>demo@sorted.fund</code> / <code>demo123</code>
+      </div>
+    </div>
+  </main>
 
   <script src="assets/js/api.js"></script>
   <script>
-    let currentTab = 'login';
-
-    function switchTab(tab, event) {
-      currentTab = tab;
-
-      // Update tab buttons
-      document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      if (event && event.target) {
-        event.target.classList.add('active');
-      } else {
-        document.querySelector(`.tab-button[onclick*="${tab}"]`).classList.add('active');
-      }
-
-      // Update tab content
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-      });
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`.tab:nth-child(${tab === 'login' ? 1 : 2})`).classList.add('active');
       document.getElementById(`${tab}-tab`).classList.add('active');
-
       hideMessages();
     }
 
-    function showError(message) {
-      const errorEl = document.getElementById('error-message');
-      errorEl.textContent = message;
-      errorEl.classList.add('show');
-      document.getElementById('success-message').classList.remove('show');
+    function showError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = msg;
+      el.classList.add('show');
+      document.getElementById('success').classList.remove('show');
     }
 
-    function showSuccess(message) {
-      const successEl = document.getElementById('success-message');
-      successEl.textContent = message;
-      successEl.classList.add('show');
-      document.getElementById('error-message').classList.remove('show');
+    function showSuccess(msg) {
+      const el = document.getElementById('success');
+      el.textContent = msg;
+      el.classList.add('show');
+      document.getElementById('error').classList.remove('show');
     }
 
     function hideMessages() {
-      document.getElementById('error-message').classList.remove('show');
-      document.getElementById('success-message').classList.remove('show');
+      document.getElementById('error').classList.remove('show');
+      document.getElementById('success').classList.remove('show');
     }
 
-    function setLoading(formId, isLoading) {
-      const button = document.getElementById(`${formId}-button`);
-      button.disabled = isLoading;
-
-      if (isLoading) {
-        if (!button.dataset.originalText) {
-          button.dataset.originalText = button.textContent.trim();
-        }
-        button.innerHTML = button.dataset.originalText + ' <span class="loading"></span>';
+    function setLoading(btn, loading) {
+      btn.disabled = loading;
+      if (loading) {
+        btn.dataset.text = btn.textContent;
+        btn.innerHTML = btn.textContent + '<span class="loading"></span>';
       } else {
-        button.innerHTML = button.dataset.originalText || button.textContent.trim();
+        btn.textContent = btn.dataset.text;
       }
     }
 
-    // Login form handler
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    async function handleLogin(e) {
       e.preventDefault();
       hideMessages();
-      setLoading('login', true);
 
+      const btn = document.getElementById('login-btn');
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
 
+      setLoading(btn, true);
+
       try {
-        const response = await fetch(`${api.baseUrl}/auth/login`, {
+        const res = await fetch(`${api.baseUrl}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
-          credentials: 'include',
+          credentials: 'include'
         });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || data.message || 'Login failed');
-        }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || data.message || 'Login failed');
 
         localStorage.setItem('sorted_session_token', data.sessionToken);
         localStorage.setItem('sorted_developer', JSON.stringify(data.developer));
 
-        showSuccess('Login successful. Redirecting...');
+        showSuccess('Redirecting...');
+        setTimeout(() => window.location.href = 'dashboard.html', 500);
 
-        setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 1000);
-
-      } catch (error) {
-        showError(error.message);
-        setLoading('login', false);
+      } catch (err) {
+        showError(err.message);
+        setLoading(btn, false);
       }
-    });
+    }
 
-    // Register form handler
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
+    async function handleRegister(e) {
       e.preventDefault();
       hideMessages();
-      setLoading('register', true);
 
+      const btn = document.getElementById('register-btn');
       const name = document.getElementById('register-name').value;
       const email = document.getElementById('register-email').value;
       const password = document.getElementById('register-password').value;
 
+      setLoading(btn, true);
+
       try {
-        const response = await fetch(`${api.baseUrl}/auth/register`, {
+        const res = await fetch(`${api.baseUrl}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password, name }),
-          credentials: 'include',
+          credentials: 'include'
         });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || data.message || 'Registration failed');
-        }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || data.message || 'Registration failed');
 
         localStorage.setItem('sorted_session_token', data.sessionToken);
         localStorage.setItem('sorted_developer', JSON.stringify(data.developer));
 
         showSuccess('Account created. Redirecting...');
+        setTimeout(() => window.location.href = 'dashboard.html', 500);
 
-        setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 1000);
-
-      } catch (error) {
-        showError(error.message);
-        setLoading('register', false);
+      } catch (err) {
+        showError(err.message);
+        setLoading(btn, false);
       }
-    });
+    }
 
-    // Check if already logged in
     if (localStorage.getItem('sorted_session_token')) {
       window.location.href = 'dashboard.html';
     }
