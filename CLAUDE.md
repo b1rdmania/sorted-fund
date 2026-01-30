@@ -1,144 +1,127 @@
 # CLAUDE.md - Sorted.fund Project Context
 
-Last Updated: 2026-01-29
+Last Updated: 2026-01-30
 
-## Status: Production Ready
+## Status: Live Demo Working, Auth Needs Rebuild
 
-Everything works end-to-end:
-- ✅ Frontend dashboard (Vercel)
-- ✅ Backend API (Render)
-- ✅ User signup/login
-- ✅ Gasless transaction flow
-- ✅ Gas reconciliation
+**What works:**
+- Live gasless transactions on Sonic testnet
+- Demo page at sorted.fund/demo.html (one click, real tx)
+- Dashboard preview at sorted.fund/demo-dashboard.html
+- Backend API on Render
+- ERC-4337 paymaster + bundler integration
 
-## What Is This?
+**What needs work:**
+- Auth system is buggy (custom-built) → Replace with Privy
+- Project creation has edge cases → Needs proper user/project database
+- No self-service deposits yet
 
-**Sorted.fund** is a gasless transaction infrastructure for Web3 games. It lets game developers sponsor gas fees so players never need tokens to play.
+## Live URLs
 
-**Tech stack:** ERC-4337 Account Abstraction on Sonic testnet with a verifying paymaster.
+| Service | URL |
+|---------|-----|
+| **Production Site** | https://sorted.fund |
+| **Live Demo** | https://sorted.fund/demo.html |
+| **Dashboard Preview** | https://sorted.fund/demo-dashboard.html |
+| **Backend API** | https://sorted-backend.onrender.com |
+| **GitHub** | https://github.com/b1rdmania/sorted-fund |
 
-**GitHub:** https://github.com/b1rdmania/sorted-fund
+**Demo login:** `demo@sorted.fund` / `demo123` (buggy - Privy will replace)
 
-## Production
+## Next Steps (Priority Order)
 
-| Service | Platform | URL |
-|---------|----------|-----|
-| Frontend | Vercel | https://sorted-fund.vercel.app |
-| Backend | Render | https://sorted-backend.onrender.com |
-| Database | Render PostgreSQL | (auto-connected to backend) |
+1. **Privy Integration** - Replace custom auth with Privy (wallet + social login)
+2. **Database Hardening** - Proper user → project → API key relationships
+3. **Self-service Deposits** - Let devs fund gas tanks directly
+4. **Mainnet Deployment** - Graduate from Sonic testnet
 
-**Demo login:** `demo@sorted.fund` / `demo123`
+## Tech Stack
 
-## Deployment
+| Layer | Tech |
+|-------|------|
+| Frontend | Static HTML/JS on Vercel |
+| Backend | Express + TypeScript + PostgreSQL on Render |
+| Auth | Custom (to be replaced with Privy) |
+| Blockchain | Sonic Testnet (Chain 14601) |
+| AA | ERC-4337 v0.7 with Verifying Paymaster |
+| Bundler | Alto (local dev only) |
 
-**Frontend (Vercel):** Auto-deploys on push to master. Config in `vercel.json`.
-
-**Backend (Render):** Auto-deploys on push to master. Config in `render.yaml`.
-
-Manual deploy:
-```bash
-# Frontend
-vercel --prod
-
-# Backend (trigger webhook)
-curl https://api.render.com/deploy/srv-d5l83963jp1c73956ml0?key=p_Ch7HGhnZA
-```
-
-## Local Development
-
-```bash
-# Prerequisites
-brew services start postgresql@14
-
-# Backend (port 3000)
-cd backend && npm run dev
-
-# Frontend (port 8081)
-cd frontend/dashboard-v2 && python3 -m http.server 8081
-
-# Alto Bundler (port 4337) - only for local E2E testing
-cd bundler/alto && ./alto --config config.sonic-testnet.json --floor-max-fee-per-gas 2 --floor-max-priority-fee-per-gas 2
-
-# E2E test
-cd sdk && npx ts-node test-e2e-alto.ts
-```
-
-## Contracts (Sonic Testnet - Chain 14601)
+## Contracts (Sonic Testnet)
 
 | Contract | Address |
 |----------|---------|
 | EntryPoint v0.7 | `0x0000000071727De22E5E9d8BAf0edAc6f37da032` |
 | Paymaster | `0x41B35AAD2e3F8c36ad883c354AEa828a2100Bb4a` |
 | Test Counter | `0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3` |
-| Test Account | `0x4BEfFA7558375a0f8e55a4eABbE9a53F661E5506` |
 
-**RPC:** https://rpc.testnet.soniclabs.com
-**Explorer:** https://testnet.sonicscan.org
+## Deployment
+
+```bash
+# Frontend (Vercel)
+vercel --prod
+
+# Backend (Render) - trigger redeploy
+curl https://api.render.com/deploy/srv-d5l83963jp1c73956ml0?key=p_Ch7HGhnZA
+
+# Update Render env vars (if needed)
+render services  # CLI is installed and authenticated
+```
+
+## Local Development
+
+```bash
+# Backend (port 3000)
+cd backend && npm run dev
+
+# Frontend (port 8081)
+cd frontend/dashboard-v2 && python3 -m http.server 8081
+
+# Bundler (port 4337) - only for local E2E
+cd bundler/alto && ./alto --config config.sonic-testnet.json --floor-max-fee-per-gas 2 --floor-max-priority-fee-per-gas 2
+```
 
 ## Project Structure
 
 ```
-├── backend/           # Express.js API (Render)
-│   └── src/
-│       ├── routes/    # API endpoints
-│       ├── services/  # Business logic (authorization, gas reconciliation)
-│       └── db/        # PostgreSQL schema & queries
+├── backend/           # Express API (Render)
 ├── frontend/
-│   └── dashboard-v2/  # Static dashboard (Vercel)
-├── sdk/               # TypeScript SDK for game integration
-├── contracts/         # Solidity contracts (already deployed)
-├── bundler/alto/      # ERC-4337 bundler (git submodule, local dev only)
-├── vercel.json        # Vercel deployment config
-└── render.yaml        # Render deployment config
+│   └── dashboard-v2/  # Static site (Vercel) ← sorted.fund
+├── sdk/               # TypeScript SDK (WIP)
+├── contracts/         # Solidity (deployed)
+├── bundler/alto/      # ERC-4337 bundler (submodule)
+├── sorted-brand-kit/  # Brand guidelines, logos, design system
+├── render.yaml        # Render config
+└── vercel.json        # Vercel config
 ```
 
 ## Key Files
 
+- `backend/src/routes/demo.ts` - Demo endpoint (executes real tx)
 - `backend/src/services/authorizationService.ts` - Signs paymasterAndData
-- `backend/src/routes/sponsor.ts` - `/sponsor/authorize` endpoint
-- `frontend/dashboard-v2/assets/js/config.js` - Auto-detects prod vs local
-- `sdk/src/index.ts` - SortedClient for game integration
+- `frontend/dashboard-v2/demo.html` - Live demo page
+- `frontend/dashboard-v2/demo-dashboard.html` - Static preview dashboard
+- `sorted-brand-kit/sorted-design-guidelines.md` - Design system
 
-## How It Works
+## Design Ethos
 
+**Visual:** "Utility Sublime" - warm infrastructure aesthetic. Functional green (#22c55e) on dark backgrounds. Inter + JetBrains Mono. Dense, information-rich layouts.
+
+**Technical:** KISS - static HTML, Express, PostgreSQL. No frameworks. Boring and reliable.
+
+**Product:** Developer-first. One API call to sponsor gas. Players never see blockchain.
+
+## CORS
+
+Backend CORS allowlist (in Render env vars):
 ```
-Game calls SDK.authorize(userOp)
-    → Backend validates & signs paymasterAndData
-    → SDK submits to bundler
-    → Bundler executes on-chain (user pays $0)
-    → Backend reconciles actual gas used
-```
-
-## API Keys (Local Dev Only)
-
-- **Project ID:** `test-game`
-- **API Key:** `sk_sorted_e579aea9ba39f0ba7fd2098d4180ccfcc6ab70810f16dfc8c5d9dcc1f3a22a44`
-
-## Quick Checks
-
-```bash
-# Backend health
-curl https://sorted-backend.onrender.com/health
-
-# Test login
-curl -X POST https://sorted-backend.onrender.com/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"demo@sorted.fund","password":"demo123"}'
+https://sorted.fund,https://www.sorted.fund,https://sorted-fund.vercel.app,https://*.vercel.app,http://localhost:8081
 ```
 
 ## Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
-| Backend won't start locally | `brew services restart postgresql@14` |
+| Demo fails with NetworkError | Check CORS - is origin in ALLOWED_ORIGINS? |
+| Backend sleeping | First request takes ~30s (Render free tier) |
+| Login not working | Known issue - auth is buggy, Privy will fix |
 | Frontend stale | Hard refresh: Cmd+Shift+R |
-| Render backend sleeping | First request takes ~30s to wake |
-| Alto "underpriced" error | Use `--floor-max-fee-per-gas 2` flags |
-
-## Design Ethos
-
-**Visual:** Terminal/hacker aesthetic (green on black, monospace). Signals "built by devs, for devs."
-
-**Technical:** KISS - static HTML frontend, Express backend, PostgreSQL. No fancy frameworks. Boring and reliable.
-
-**Product:** Developer-first. Get API key → integrate SDK → working in under an hour. Players never see blockchain.
