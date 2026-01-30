@@ -2,6 +2,15 @@
 
 Last Updated: 2026-01-29
 
+## Status: Production Ready
+
+Everything works end-to-end:
+- ✅ Frontend dashboard (Vercel)
+- ✅ Backend API (Render)
+- ✅ User signup/login
+- ✅ Gasless transaction flow
+- ✅ Gas reconciliation
+
 ## What Is This?
 
 **Sorted.fund** is a gasless transaction infrastructure for Web3 games. It lets game developers sponsor gas fees so players never need tokens to play.
@@ -125,3 +134,11 @@ curl -X POST https://sorted-backend.onrender.com/auth/login \
 | Frontend stale | Hard refresh: Cmd+Shift+R |
 | Render backend sleeping | First request takes ~30s to wake |
 | Alto "underpriced" error | Use `--floor-max-fee-per-gas 2` flags |
+
+## Design Ethos
+
+**Visual:** Terminal/hacker aesthetic (green on black, monospace). Signals "built by devs, for devs."
+
+**Technical:** KISS - static HTML frontend, Express backend, PostgreSQL. No fancy frameworks. Boring and reliable.
+
+**Product:** Developer-first. Get API key → integrate SDK → working in under an hour. Players never see blockchain.
