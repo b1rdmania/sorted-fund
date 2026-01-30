@@ -273,7 +273,7 @@
       <nav class="nav">
         <a href="index.html">Home</a>
         <a href="demo.html" class="active">Live Demo</a>
-        <a href="#" onclick="previewDashboard()">Preview Dashboard</a>
+        <a href="demo-dashboard.html">Preview Dashboard</a>
         <a href="login.html">Login</a>
       </nav>
     </aside>
@@ -412,24 +412,6 @@
       return new Promise(r => setTimeout(r, ms));
     }
 
-    async function previewDashboard() {
-      try {
-        const res = await fetch(`${api.baseUrl}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'demo@sorted.fund', password: 'demo123' }),
-          credentials: 'include'
-        });
-        const data = await res.json();
-        if (res.ok) {
-          localStorage.setItem('sorted_session_token', data.sessionToken);
-          localStorage.setItem('sorted_developer', JSON.stringify(data.developer));
-          window.location.href = 'dashboard.html';
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
   </script>
 </body>
 </html>

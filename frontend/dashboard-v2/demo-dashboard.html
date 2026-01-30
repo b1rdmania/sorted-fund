@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Preview - Sorted.fund</title>
+  <link rel="icon" type="image/png" href="sorted-favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0e0e10;
+      --bg-elevated: #16151a;
+      --bg-surface: #1c1b20;
+      --border: #27252b;
+      --text: #e4e1e8;
+      --text-muted: #6b6779;
+      --green: #22c55e;
+      --green-dim: #1a9d4a;
+      --green-bg: #0f2918;
+      --amber: #f59e0b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 200px;
+      border-right: 1px solid var(--border);
+      padding: 32px 0;
+      position: fixed;
+      height: 100vh;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo { padding: 0 24px; margin-bottom: 48px; }
+    .logo img { height: 24px; }
+
+    .nav { flex: 1; }
+    .nav a {
+      display: block;
+      padding: 8px 24px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .nav a:hover { color: var(--text); }
+    .nav a.active { color: var(--green); border-left-color: var(--green); }
+
+    .nav-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 24px;
+    }
+
+    .nav-label {
+      padding: 8px 24px;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .sidebar-footer {
+      padding: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .demo-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: var(--green-bg);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-footer p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .sidebar-footer a {
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--green);
+      color: var(--bg);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .sidebar-footer a:hover { background: var(--green-dim); }
+
+    /* Main */
+    .main {
+      flex: 1;
+      margin-left: 200px;
+      padding: 32px 48px;
+      max-width: 1100px;
+    }
+
+    /* Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .header-actions { display: flex; gap: 8px; }
+
+    .btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-primary { background: var(--green); color: var(--bg); }
+    .btn-primary:hover { background: var(--green-dim); }
+    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { background: var(--bg-elevated); }
+
+    /* Project selector */
+    .project-selector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+
+    .project-selector-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .project-selector-value {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text);
+    }
+
+    /* Balance card */
+    .balance-card {
+      background: var(--green-bg);
+      border: 1px solid var(--green-dim);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .balance-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    .balance-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 36px;
+      font-weight: 500;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    .balance-address {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .stat-change {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Two column */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    /* Panel */
+    .panel {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .panel-content { padding: 16px; }
+
+    /* Contract list */
+    .contract-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .contract-item:last-child { border-bottom: none; }
+
+    .contract-address {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .contract-stats {
+      text-align: right;
+    }
+
+    .contract-calls {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .contract-gas {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Quick actions */
+    .quick-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quick-action {
+      display: block;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    .quick-action:hover {
+      background: var(--bg);
+      border-color: var(--green);
+    }
+
+    /* Events */
+    .event-list { max-height: 300px; overflow-y: auto; }
+
+    .event-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .event-item:hover { background: var(--bg-surface); }
+
+    .event-time {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      width: 60px;
+    }
+
+    .event-detail {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0 16px;
+    }
+
+    .event-status {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .status-success { background: var(--green-bg); color: var(--green); }
+    .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+
+    @media (max-width: 1000px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 24px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="assets/img/sorted-wordmark-short.svg" alt="sorted">
+      </div>
+
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="demo.html">Live Demo</a>
+        <a href="demo-dashboard.html" class="active">Preview Dashboard</a>
+        <a href="login.html">Login</a>
+      </nav>
+
+      <div class="nav-divider"></div>
+      <div class="nav-label">Dashboard Preview</div>
+      <nav class="nav">
+        <a href="demo-dashboard.html" class="active">Overview</a>
+        <a href="#">API Keys</a>
+        <a href="#">Allowlist</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="demo-badge">Demo Mode</div>
+        <p>This is a preview with sample data</p>
+        <a href="login.html">Get started</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Real-time metrics for your gas station</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary">Manage Allowlist</button>
+          <button class="btn btn-primary">Generate API Key</button>
+        </div>
+      </header>
+
+      <div class="project-selector">
+        <span class="project-selector-label">Project</span>
+        <span class="project-selector-value">my-game-prod</span>
+      </div>
+
+      <div class="balance-card">
+        <div class="balance-label">Gas Station Balance</div>
+        <div class="balance-value">2.847 S</div>
+        <div class="balance-address">Deposit: 0x4BEf...5506</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Sponsored</div>
+          <div class="stat-value">12,847</div>
+          <div class="stat-change">All-time transactions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Gas Saved</div>
+          <div class="stat-value">4.2 S</div>
+          <div class="stat-change">Total cost sponsored</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Users</div>
+          <div class="stat-value">847</div>
+          <div class="stat-change">Unique addresses</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Today</div>
+          <div class="stat-value">234</div>
+          <div class="stat-change">0.12 S remaining</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-header">Top Contracts</div>
+          <div class="panel-content">
+            <div class="contract-item">
+              <span class="contract-address">0xEcca...96E3</span>
+              <div class="contract-stats">
+                <div class="contract-calls">8,421</div>
+                <div class="contract-gas">2.1 S used</div>
+              </div>
+            </div>
+            <div class="contract-item">
+              <span class="contract-address">0x7B2f...3D12</span>
+              <div class="contract-stats">
+                <div class="contract-calls">3,892</div>
+                <div class="contract-gas">1.4 S used</div>
+              </div>
+            </div>
+            <div class="contract-item">
+              <span class="contract-address">0x91Ac...8F7a</span>
+              <div class="contract-stats">
+                <div class="contract-calls">534</div>
+                <div class="contract-gas">0.7 S used</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">Quick Actions</div>
+          <div class="panel-content">
+            <div class="quick-actions">
+              <a href="#" class="quick-action">Generate new API key</a>
+              <a href="#" class="quick-action">Add contract to allowlist</a>
+              <a href="#" class="quick-action">View documentation</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Recent Activity</div>
+        <div class="event-list">
+          <div class="event-item">
+            <span class="event-time">2m ago</span>
+            <span class="event-detail">0x8a2F...4E1c → 0xEcca...96E3 · mint()</span>
+            <span class="event-status status-success">Success</span>
+          </div>
+          <div class="event-item">
+            <span class="event-time">5m ago</span>
+            <span class="event-detail">0x3B7d...9A2f → 0xEcca...96E3 · transfer()</span>
+            <span class="event-status status-success">Success</span>
+          </div>
+          <div class="event-item">
+            <span class="event-time">8m ago</span>
+            <span class="event-detail">0x6C1e...7D3b → 0x7B2f...3D12 · claim()</span>
+            <span class="event-status status-success">Success</span>
+          </div>
+          <div class="event-item">
+            <span class="event-time">12m ago</span>
+            <span class="event-detail">0x2E4a...8F9c → 0xEcca...96E3 · increment()</span>
+            <span class="event-status status-pending">Pending</span>
+          </div>
+          <div class="event-item">
+            <span class="event-time">15m ago</span>
+            <span class="event-detail">0x9D3f...2B1a → 0x91Ac...8F7a · stake()</span>
+            <span class="event-status status-success">Success</span>
+          </div>
+          <div class="event-item">
+            <span class="event-time">23m ago</span>
+            <span class="event-detail">0x4A8c...6E2d → 0xEcca...96E3 · mint()</span>
+            <span class="event-status status-success">Success</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
