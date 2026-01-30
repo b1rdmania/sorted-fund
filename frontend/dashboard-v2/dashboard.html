@@ -185,12 +185,12 @@ fetch('/sponsor/authorize', {
         currentProject = await ProjectSwitcher.getCurrentProject();
 
         if (!currentProject) {
-          showCreateProjectPrompt();
-          return;
+          showNoProjectBanner();
+          showEmptyDashboard();
+        } else {
+          await loadDashboard();
+          startAutoRefresh();
         }
-
-        await loadDashboard();
-        startAutoRefresh();
       } catch (error) {
         console.error('Initialization error:', error);
         if (!error.message.includes('Authentication required')) {
@@ -199,16 +199,34 @@ fetch('/sponsor/authorize', {
       }
     }
 
-    function showCreateProjectPrompt() {
-      document.querySelector('.container').innerHTML = `
-        <div style="text-align: center; padding: var(--space-3xl) var(--space-lg);">
-          <h1 style="margin-bottom: var(--space-md);">Welcome to Sorted.fund</h1>
-          <p style="color: var(--text-muted); margin-bottom: var(--space-lg);">Create your first project to get started</p>
-          <button onclick="ProjectSwitcher.showCreateModal()" style="padding: var(--space-sm) var(--space-lg);">
-            Create Project
-          </button>
+    function showNoProjectBanner() {
+      const banner = document.createElement('div');
+      banner.className = 'no-project-banner';
+      banner.innerHTML = `
+        <div style="background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="margin: 0 0 4px 0;">Create your first project</h3>
+            <p style="margin: 0; color: var(--text-muted); font-size: 14px;">Get an API key and start sponsoring transactions</p>
+          </div>
+          <button onclick="ProjectSwitcher.showCreateModal()">Create Project</button>
         </div>
       `;
+      const container = document.querySelector('.container');
+      const pageHeader = container.querySelector('.page-header');
+      container.insertBefore(banner, pageHeader);
+    }
+
+    function showEmptyDashboard() {
+      document.getElementById('gasTankBalance').textContent = '0 S';
+      document.getElementById('depositAddress').textContent = 'Create a project to get your deposit address';
+      document.getElementById('totalSponsored').textContent = '0';
+      document.getElementById('totalGasSaved').textContent = '0 S';
+      document.getElementById('activeUsers').textContent = '0';
+      document.getElementById('todaySponsored').textContent = '0';
+      document.getElementById('dailyCapStatus').textContent = 'No project selected';
+      document.getElementById('topContractsContainer').innerHTML = '<div class="empty-state"><div class="empty-state-message">Create a project to see data</div></div>';
+      document.getElementById('eventsLog').innerHTML = '<div class="empty-state" style="padding: 24px;"><div class="empty-state-message">No activity yet</div></div>';
+      document.getElementById('quickProjectId').textContent = 'your-project-id';
     }
 
     async function loadDashboard() {

@@ -99,7 +99,17 @@ class ProjectSwitcher {
     if (!name) return;
 
     try {
-      const project = await api.createProject({ name });
+      // Generate a slug ID from the name
+      const id = name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .substring(0, 32) + '-' + Date.now().toString(36);
+
+      // Get owner from stored developer info
+      const developer = JSON.parse(localStorage.getItem('sorted_developer') || '{}');
+      const owner = developer.id || developer.email || 'unknown';
+
+      const project = await api.createProject({ id, name, owner });
       console.log('Project created:', project);
 
       // Switch to new project
