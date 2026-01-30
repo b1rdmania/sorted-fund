@@ -4,63 +4,72 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Sorted.fund</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="sorted-favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="assets/css/global.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <style>
     .auth-container {
       width: 100%;
-      max-width: 450px;
-      margin: 60px auto;
+      max-width: 420px;
+      margin: var(--space-2xl) auto;
     }
 
     .auth-box {
-      background: #1a1a1a;
-      border: 1px solid #00ff00;
-      border-radius: 8px;
-      padding: 40px;
+      background: var(--bg-warm);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
     }
 
     .auth-logo {
-      font-size: 48px;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: var(--space-lg);
+    }
+
+    .auth-logo img {
+      height: 40px;
+      width: auto;
     }
 
     .auth-title {
-      font-size: 24px;
-      color: #00ff00;
+      font-size: var(--text-h3);
+      color: var(--text-primary);
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: var(--space-lg);
+      font-weight: 500;
     }
 
     .auth-tabs {
       display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
     }
 
     .tab-button {
       flex: 1;
-      padding: 12px;
+      padding: var(--space-sm) var(--space-md);
       background: transparent;
-      border: 1px solid #333;
-      color: #666;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.3s;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
+      transition: all var(--transition-default);
+      font-family: var(--font-sans);
+      font-size: var(--text-body-sm);
+      border-radius: var(--radius-md);
     }
 
     .tab-button.active {
-      background: rgba(0, 255, 0, 0.1);
-      border: 1px solid #00ff00;
-      color: #00ff00;
+      background: var(--bg-surface);
+      border-color: var(--green);
+      color: var(--green);
     }
 
     .tab-button:hover:not(.active) {
-      background: rgba(0, 255, 0, 0.05);
-      border-color: #00ff00;
+      background: var(--bg-surface);
+      border-color: var(--border-light);
+      color: var(--text-primary);
     }
 
     .tab-content {
@@ -72,50 +81,53 @@
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: var(--space-md);
     }
 
     .form-label {
       display: block;
-      color: #00ff00;
-      margin-bottom: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: var(--space-sm);
+      font-size: var(--text-label);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .form-input {
       width: 100%;
-      padding: 12px;
-      background: #0a0a0a;
-      border: 1px solid #333;
-      color: #00ff00;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      transition: all 0.3s;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: var(--text-body-sm);
+      transition: border-color var(--transition-default);
       box-sizing: border-box;
     }
 
     .form-input:focus {
       outline: none;
-      border-color: #00ff00;
+      border-color: var(--green);
     }
 
     .form-button {
       width: 100%;
-      padding: 12px;
-      background: #00ff00;
-      color: #000;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--green);
+      color: var(--bg-deep);
       border: none;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      font-weight: bold;
+      border-radius: var(--radius-md);
+      font-family: var(--font-sans);
+      font-size: var(--text-body-sm);
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.3s;
-      margin-top: 10px;
+      transition: background var(--transition-default);
+      margin-top: var(--space-md);
     }
 
     .form-button:hover {
-      background: #00cc00;
+      background: var(--green-dim);
     }
 
     .form-button:disabled {
@@ -124,13 +136,13 @@
     }
 
     .error-message {
-      background: rgba(255, 0, 0, 0.1);
-      border: 1px solid #ff0000;
-      color: #ff6666;
-      padding: 12px;
-      margin-bottom: 20px;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
+      background: rgba(220, 38, 38, 0.1);
+      border: 1px solid var(--red);
+      border-radius: var(--radius-md);
+      color: var(--red);
+      padding: var(--space-sm) var(--space-md);
+      margin-bottom: var(--space-md);
+      font-size: var(--text-body-sm);
       display: none;
     }
 
@@ -139,13 +151,13 @@
     }
 
     .success-message {
-      background: rgba(0, 255, 0, 0.1);
-      border: 1px solid #00ff00;
-      color: #00ff00;
-      padding: 12px;
-      margin-bottom: 20px;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
+      background: var(--green-dark);
+      border: 1px solid var(--green-dim);
+      border-radius: var(--radius-md);
+      color: var(--green);
+      padding: var(--space-sm) var(--space-md);
+      margin-bottom: var(--space-md);
+      font-size: var(--text-body-sm);
       display: none;
     }
 
@@ -154,25 +166,42 @@
     }
 
     .helper-text {
-      font-size: 11px;
-      color: #666;
-      margin-top: 8px;
+      font-size: var(--text-caption);
+      color: var(--text-muted);
+      margin-top: var(--space-sm);
     }
 
     .loading {
       display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(0, 255, 0, 0.3);
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
       border-radius: 50%;
-      border-top-color: #00ff00;
+      border-top-color: var(--bg-deep);
       animation: spin 1s linear infinite;
-      margin-left: 8px;
+      margin-left: var(--space-sm);
       vertical-align: middle;
     }
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    .demo-link {
+      display: inline-block;
+      margin-top: var(--space-md);
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: var(--text-body-sm);
+      transition: all var(--transition-default);
+    }
+
+    .demo-link:hover {
+      border-color: var(--green);
+      color: var(--green);
     }
   </style>
 </head>
@@ -181,8 +210,9 @@
     <!-- Left Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <div class="sidebar-brand-logo">⛽</div>
-        <a href="index.html" class="sidebar-brand-text">SORTED.FUND</a>
+        <a href="index.html" class="sidebar-brand-text">
+          <img src="assets/img/sorted-wordmark-short.svg" alt="Sorted" style="height: 28px;">
+        </a>
       </div>
 
       <nav class="sidebar-nav">
@@ -203,107 +233,108 @@
     <!-- Main Content -->
     <main class="main-content">
       <div class="auth-container">
-    <div class="auth-box">
-      <div class="auth-logo">⛽</div>
-      <h1 class="auth-title">SORTED.FUND</h1>
-      <p style="text-align: center; color: #666; margin-bottom: 20px;">
-        Gasless Transactions for Web3 Games
-      </p>
-      <p style="text-align: center; margin-bottom: 20px;">
-        <a href="demo.html" style="color: #00ff00; text-decoration: none; border: 1px solid #00ff00; padding: 8px 16px; display: inline-block; transition: all 0.3s;">
-          🚀 Watch Live Demo
-        </a>
-      </p>
+        <div class="auth-box">
+          <div class="auth-logo">
+            <img src="assets/img/sorted-wordmark-final.svg" alt="Sorted.fund">
+          </div>
+          <p style="text-align: center; color: var(--text-muted); margin-bottom: var(--space-md); font-size: var(--text-body-sm);">
+            Gasless transactions for Web3 games
+          </p>
+          <p style="text-align: center; margin-bottom: var(--space-lg);">
+            <a href="demo.html" class="demo-link">
+              Watch Live Demo
+            </a>
+          </p>
 
-      <!-- Tab Buttons -->
-      <div class="auth-tabs">
-        <button class="tab-button active" onclick="switchTab('login', event)">Login</button>
-        <button class="tab-button" onclick="switchTab('register', event)">Register</button>
-      </div>
-
-      <!-- Error/Success Messages -->
-      <div id="error-message" class="error-message"></div>
-      <div id="success-message" class="success-message"></div>
-
-      <!-- Login Tab -->
-      <div id="login-tab" class="tab-content active">
-        <form id="login-form">
-          <div class="form-group">
-            <label class="form-label">EMAIL</label>
-            <input
-              type="email"
-              id="login-email"
-              class="form-input"
-              placeholder="developer@example.com"
-              required
-            />
+          <!-- Tab Buttons -->
+          <div class="auth-tabs">
+            <button class="tab-button active" onclick="switchTab('login', event)">Login</button>
+            <button class="tab-button" onclick="switchTab('register', event)">Register</button>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">PASSWORD</label>
-            <input
-              type="password"
-              id="login-password"
-              class="form-input"
-              placeholder="••••••••"
-              required
-            />
+          <!-- Error/Success Messages -->
+          <div id="error-message" class="error-message"></div>
+          <div id="success-message" class="success-message"></div>
+
+          <!-- Login Tab -->
+          <div id="login-tab" class="tab-content active">
+            <form id="login-form">
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input
+                  type="email"
+                  id="login-email"
+                  class="form-input"
+                  placeholder="developer@example.com"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <input
+                  type="password"
+                  id="login-password"
+                  class="form-input"
+                  placeholder="Enter password"
+                  required
+                />
+              </div>
+
+              <button type="submit" class="form-button" id="login-button">
+                Login
+              </button>
+            </form>
+
+            <p class="helper-text" style="text-align: center; margin-top: var(--space-lg);">
+              Demo account: demo@sorted.fund / demo123
+            </p>
           </div>
 
-          <button type="submit" class="form-button" id="login-button">
-            LOGIN
-          </button>
-        </form>
+          <!-- Register Tab -->
+          <div id="register-tab" class="tab-content">
+            <form id="register-form">
+              <div class="form-group">
+                <label class="form-label">Name</label>
+                <input
+                  type="text"
+                  id="register-name"
+                  class="form-input"
+                  placeholder="Your Name"
+                  required
+                />
+              </div>
 
-        <p class="helper-text" style="text-align: center; margin-top: 20px;">
-          Demo account: demo@sorted.fund / demo123
-        </p>
-      </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input
+                  type="email"
+                  id="register-email"
+                  class="form-input"
+                  placeholder="developer@example.com"
+                  required
+                />
+              </div>
 
-      <!-- Register Tab -->
-      <div id="register-tab" class="tab-content">
-        <form id="register-form">
-          <div class="form-group">
-            <label class="form-label">NAME</label>
-            <input
-              type="text"
-              id="register-name"
-              class="form-input"
-              placeholder="Your Name"
-              required
-            />
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <input
+                  type="password"
+                  id="register-password"
+                  class="form-input"
+                  placeholder="Enter password"
+                  required
+                  minlength="8"
+                />
+                <p class="helper-text">Minimum 8 characters</p>
+              </div>
+
+              <button type="submit" class="form-button" id="register-button">
+                Create Account
+              </button>
+            </form>
           </div>
-
-          <div class="form-group">
-            <label class="form-label">EMAIL</label>
-            <input
-              type="email"
-              id="register-email"
-              class="form-input"
-              placeholder="developer@example.com"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">PASSWORD</label>
-            <input
-              type="password"
-              id="register-password"
-              class="form-input"
-              placeholder="••••••••"
-              required
-              minlength="8"
-            />
-            <p class="helper-text">Minimum 8 characters</p>
-          </div>
-
-          <button type="submit" class="form-button" id="register-button">
-            CREATE ACCOUNT
-          </button>
-        </form>
-      </div>
-    </div>
+        </div>
       </div>
     </main>
   </div>
@@ -322,7 +353,6 @@
       if (event && event.target) {
         event.target.classList.add('active');
       } else {
-        // Fallback: find the button by tab name
         document.querySelector(`.tab-button[onclick*="${tab}"]`).classList.add('active');
       }
 
@@ -332,7 +362,6 @@
       });
       document.getElementById(`${tab}-tab`).classList.add('active');
 
-      // Clear messages
       hideMessages();
     }
 
@@ -392,13 +421,11 @@
           throw new Error(data.error || data.message || 'Login failed');
         }
 
-        // Store session token
         localStorage.setItem('sorted_session_token', data.sessionToken);
         localStorage.setItem('sorted_developer', JSON.stringify(data.developer));
 
-        showSuccess('Login successful! Redirecting...');
+        showSuccess('Login successful. Redirecting...');
 
-        // Redirect to dashboard
         setTimeout(() => {
           window.location.href = 'dashboard.html';
         }, 1000);
@@ -433,13 +460,11 @@
           throw new Error(data.error || data.message || 'Registration failed');
         }
 
-        // Store session token
         localStorage.setItem('sorted_session_token', data.sessionToken);
         localStorage.setItem('sorted_developer', JSON.stringify(data.developer));
 
-        showSuccess('Account created! Redirecting...');
+        showSuccess('Account created. Redirecting...');
 
-        // Redirect to dashboard
         setTimeout(() => {
           window.location.href = 'dashboard.html';
         }, 1000);

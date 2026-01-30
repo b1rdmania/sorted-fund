@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sorted.fund - Gasless Transactions for Web3 Games</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="sorted-favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="assets/css/global.css">
   <link rel="stylesheet" href="assets/css/components.css">
 </head>
@@ -13,8 +15,9 @@
     <!-- Left Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <div class="sidebar-brand-logo">⛽</div>
-        <a href="index.html" class="sidebar-brand-text">SORTED.FUND</a>
+        <a href="index.html" class="sidebar-brand-text">
+          <img src="assets/img/sorted-wordmark-short.svg" alt="Sorted" style="height: 28px;">
+        </a>
       </div>
 
       <nav class="sidebar-nav">
@@ -34,57 +37,57 @@
 
     <!-- Main Content -->
     <main class="main-content">
-      <div style="max-width: 900px; padding: var(--spacing-xl) 0;">
-        <h1 style="font-size: 48px; color: var(--color-primary); margin-bottom: var(--spacing-md);">
+      <div style="max-width: 800px; padding: var(--space-2xl) 0;">
+        <h1 style="font-size: var(--text-display); margin-bottom: var(--space-md);">
           Gasless Transactions for Web3 Games
         </h1>
-        <p style="font-size: 24px; color: #888; margin-bottom: var(--spacing-xl);">
-          One API call. Zero wallet friction. Pure gameplay.
+        <p style="font-size: var(--text-h2); color: var(--text-secondary); margin-bottom: var(--space-xl); font-weight: 400;">
+          One API call. Zero wallet friction.
         </p>
 
-        <div style="margin-bottom: var(--spacing-xl); line-height: 1.8; color: #aaa;">
-          <p style="margin-bottom: var(--spacing-md);">
-            Let your players interact with the blockchain <strong style="color: var(--color-primary);">without ever touching a wallet</strong>.
+        <div style="margin-bottom: var(--space-xl); line-height: 1.8; color: var(--text-secondary);">
+          <p style="margin-bottom: var(--space-md); font-size: var(--text-body);">
+            Let your players interact with the blockchain <strong style="color: var(--text-primary);">without ever touching a wallet</strong>.
             No seed phrases. No gas fees. No transaction popups.
           </p>
-          <p>
-            Just <strong style="color: var(--color-primary);">one click</strong> → instant on-chain transaction.
+          <p style="font-size: var(--text-body);">
+            Just <strong style="color: var(--green);">one click</strong> and instant on-chain transactions.
           </p>
         </div>
 
-        <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-xxl);">
-          <button onclick="window.location.href='demo.html'" style="padding: 18px 40px; font-size: 18px;">
-            🚀 Watch Live Demo
+        <div style="display: flex; gap: var(--space-md); margin-bottom: var(--space-2xl);">
+          <button onclick="window.location.href='demo.html'" style="padding: 16px 32px; font-size: var(--text-body);">
+            Watch Live Demo
           </button>
-          <button onclick="window.location.href='login.html'" class="btn-secondary" style="padding: 18px 40px; font-size: 18px;">
-            🔑 Login / Get Started
+          <button onclick="window.location.href='login.html'" class="btn-secondary" style="padding: 16px 32px; font-size: var(--text-body);">
+            Get Started
           </button>
         </div>
 
         <!-- Features Grid -->
-        <div class="grid grid-3" style="margin-top: var(--spacing-xxl);">
-          <div class="panel" style="text-align: center;">
-            <div class="panel-content">
-              <div style="font-size: 40px; margin-bottom: var(--spacing-md);">⚡</div>
-              <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">One-Line Integration</h3>
-              <p class="text-muted">Single API call. No complex wallet integrations.</p>
+        <div class="grid grid-3" style="margin-top: var(--space-2xl);">
+          <div class="card" style="text-align: center; padding: var(--space-xl);">
+            <div style="width: 48px; height: 48px; background: var(--green-dark); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); color: var(--green);">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
+            <h3 style="margin-bottom: var(--space-sm);">One-Line Integration</h3>
+            <p class="text-muted" style="font-size: var(--text-body-sm); margin-bottom: 0;">Single API call. No complex wallet integrations.</p>
           </div>
 
-          <div class="panel" style="text-align: center;">
-            <div class="panel-content">
-              <div style="font-size: 40px; margin-bottom: var(--spacing-md);">🎮</div>
-              <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">Zero User Friction</h3>
-              <p class="text-muted">Players just click. No wallets. No gas.</p>
+          <div class="card" style="text-align: center; padding: var(--space-xl);">
+            <div style="width: 48px; height: 48px; background: var(--green-dark); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); color: var(--green);">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
+            <h3 style="margin-bottom: var(--space-sm);">Zero User Friction</h3>
+            <p class="text-muted" style="font-size: var(--text-body-sm); margin-bottom: 0;">Players just click. No wallets. No gas.</p>
           </div>
 
-          <div class="panel" style="text-align: center;">
-            <div class="panel-content">
-              <div style="font-size: 40px; margin-bottom: var(--spacing-md);">🔒</div>
-              <h3 style="color: var(--color-primary); margin-bottom: var(--spacing-sm);">You Control Spending</h3>
-              <p class="text-muted">Set limits. Fund once. We handle refunds.</p>
+          <div class="card" style="text-align: center; padding: var(--space-xl);">
+            <div style="width: 48px; height: 48px; background: var(--green-dark); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); color: var(--green);">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
+            <h3 style="margin-bottom: var(--space-sm);">You Control Spending</h3>
+            <p class="text-muted" style="font-size: var(--text-body-sm); margin-bottom: 0;">Set limits. Fund once. We handle the rest.</p>
           </div>
         </div>
       </div>

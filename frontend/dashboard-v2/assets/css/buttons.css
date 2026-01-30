@@ -1,77 +1,224 @@
-/* ============================================
-   SORTED.FUND V2 - STANDARDIZED BUTTONS
-   All buttons match transactions page style
-   ============================================ */
+/**
+ * Sorted.fund - Button Styles
+ * Design System: Utility Sublime v1.0
+ *
+ * Green means go - use primary buttons sparingly for key actions
+ */
 
-/* Base button - green text on black bg with border */
+/* ===== Base Button ===== */
 button,
 .btn,
 input[type="button"],
 input[type="submit"] {
-  background: #000;
-  color: #00ff00;
-  border: 1px solid #00ff00;
-  padding: 4px 12px;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  font-weight: normal;
+  background: var(--green);
+  color: var(--bg-deep);
+  border: none;
+  padding: 12px 20px;
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
   cursor: pointer;
+  transition: all var(--transition-default);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
   text-decoration: none;
-  display: inline-block;
+  line-height: 1;
 }
 
-/* Primary action button (rare use - only for critical actions) */
+button:hover:not(:disabled),
+.btn:hover:not(:disabled),
+input[type="button"]:hover:not(:disabled),
+input[type="submit"]:hover:not(:disabled) {
+  background: var(--green-dim);
+}
+
+button:active:not(:disabled),
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* ===== Primary Button (Default) ===== */
 button.btn-primary,
 .btn-primary {
-  background: #00ff00;
-  color: #000;
+  background: var(--green);
+  color: var(--bg-deep);
 }
 
-/* Danger button (delete, disable) */
-button.btn-danger,
-.btn-danger {
-  background: #000;
-  color: #ff3333;
-  border-color: #ff3333;
+button.btn-primary:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
+  background: var(--green-dim);
 }
 
-/* Secondary button (less important actions) */
+/* ===== Secondary Button (Outline) ===== */
 button.btn-secondary,
 .btn-secondary {
-  background: #000;
-  color: #00aa00;
-  border-color: #00aa00;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
 }
 
-/* Small button */
+button.btn-secondary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-surface);
+  border-color: var(--border-light);
+}
+
+/* ===== Ghost Button (No border) ===== */
+button.btn-ghost,
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+}
+
+button.btn-ghost:hover:not(:disabled),
+.btn-ghost:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+}
+
+/* ===== Danger Button ===== */
+button.btn-danger,
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+  border: none;
+}
+
+button.btn-danger:hover:not(:disabled),
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+/* ===== Warning Button ===== */
+button.btn-warning,
+.btn-warning {
+  background: var(--amber);
+  color: var(--bg-deep);
+  border: none;
+}
+
+button.btn-warning:hover:not(:disabled),
+.btn-warning:hover:not(:disabled) {
+  background: #b8882f;
+}
+
+/* ===== Size Variants ===== */
 button.btn-sm,
 .btn-sm {
-  padding: 2px 8px;
-  font-size: 11px;
+  padding: 6px 12px;
+  font-size: var(--text-caption);
 }
 
-/* Disabled state */
+button.btn-lg,
+.btn-lg {
+  padding: 16px 28px;
+  font-size: var(--text-body);
+}
+
+/* ===== Block Button (Full Width) ===== */
+button.btn-block,
+.btn-block {
+  width: 100%;
+  display: flex;
+}
+
+/* ===== Disabled State ===== */
 button:disabled,
-.btn:disabled {
+.btn:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Header add funds button */
-.btn-add-funds {
-  background: #00ff00;
-  color: #000;
-  border: 1px solid #00ff00;
-  padding: 4px 12px;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  font-weight: normal;
-  cursor: pointer;
+/* ===== Icon Button ===== */
+.btn-icon {
+  padding: var(--space-sm);
+  width: 36px;
+  height: 36px;
 }
 
-/* Page action buttons (top right of page) */
+.btn-icon.btn-sm {
+  width: 28px;
+  height: 28px;
+  padding: var(--space-xs);
+}
+
+/* ===== Button Group ===== */
+.btn-group {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.btn-group .btn {
+  border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.btn-group .btn:last-child {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* ===== Special Buttons ===== */
+
+/* Header add funds button */
+.btn-add-funds {
+  background: var(--green);
+  color: var(--bg-deep);
+  border: none;
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-default);
+}
+
+.btn-add-funds:hover {
+  background: var(--green-dim);
+}
+
+/* Page action buttons */
 .page-actions button {
-  background: #000;
-  color: #00ff00;
-  border: 1px solid #00ff00;
+  /* Inherits default button styles */
+}
+
+/* ===== Loading State ===== */
+button.loading,
+.btn.loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+button.loading::after,
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.btn-primary.loading::after {
+  border-top-color: var(--bg-deep);
+}
+
+.btn-secondary.loading::after {
+  border-top-color: var(--text-primary);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
