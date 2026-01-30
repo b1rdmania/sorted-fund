@@ -214,49 +214,38 @@ const selector = hash.slice(0, 10);  // 0x + 8 hex chars
   </div>
 
   <!-- Scripts -->
-  <script src="assets/js/utils.js"></script>
-  <script src="assets/js/api.js"></script>
+  <script src="assets/js/utils.js?v=2"></script>
+  <script src="assets/js/api.js?v=2"></script>
+  <script src="assets/js/auth.js?v=2"></script>
+  <script src="assets/js/projectSwitcher.js?v=2"></script>
   <script>
-    const CONFIG = {
-      DEFAULT_PROJECT_ID: 'test-game',
-    };
-
-    let currentProjectId = CONFIG.DEFAULT_PROJECT_ID;
+    let currentProject = null;
     let currentDeleteEntry = null;
 
     async function init() {
       try {
-        await loadProjects();
+        await Auth.requireAuth();
+        await ProjectSwitcher.renderSelector('projectSelector');
+        currentProject = await ProjectSwitcher.getCurrentProject();
+
+        if (!currentProject) {
+          showError('No projects found. Please create a project first.');
+          return;
+        }
+
         await loadAllowlist();
       } catch (error) {
         console.error('Initialization error:', error);
-        showError('Failed to initialize page: ' + error.message);
-      }
-    }
-
-    async function loadProjects() {
-      try {
-        const projects = await api.getAllProjects();
-        const selector = document.getElementById('projectSelector');
-
-        selector.innerHTML = projects.map(p =>
-          `<option value="${p.id}" ${p.id === currentProjectId ? 'selected' : ''}>
-            ${p.name} (${p.id})
-          </option>`
-        ).join('');
-
-        selector.addEventListener('change', (e) => {
-          currentProjectId = e.target.value;
-          loadAllowlist();
-        });
-      } catch (error) {
-        console.error('Failed to load projects:', error);
+        if (!error.message.includes('Authentication required')) {
+          showError('Failed to initialize page: ' + error.message);
+        }
       }
     }
 
     async function loadAllowlist() {
       try {
-        const entries = await api.getAllowlist(currentProjectId);
+        if (!currentProject) return;
+        const entries = await api.getAllowlist(currentProject.id);
         displayAllowlist(entries);
       } catch (error) {
         console.error('Failed to load allowlist:', error);
@@ -356,7 +345,7 @@ const selector = hash.slice(0, 10);  // 0x + 8 hex chars
       try {
         setButtonLoading(btn, 'Adding...');
 
-        await api.addAllowlistEntry(currentProjectId, {
+        await api.addAllowlistEntry(currentProject.id, {
           targetContract: contractAddress,
           functionSelector: functionSelector
         });
@@ -396,7 +385,7 @@ const selector = hash.slice(0, 10);  // 0x + 8 hex chars
       try {
         setButtonLoading(btn, 'Deleting...');
 
-        await api.deleteAllowlistEntry(currentProjectId, currentDeleteEntry);
+        await api.deleteAllowlistEntry(currentProject.id, currentDeleteEntry);
 
         showSuccess('Allowlist entry deleted successfully');
         closeDeleteEntryModal();
