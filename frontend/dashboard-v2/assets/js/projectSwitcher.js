@@ -106,9 +106,12 @@ class ProjectSwitcher {
         .substring(0, 32) + '-' + Date.now().toString(36);
 
       // Get owner from stored developer info
-      const developer = JSON.parse(localStorage.getItem('sorted_developer') || '{}');
+      const developerStr = localStorage.getItem('sorted_developer');
+      console.log('Developer from localStorage:', developerStr);
+      const developer = JSON.parse(developerStr || '{}');
       const owner = developer.id || developer.email || 'unknown';
 
+      console.log('Creating project with:', { id, name, owner });
       const project = await api.createProject({ id, name, owner });
       console.log('Project created:', project);
 
