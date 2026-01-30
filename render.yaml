@@ -23,7 +23,7 @@ services:
       - key: BACKEND_SIGNER_PRIVATE_KEY
         sync: false
       - key: ALLOWED_ORIGINS
-        value: https://sorted-fund.vercel.app,https://*.vercel.app,http://localhost:8081
+        value: https://sorted.fund,https://www.sorted.fund,https://sorted-fund.vercel.app,https://*.vercel.app,http://localhost:8081
 
 databases:
   # PostgreSQL Database
