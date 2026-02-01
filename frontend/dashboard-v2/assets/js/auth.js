@@ -1,32 +1,37 @@
 /**
  * Sorted.fund Dashboard - Authentication Utility
- * Session management and auth state handling
+ * Privy-based session management
  */
 
 class Auth {
+  // Privy token (primary)
+  static PRIVY_TOKEN_KEY = 'sorted_privy_token';
+  // Legacy token (for backward compat during migration)
   static TOKEN_KEY = 'sorted_session_token';
   static DEVELOPER_KEY = 'sorted_developer';
 
   /**
-   * Get session token from localStorage
+   * Get session token from localStorage (Privy or legacy)
    */
   static getToken() {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return localStorage.getItem(this.PRIVY_TOKEN_KEY) || localStorage.getItem(this.TOKEN_KEY);
   }
 
   /**
    * Store session token in localStorage
    */
   static setToken(token) {
-    localStorage.setItem(this.TOKEN_KEY, token);
+    localStorage.setItem(this.PRIVY_TOKEN_KEY, token);
   }
 
   /**
-   * Remove session token from localStorage
+   * Remove all tokens from localStorage
    */
   static clearToken() {
+    localStorage.removeItem(this.PRIVY_TOKEN_KEY);
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.DEVELOPER_KEY);
+    localStorage.removeItem('sorted_privy_user');
   }
 
   /**
@@ -45,18 +50,34 @@ class Auth {
     if (!token) return false;
 
     try {
-      const response = await fetch(`${api.baseUrl}/auth/me`, {
+      // Try Privy endpoint first
+      let response = await fetch(`${api.baseUrl}/auth/privy/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
-        },
-        credentials: 'include'
+        }
       });
 
+      // If Privy fails, try legacy endpoint
+      if (!response.ok && localStorage.getItem(this.TOKEN_KEY)) {
+        response = await fetch(`${api.baseUrl}/auth/me`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem(this.TOKEN_KEY)}`
+          },
+          credentials: 'include'
+        });
+      }
+
       if (!response.ok) {
-        // Token invalid or expired
         this.clearToken();
         return false;
+      }
+
+      // Update developer info
+      const data = await response.json();
+      if (data.developer) {
+        localStorage.setItem(this.DEVELOPER_KEY, JSON.stringify(data.developer));
       }
 
       return true;
@@ -68,84 +89,21 @@ class Auth {
 
   /**
    * Redirect to login if not authenticated
-   * Call this at the top of every dashboard page
    */
   static async requireAuth() {
     const isAuth = await this.isAuthenticated();
     if (!isAuth) {
-      window.location.href = '/login.html';
-      throw new Error('Authentication required'); // Stop execution
+      window.location.href = '/login/';
+      throw new Error('Authentication required');
     }
-  }
-
-  /**
-   * Login with email and password
-   */
-  static async login(email, password) {
-    const response = await fetch(`${api.baseUrl}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-      credentials: 'include'
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || error.message || 'Login failed');
-    }
-
-    const data = await response.json();
-    this.setToken(data.sessionToken);
-    localStorage.setItem(this.DEVELOPER_KEY, JSON.stringify(data.developer));
-
-    return data;
-  }
-
-  /**
-   * Register new developer account
-   */
-  static async register(email, password, name) {
-    const response = await fetch(`${api.baseUrl}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
-      credentials: 'include'
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || error.message || 'Registration failed');
-    }
-
-    const data = await response.json();
-    this.setToken(data.sessionToken);
-    localStorage.setItem(this.DEVELOPER_KEY, JSON.stringify(data.developer));
-
-    return data;
   }
 
   /**
    * Logout and redirect to login page
    */
   static async logout() {
-    const token = this.getToken();
-
-    if (token) {
-      try {
-        await fetch(`${api.baseUrl}/auth/logout`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          credentials: 'include'
-        });
-      } catch (error) {
-        console.error('Logout request failed:', error);
-      }
-    }
-
     this.clearToken();
-    window.location.href = '/login.html';
+    window.location.href = '/login/';
   }
 }
 
