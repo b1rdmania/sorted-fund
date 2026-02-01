@@ -16,6 +16,10 @@ out/
 frontend/dashboard-v2/docs/
 docs/.vitepress/cache/
 
+# Login app build (built on Vercel)
+frontend/dashboard-v2/login/
+frontend/dashboard-v2/login-app/node_modules/
+
 # Environment variables
 .env
 .env.local

@@ -2,7 +2,8 @@
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "build": "npm run docs:build"
+    "login:build": "cd frontend/dashboard-v2/login-app && npm install && npm run build",
+    "build": "npm run docs:build && npm run login:build"
   },
   "devDependencies": {
     "vitepress": "^1.6.4"

@@ -12,8 +12,9 @@ const SESSION_DURATION_DAYS = 7;
 
 export interface Developer {
   id: number;
-  email: string;
-  name: string;
+  privy_user_id?: string | null;
+  email: string | null;
+  name: string | null;
   credit_balance: string; // BigInt as string
   status: string;
   created_at: Date;

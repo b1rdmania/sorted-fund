@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Sorted.fund</title>
+  <link rel="icon" type="image/png" href="/sorted-favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0e0e10;
+      --bg-elevated: #16151a;
+      --border: #27252b;
+      --text: #e4e1e8;
+      --text-muted: #6b6779;
+      --green: #22c55e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 200px;
+      border-right: 1px solid var(--border);
+      padding: 32px 0;
+      position: fixed;
+      height: 100vh;
+      background: var(--bg);
+    }
+
+    .logo { padding: 0 24px; margin-bottom: 48px; }
+    .logo img { height: 48px; }
+
+    .nav a {
+      display: block;
+      padding: 8px 24px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .nav a:hover { color: var(--text); }
+    .nav a.active { color: var(--green); border-left-color: var(--green); }
+
+    .main {
+      flex: 1;
+      margin-left: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .auth-header { margin-bottom: 32px; }
+    .auth-header h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+    .auth-header p { color: var(--text-muted); font-size: 14px; }
+
+    @media (max-width: 600px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/assets/img/sorted-wordmark-short.svg" alt="sorted">
+    </div>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/demo.html">Live Demo</a>
+      <a href="/demo-dashboard.html">Preview Dashboard</a>
+      <a href="/login/" class="active">Login</a>
+      <a href="/docs/" style="margin-top: 24px;">Docs</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="auth-container">
+      <header class="auth-header">
+        <h1>Welcome</h1>
+        <p>Sign in to manage your gas station</p>
+      </header>
+
+      <div id="privy-login"></div>
+    </div>
+  </main>
+
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

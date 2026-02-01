@@ -8,6 +8,7 @@ import { initializeDatabase, closeDatabase } from './db/database';
 
 // Import routes
 import authRoutes from './routes/auth';
+import privyAuthRoutes from './routes/privyAuth';
 import projectRoutes from './routes/projects';
 import sponsorRoutes from './routes/sponsor';
 import allowlistRoutes from './routes/allowlist';
@@ -139,7 +140,8 @@ app.post('/admin/migrate', async (req: Request, res: Response) => {
 });
 
 // API Routes
-app.use('/auth', authRoutes);
+app.use('/auth', authRoutes); // Legacy email/password auth (deprecated)
+app.use('/auth/privy', privyAuthRoutes); // New Privy auth
 app.use('/projects', projectRoutes);
 app.use('/sponsor', sponsorRoutes);
 app.use('/projects', allowlistRoutes); // Allowlist routes under /projects/:id/allowlist
