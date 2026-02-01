@@ -46,6 +46,26 @@ Last Updated: 2026-02-01
 4. **Self-service Deposits** - Let devs fund gas tanks directly (currently manual)
 5. **Mainnet Deployment** - Graduate from Sonic testnet
 
+## Privy Integration Notes
+
+Reference implementation: `github.com/b1rdmania/mars-reserves` (working Privy + Supabase)
+
+**Plan (KISS - no React, keep static HTML):**
+1. Frontend: Use `@privy-io/js-sdk-core` (vanilla JS SDK) in login.html
+2. Backend: Verify Privy tokens in auth middleware, replace custom session logic
+3. Database: Add `privy_user_id` to developers table, remove password hashing
+
+**Files to change:**
+- `frontend/dashboard-v2/login.html` - Privy login flow
+- `frontend/dashboard-v2/assets/js/api.js` - Auth token handling
+- `backend/src/routes/auth.ts` - Privy token verification
+- `backend/src/middleware/auth.ts` - Check Privy token instead of custom session
+- `backend/src/services/authService.ts` - Probably delete most of this
+
+**Env vars needed:**
+- `PRIVY_APP_ID` - from Privy dashboard
+- `PRIVY_APP_SECRET` - for server-side verification
+
 ## Tech Stack
 
 | Layer | Tech |
