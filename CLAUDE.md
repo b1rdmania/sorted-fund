@@ -1,13 +1,14 @@
 # CLAUDE.md - Sorted.fund Project Context
 
-Last Updated: 2026-01-30
+Last Updated: 2026-02-01
 
-## Status: Live Demo Working, Auth Needs Rebuild
+## Status: Live Demo Working, Docs Live, Auth Needs Rebuild
 
 **What works:**
 - Live gasless transactions on Sonic testnet
 - Demo page at sorted.fund/demo.html (one click, real tx)
 - Dashboard preview at sorted.fund/demo-dashboard.html
+- Documentation at sorted.fund/docs/ (VitePress)
 - Backend API on Render
 - ERC-4337 paymaster + bundler integration
 
@@ -16,11 +17,20 @@ Last Updated: 2026-01-30
 - Project creation has edge cases → Needs proper user/project database
 - No self-service deposits yet
 
+## Recent Changes (2026-02-01)
+
+**Docs cleanup & deployment:**
+- Applied Orwell language rules: removed time estimates, vague promises, marketing fluff
+- Honest beta language: "Testnet" badge, "planned" SDK (not "coming soon"), pricing TBD
+- VitePress docs now build on Vercel deploy → sorted.fund/docs/
+- Added docs link to main site nav (bottom, with spacing)
+
 ## Live URLs
 
 | Service | URL |
 |---------|-----|
 | **Production Site** | https://sorted.fund |
+| **Documentation** | https://sorted.fund/docs/ |
 | **Live Demo** | https://sorted.fund/demo.html |
 | **Dashboard Preview** | https://sorted.fund/demo-dashboard.html |
 | **Backend API** | https://sorted-backend.onrender.com |
@@ -30,10 +40,11 @@ Last Updated: 2026-01-30
 
 ## Next Steps (Priority Order)
 
-1. **Privy Integration** - Replace custom auth with Privy (wallet + social login)
-2. **Database Hardening** - Proper user → project → API key relationships
-3. **Self-service Deposits** - Let devs fund gas tanks directly
-4. **Mainnet Deployment** - Graduate from Sonic testnet
+1. **Privy Integration** - Replace buggy custom auth with Privy (wallet + social login). This unblocks real user testing.
+2. **Database Hardening** - Fix user → project → API key relationships. Current project creation has edge cases.
+3. **User Testing** - Get real developers trying the flow end-to-end
+4. **Self-service Deposits** - Let devs fund gas tanks directly (currently manual)
+5. **Mainnet Deployment** - Graduate from Sonic testnet
 
 ## Tech Stack
 
@@ -84,14 +95,15 @@ cd bundler/alto && ./alto --config config.sonic-testnet.json --floor-max-fee-per
 
 ```
 ├── backend/           # Express API (Render)
+├── docs/              # VitePress docs (builds to frontend/dashboard-v2/docs/)
 ├── frontend/
 │   └── dashboard-v2/  # Static site (Vercel) ← sorted.fund
-├── sdk/               # TypeScript SDK (WIP)
+├── sdk/               # TypeScript SDK (planned, not built)
 ├── contracts/         # Solidity (deployed)
 ├── bundler/alto/      # ERC-4337 bundler (submodule)
 ├── sorted-brand-kit/  # Brand guidelines, logos, design system
 ├── render.yaml        # Render config
-└── vercel.json        # Vercel config
+└── vercel.json        # Vercel config (runs docs build)
 ```
 
 ## Key Files
@@ -100,7 +112,8 @@ cd bundler/alto && ./alto --config config.sonic-testnet.json --floor-max-fee-per
 - `backend/src/services/authorizationService.ts` - Signs paymasterAndData
 - `frontend/dashboard-v2/demo.html` - Live demo page
 - `frontend/dashboard-v2/demo-dashboard.html` - Static preview dashboard
-- `sorted-brand-kit/sorted-design-guidelines.md` - Design system
+- `docs/` - VitePress documentation source
+- `sorted-brand-kit/sorted-design-guidelines.md` - Design system (Orwell language rules apply)
 
 ## Design Ethos
 
