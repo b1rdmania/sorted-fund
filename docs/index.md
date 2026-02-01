@@ -19,11 +19,11 @@ hero:
 features:
   - icon: ⚡
     title: Zero friction
-    details: Players never see a wallet popup, pay a fee, or know they're on-chain.
+    details: Players don't see wallet popups, pay fees, or know they're on-chain.
   - icon: 🔌
     title: One API call
-    details: Integrate in minutes. No smart contract changes needed.
+    details: No smart contract changes needed. Allowlist and go.
   - icon: 🎮
     title: Built for games
-    details: Allowlist your contracts. Set spending limits. Track usage.
+    details: Allowlist contracts. Set spending limits. Track usage.
 ---

@@ -1,16 +1,16 @@
 # SDK Reference
 
-::: warning Coming Soon
-The TypeScript SDK is under development. For now, use the [API directly](/api-reference).
+::: warning Planned — Not Yet Available
+The TypeScript SDK is under development. The examples below show the **planned API design**. For now, use the [REST API directly](/api-reference).
 :::
 
-## Installation
+## Planned Installation
 
 ```bash
-npm install @sorted/sdk
+npm install @sorted/sdk  # Not yet published
 ```
 
-## Usage
+## Planned Usage
 
 ```typescript
 import { SortedClient } from '@sorted/sdk';
@@ -32,7 +32,7 @@ const result = await sorted.sponsor({
 console.log(result.transactionHash);
 ```
 
-## Methods
+## Planned Methods
 
 ### `sponsor(options)`
 
@@ -74,7 +74,7 @@ Get your allowlisted contracts.
 const entries = await sorted.getAllowlist();
 ```
 
-## React Hook
+## Planned React Hook
 
 ```typescript
 import { useSorted } from '@sorted/react';

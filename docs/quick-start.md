@@ -2,6 +2,10 @@
 
 Get gasless transactions working in your game.
 
+::: tip Testnet Only
+Sorted is currently live on Sonic Testnet. Mainnet support coming.
+:::
+
 ## 1. Create an account
 
 Go to [sorted.fund](https://sorted.fund) and sign up.

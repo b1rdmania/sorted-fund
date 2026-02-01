@@ -1,6 +1,10 @@
 # Examples
 
-Real integration examples for common use cases.
+Integration examples for common use cases.
+
+::: info Note
+Examples using `sorted.authorize()` show the planned SDK syntax. For now, use the [REST API](/api-reference) directly as shown in the "Basic" example.
+:::
 
 ## Basic: Mint an NFT
 

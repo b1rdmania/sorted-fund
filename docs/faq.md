@@ -18,7 +18,7 @@ They just click buttons. You pay the gas.
 
 ### What chains do you support?
 
-Currently Sonic Testnet. More EVM chains coming.
+Sonic Testnet (Chain ID 14601). More chains planned.
 
 ### How much does it cost?
 

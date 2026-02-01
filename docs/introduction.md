@@ -45,14 +45,12 @@ That's the whole integration.
 
 ## What it costs
 
-You pay the gas your users would have paid. Nothing more.
-
-We take a small fee on top (details TBD — we're in testnet).
+You pay the gas your users would have paid, plus a small fee. Pricing details TBD — we're in testnet.
 
 ## Supported chains
 
-Currently live on **Sonic Testnet**. More EVM chains coming.
+Live on **Sonic Testnet** (Chain ID 14601). More chains planned.
 
 ## Next steps
 
-→ [Quick Start](/quick-start) — Get running in 10 minutes
+→ [Quick Start](/quick-start) — Set up your first project

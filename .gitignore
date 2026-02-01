@@ -12,6 +12,10 @@ dist/
 build/
 out/
 
+# VitePress docs build (built on Vercel)
+frontend/dashboard-v2/docs/
+docs/.vitepress/cache/
+
 # Environment variables
 .env
 .env.local

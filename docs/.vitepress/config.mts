@@ -3,6 +3,8 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Sorted.fund',
   description: 'Gasless transactions for Web3 games',
+  base: '/docs/',
+  outDir: '../frontend/dashboard-v2/docs',
 
   head: [
     ['link', { rel: 'icon', href: '/favicon.png' }],
