@@ -72,7 +72,19 @@ export async function initializeDatabase(): Promise<void> {
   try {
     console.log('🔧 Initializing database schema...');
 
-    const schemaPath = path.join(__dirname, 'schema.sql');
+    // dist builds don't currently copy schema.sql, so fall back to src path.
+    const schemaCandidates = [
+      path.join(__dirname, 'schema.sql'),
+      path.join(process.cwd(), 'src', 'db', 'schema.sql'),
+    ];
+
+    const schemaPath = schemaCandidates.find((candidate: string) => fs.existsSync(candidate));
+    if (!schemaPath) {
+      throw new Error(
+        `schema.sql not found. Checked: ${schemaCandidates.join(', ')}`
+      );
+    }
+
     const schema = fs.readFileSync(schemaPath, 'utf8');
 
     await query(schema);
