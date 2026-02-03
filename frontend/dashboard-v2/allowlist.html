@@ -54,12 +54,14 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Allowlist</h1>
-            <p class="page-subtitle">Control which contracts and functions can be sponsored</p>
+            <p class="page-subtitle">Step 4 of setup: define what calls can be sponsored</p>
           </div>
           <div class="page-actions">
             <button onclick="openAddEntryModal()">Add Entry</button>
           </div>
         </div>
+
+        <div id="setupHintContainer"></div>
 
         <!-- Info Box -->
         <div class="info-box">
@@ -217,6 +219,7 @@ const selector = hash.slice(0, 10);  // 0x + 8 hex chars
   <script src="assets/js/utils.js?v=2"></script>
   <script src="assets/js/api.js?v=2"></script>
   <script src="assets/js/auth.js?v=2"></script>
+  <script src="assets/js/onboarding.js?v=1"></script>
   <script src="assets/js/projectSwitcher.js?v=2"></script>
   <script>
     let currentProject = null;
@@ -225,14 +228,13 @@ const selector = hash.slice(0, 10);  // 0x + 8 hex chars
     async function init() {
       try {
         await Auth.requireAuth();
+        const state = await OnboardingFlow.requireProjectOrRedirect('/dashboard.html?flow=setup&missing=project');
+        if (!state) return;
+
         await ProjectSwitcher.renderSelector('projectSelector');
-        currentProject = await ProjectSwitcher.getCurrentProject();
+        currentProject = state.project || await ProjectSwitcher.getCurrentProject();
 
-        if (!currentProject) {
-          showError('No projects found. Please create a project first.');
-          return;
-        }
-
+        renderSetupHint(state);
         await loadAllowlist();
       } catch (error) {
         console.error('Initialization error:', error);
@@ -315,6 +317,19 @@ const selector = hash.slice(0, 10);  // 0x + 8 hex chars
       `;
 
       container.innerHTML = tableHTML;
+    }
+
+    function renderSetupHint(state) {
+      const host = document.getElementById('setupHintContainer');
+      if (!host) return;
+
+      host.innerHTML = `
+        <div class="alert alert-warning">
+          ${state.hasApiKey
+            ? 'Only add functions you want to sponsor. Start with one trusted contract/function and expand from there.'
+            : 'Create an API key first so you can test your first allowlist rule end-to-end.'}
+        </div>
+      `;
     }
 
     function openAddEntryModal() {

@@ -7,6 +7,7 @@ class ProjectSwitcher {
   static CURRENT_PROJECT_KEY = 'sorted_current_project';
   static currentProject = null;
   static projects = [];
+  static CREATE_MODAL_ID = 'createProjectModal';
 
   /**
    * Load user's projects from API
@@ -56,6 +57,57 @@ class ProjectSwitcher {
     window.location.reload(); // Reload dashboard with new project
   }
 
+  static slugifyProjectName(name) {
+    const base = (name || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .substring(0, 32);
+
+    return `${base || 'project'}-${Date.now().toString(36)}`;
+  }
+
+  static getOrCreateCreateProjectModal() {
+    let modal = document.getElementById(this.CREATE_MODAL_ID);
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = this.CREATE_MODAL_ID;
+    modal.className = 'modal-overlay hidden';
+    modal.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Create project</h2>
+          <button class="modal-close" type="button" data-action="close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="color: var(--text-secondary); font-size: var(--text-body-sm);">
+            This is your workspace for funding addresses, API keys, and usage analytics.
+          </p>
+          <div class="form-group">
+            <label for="createProjectNameInput">Project Name</label>
+            <input id="createProjectNameInput" type="text" placeholder="My game backend" maxlength="64" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-action="close">Cancel</button>
+          <button type="button" id="createProjectSubmitBtn" data-action="submit">Create project</button>
+        </div>
+      </div>
+    `;
+
+    modal.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.dataset.action === 'close' || target === modal) {
+        modal.classList.add('hidden');
+      }
+    });
+
+    document.body.appendChild(modal);
+    return modal;
+  }
+
   /**
    * Render project selector dropdown in existing select element
    */
@@ -95,31 +147,51 @@ class ProjectSwitcher {
    * Show create project modal (simple prompt for now)
    */
   static async showCreateModal() {
-    const name = prompt('Enter project name:');
-    if (!name) return;
+    const modal = this.getOrCreateCreateProjectModal();
+    const nameInput = modal.querySelector('#createProjectNameInput');
+    const submitButton = modal.querySelector('#createProjectSubmitBtn');
 
-    try {
-      // Generate a slug ID from the name
-      const id = name.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '')
-        .substring(0, 32) + '-' + Date.now().toString(36);
-
-      // Get owner from stored developer info
-      const developerStr = localStorage.getItem('sorted_developer');
-      console.log('Developer from localStorage:', developerStr);
-      const developer = JSON.parse(developerStr || '{}');
-      const owner = developer.id || developer.email || 'unknown';
-
-      console.log('Creating project with:', { id, name, owner });
-      const project = await api.createProject({ id, name, owner });
-      console.log('Project created:', project);
-
-      // Switch to new project
-      this.switchProject(project.id);
-    } catch (error) {
-      alert('Failed to create project: ' + error.message);
+    if (!(nameInput instanceof HTMLInputElement) || !(submitButton instanceof HTMLButtonElement)) {
+      return;
     }
+
+    modal.classList.remove('hidden');
+    nameInput.value = '';
+    setTimeout(() => nameInput.focus(), 0);
+
+    const submit = async () => {
+      const name = nameInput.value.trim();
+      if (!name) {
+        showError('Project name is required');
+        nameInput.focus();
+        return;
+      }
+
+      try {
+        setButtonLoading(submitButton, 'Creating...');
+
+        const id = this.slugifyProjectName(name);
+        const developerStr = localStorage.getItem('sorted_developer');
+        const developer = JSON.parse(developerStr || '{}');
+        const owner = developer.email || developer.name || `developer-${developer.id || 'unknown'}`;
+
+        const project = await api.createProject({ id, name, owner });
+        modal.classList.add('hidden');
+        this.switchProject(project.id);
+      } catch (error) {
+        showError('Failed to create project: ' + error.message);
+      } finally {
+        unsetButtonLoading(submitButton);
+      }
+    };
+
+    submitButton.onclick = submit;
+    nameInput.onkeydown = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        submit();
+      }
+    };
   }
 
   /**

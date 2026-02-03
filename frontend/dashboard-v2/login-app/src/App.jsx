@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 const API_BASE = window.location.hostname === 'localhost'
   ? 'http://localhost:3000'
   : 'https://sorted-backend.onrender.com'
+const DASHBOARD_ENTRY = '/dashboard.html?flow=setup'
 
 export default function App() {
   const { ready, authenticated, user, login, logout, getAccessToken } = usePrivy()
@@ -31,7 +32,7 @@ export default function App() {
             localStorage.setItem('sorted_developer', JSON.stringify(data.developer))
 
             // Redirect to dashboard
-            window.location.href = '/dashboard.html'
+            window.location.href = DASHBOARD_ENTRY
           } else {
             console.error('Backend auth failed:', await res.text())
           }
@@ -54,7 +55,7 @@ export default function App() {
             headers: { 'Authorization': `Bearer ${token}` },
           })
           if (res.ok) {
-            window.location.href = '/dashboard.html'
+            window.location.href = DASHBOARD_ENTRY
           } else {
             // Token invalid, clear it
             localStorage.removeItem('sorted_privy_token')

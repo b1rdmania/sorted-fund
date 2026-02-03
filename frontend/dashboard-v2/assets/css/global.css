@@ -318,6 +318,66 @@ tr:hover td {
   margin-bottom: var(--space-lg);
 }
 
+/* Setup flow */
+.setup-panel {
+  border: 1px solid var(--border-light);
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.08), rgba(22, 21, 26, 0.95));
+}
+
+.setup-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.setup-progress {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.setup-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--green);
+  transition: width 0.2s ease;
+}
+
+.setup-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--space-sm);
+}
+
+.setup-step {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.setup-step.done {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.setup-step-title {
+  display: block;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.setup-step-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 /* Stats */
 .stats-grid {
   display: grid;

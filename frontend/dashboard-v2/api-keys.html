@@ -54,12 +54,14 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">API Keys</h1>
-            <p class="page-subtitle">Manage authentication keys for your project</p>
+            <p class="page-subtitle">Step 3 of setup: create keys your backend will use</p>
           </div>
           <div class="page-actions">
             <button onclick="openGenerateKeyModal()">Generate New Key</button>
           </div>
         </div>
+
+        <div id="setupHintContainer"></div>
 
         <!-- Info Box -->
         <div class="info-box">
@@ -207,6 +209,7 @@ fetch('http://localhost:3000/sponsor/authorize', {
   <script src="assets/js/utils.js?v=2"></script>
   <script src="assets/js/api.js?v=2"></script>
   <script src="assets/js/auth.js?v=2"></script>
+  <script src="assets/js/onboarding.js?v=1"></script>
   <script src="assets/js/projectSwitcher.js?v=2"></script>
   <script>
     let currentProject = null;
@@ -215,15 +218,14 @@ fetch('http://localhost:3000/sponsor/authorize', {
     async function init() {
       try {
         await Auth.requireAuth();
-        await ProjectSwitcher.renderSelector('projectSelector');
-        currentProject = await ProjectSwitcher.getCurrentProject();
+        const state = await OnboardingFlow.requireProjectOrRedirect('/dashboard.html?flow=setup&missing=project');
+        if (!state) return;
 
-        if (!currentProject) {
-          showError('No projects found. Please create a project first.');
-          return;
-        }
+        await ProjectSwitcher.renderSelector('projectSelector');
+        currentProject = state.project || await ProjectSwitcher.getCurrentProject();
 
         document.getElementById('exampleProjectId').textContent = currentProject.id;
+        renderSetupHint(state);
         await loadApiKeys();
       } catch (error) {
         console.error('Initialization error:', error);
@@ -248,8 +250,9 @@ fetch('http://localhost:3000/sponsor/authorize', {
 
     function displayApiKeys(keys) {
       const container = document.getElementById('apiKeysContainer');
+      const normalizedKeys = OnboardingFlow.normalizeApiKeys(keys);
 
-      if (!keys || keys.length === 0) {
+      if (!normalizedKeys || normalizedKeys.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
             <div class="empty-state-message">No API keys yet</div>
@@ -276,20 +279,20 @@ fetch('http://localhost:3000/sponsor/authorize', {
               </tr>
             </thead>
             <tbody>
-              ${keys.map(key => `
+              ${normalizedKeys.map(key => `
                 <tr>
-                  <td><code>${key.key_preview}...</code></td>
-                  <td>${key.rate_limit} req/min</td>
-                  <td>${formatDate(key.issued_at)}</td>
-                  <td>${key.last_used_at ? formatRelativeTime(key.last_used_at) : 'Never'}</td>
+                  <td><code>${key.preview}...</code></td>
+                  <td>${key.rateLimit} req/min</td>
+                  <td>${formatDate(key.issuedAt)}</td>
+                  <td>${key.lastUsedAt ? formatRelativeTime(key.lastUsedAt) : 'Never'}</td>
                   <td>
-                    <span class="badge ${key.revoked_at ? 'badge-error' : 'badge-success'}">
-                      ${key.revoked_at ? 'Revoked' : 'Active'}
+                    <span class="badge ${key.revokedAt ? 'badge-error' : 'badge-success'}">
+                      ${key.revokedAt ? 'Revoked' : 'Active'}
                     </span>
                   </td>
                   <td>
-                    ${!key.revoked_at ? `
-                      <button onclick="openRevokeKeyModal(${key.id}, '${key.key_preview}')"
+                    ${!key.revokedAt ? `
+                      <button onclick="openRevokeKeyModal(${key.id}, '${key.preview}')"
                               class="btn-sm btn-danger">
                         Revoke
                       </button>
@@ -303,6 +306,19 @@ fetch('http://localhost:3000/sponsor/authorize', {
       `;
 
       container.innerHTML = tableHTML;
+    }
+
+    function renderSetupHint(state) {
+      const host = document.getElementById('setupHintContainer');
+      if (!host) return;
+
+      host.innerHTML = `
+        <div class="alert alert-warning">
+          ${state.hasApiKey
+            ? `You already have ${state.activeApiKeyCount} active key(s). Generate another key only if you need environment separation.`
+            : 'Generate your first API key, copy it to your backend env, then continue to allowlist setup.'}
+        </div>
+      `;
     }
 
     function openGenerateKeyModal() {

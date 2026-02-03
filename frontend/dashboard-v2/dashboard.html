@@ -54,13 +54,15 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Dashboard</h1>
-            <p class="page-subtitle">Real-time metrics for your gas station</p>
+            <p class="page-subtitle">Guided setup + real-time metrics for your gas station</p>
           </div>
           <div class="page-actions">
-            <button onclick="window.location.href='api-keys.html'">Generate API Key</button>
-            <button onclick="window.location.href='allowlist.html'" class="btn-secondary">Manage Allowlist</button>
+            <button onclick="window.location.href='api-keys.html'">API Keys</button>
+            <button onclick="window.location.href='allowlist.html'" class="btn-secondary">Allowlist</button>
           </div>
         </div>
+
+        <div id="setupFlowContainer"></div>
 
         <!-- Gas Tank Balance -->
         <div class="panel highlight">
@@ -174,6 +176,7 @@ fetch('/sponsor/authorize', {
   <script src="assets/js/utils.js?v=2"></script>
   <script src="assets/js/api.js?v=2"></script>
   <script src="assets/js/auth.js?v=2"></script>
+  <script src="assets/js/onboarding.js?v=1"></script>
   <script src="assets/js/projectSwitcher.js?v=2"></script>
   <script>
     const CONFIG = {
@@ -184,15 +187,22 @@ fetch('/sponsor/authorize', {
     let refreshTimer = null;
     let currentFundingAddress = null;
     const RUNTIME_CHAIN_ID = 14601;
+    let setupState = null;
 
     async function init() {
       try {
         await Auth.requireAuth();
         await ProjectSwitcher.renderSelector('projectSelector');
         currentProject = await ProjectSwitcher.getCurrentProject();
+        setupState = await OnboardingFlow.getState(currentProject);
+        renderSetupFlow();
+
+        const missing = getQueryParam('missing');
+        if (missing === 'project') {
+          showError('Create a project first to continue.');
+        }
 
         if (!currentProject) {
-          showNoProjectBanner();
           showEmptyDashboard();
         } else {
           await loadDashboard();
@@ -206,21 +216,56 @@ fetch('/sponsor/authorize', {
       }
     }
 
-    function showNoProjectBanner() {
-      const banner = document.createElement('div');
-      banner.className = 'no-project-banner';
-      banner.innerHTML = `
-        <div style="background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <h3 style="margin: 0 0 4px 0;">Create your first project</h3>
-            <p style="margin: 0; color: var(--text-muted); font-size: 14px;">Get an API key and start sponsoring transactions</p>
+    function renderSetupFlow() {
+      const host = document.getElementById('setupFlowContainer');
+      if (!host || !setupState) return;
+
+      const progressPercent = Math.round((setupState.progress / setupState.totalSteps) * 100);
+      const summaryText = setupState.hasProject
+        ? `Project: ${setupState.project.name || setupState.project.id}`
+        : 'No project yet';
+
+      host.innerHTML = `
+        <div class="panel setup-panel" style="margin-bottom: var(--space-lg);">
+          <div class="panel-content">
+            <div class="setup-summary">
+              <div>
+                <div class="metric-card-label" style="margin-bottom: 4px;">Setup Checklist</div>
+                <div style="font-size: 14px; color: var(--text-secondary);">${summaryText}</div>
+              </div>
+              <div style="text-align: right;">
+                <div class="metric-card-label" style="margin-bottom: 4px;">Progress</div>
+                <div style="font-family: var(--font-mono);">${setupState.progress}/${setupState.totalSteps}</div>
+              </div>
+            </div>
+            <div class="setup-progress" style="margin-bottom: var(--space-md);">
+              <span style="width: ${progressPercent}%;"></span>
+            </div>
+            <div class="setup-steps">
+              ${setupState.steps.map((step) => `
+                <div class="setup-step ${step.done ? 'done' : ''}">
+                  <span class="setup-step-title">${step.done ? 'Done' : 'Next'} - ${step.label}</span>
+                  <span class="setup-step-subtitle">${step.done ? 'Completed' : 'Required for launch'}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
+              ${!setupState.hasProject
+                ? '<button onclick="ProjectSwitcher.showCreateModal()">Create Project</button>'
+                : ''}
+              ${setupState.hasProject && !setupState.hasApiKey
+                ? '<button onclick="window.location.href=\'api-keys.html\'">Generate API Key</button>'
+                : ''}
+              ${setupState.hasProject && !setupState.hasAllowlist
+                ? '<button onclick="window.location.href=\'allowlist.html\'" class="btn-secondary">Add Allowlist Rule</button>'
+                : ''}
+              ${setupState.hasProject && setupState.hasApiKey
+                ? '<button onclick="window.location.href=\'demo.html\'" class="btn-secondary">Run Demo Flow</button>'
+                : ''}
+            </div>
           </div>
-          <button onclick="ProjectSwitcher.showCreateModal()">Create Project</button>
         </div>
       `;
-      const container = document.querySelector('.container');
-      const pageHeader = container.querySelector('.page-header');
-      container.insertBefore(banner, pageHeader);
     }
 
     function showEmptyDashboard() {
@@ -245,6 +290,8 @@ fetch('/sponsor/authorize', {
         loadAnalytics(),
         loadRecentEvents()
       ]);
+      setupState = await OnboardingFlow.getState(currentProject);
+      renderSetupFlow();
     }
 
     async function loadProjectInfo() {
