@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security disclosure
+    url: https://github.com/b1rdmania/sorted-fund/blob/master/SECURITY.md
+    about: Report vulnerabilities privately.
