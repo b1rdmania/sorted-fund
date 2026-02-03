@@ -144,6 +144,15 @@ class ApiClient {
   }
 
   /**
+   * Get funds parity status for a project
+   * @param {string} projectId - Project ID
+   * @returns {Promise<Object>} Parity data
+   */
+  async getFundsParity(projectId) {
+    return this._get(`/projects/${projectId}/funds/parity`);
+  }
+
+  /**
    * Get refuel history
    * @param {string} projectId - Project ID
    * @returns {Promise<Array>} Refuel history

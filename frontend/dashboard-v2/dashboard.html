@@ -69,7 +69,12 @@
             <div class="metric-card highlight" style="border: none; background: transparent;">
               <span class="metric-card-label">Current Balance</span>
               <span class="metric-card-value" id="gasTankBalance">Loading...</span>
-              <span class="metric-card-subtitle" id="depositAddress">Deposit Address: Loading...</span>
+              <span class="metric-card-subtitle" id="depositAddress">Sonic Funding Address: Loading...</span>
+              <div style="margin-top: var(--space-sm); display: flex; gap: var(--space-sm); justify-content: center; align-items: center; flex-wrap: wrap;">
+                <span style="font-size: 12px; color: var(--text-muted);">Parity Health:</span>
+                <span id="parityHealth" class="badge badge-warning">Loading</span>
+                <button id="copyFundingAddressBtn" class="btn-secondary btn-sm" onclick="copyFundingAddress()" disabled>Copy Address</button>
+              </div>
             </div>
           </div>
         </div>
@@ -177,6 +182,8 @@ fetch('/sponsor/authorize', {
 
     let currentProject = null;
     let refreshTimer = null;
+    let currentFundingAddress = null;
+    const RUNTIME_CHAIN_ID = 14601;
 
     async function init() {
       try {
@@ -218,7 +225,10 @@ fetch('/sponsor/authorize', {
 
     function showEmptyDashboard() {
       document.getElementById('gasTankBalance').textContent = '0 S';
-      document.getElementById('depositAddress').textContent = 'Create a project to get your deposit address';
+      document.getElementById('depositAddress').textContent = 'Create a project to get your Sonic funding address';
+      document.getElementById('parityHealth').textContent = 'N/A';
+      document.getElementById('parityHealth').className = 'badge badge-warning';
+      document.getElementById('copyFundingAddressBtn').disabled = true;
       document.getElementById('totalSponsored').textContent = '0';
       document.getElementById('totalGasSaved').textContent = '0 S';
       document.getElementById('activeUsers').textContent = '0';
@@ -245,15 +255,76 @@ fetch('/sponsor/authorize', {
         const balance = formatWeiWithUnit(balanceData.balance || '0');
         document.getElementById('gasTankBalance').textContent = balance;
 
+        let fundingResponse = null;
+        try {
+          fundingResponse = await api.getFundingAccountByChain(currentProject.id, RUNTIME_CHAIN_ID);
+        } catch (error) {
+          console.warn('Failed to load chain funding account, falling back to project deposit address:', error);
+        }
+
         const project = await api.getProject(currentProject.id);
-        const depositAddr = project.deposit_address || '0x' + project.id.substring(0, 40).padStart(40, '0');
+        const depositAddr =
+          fundingResponse?.account?.deposit_address ||
+          project.deposit_address ||
+          null;
+
+        currentFundingAddress = depositAddr;
         document.getElementById('depositAddress').textContent =
-          `Deposit Address: ${shortenAddress(depositAddr)}`;
+          `Sonic Funding Address: ${depositAddr ? shortenAddress(depositAddr) : 'Not available'}`;
+        document.getElementById('copyFundingAddressBtn').disabled = !depositAddr;
+
+        let parityData = null;
+        if (balanceData && typeof balanceData.ledgerBalance !== 'undefined') {
+          const cached = balanceData.balance || '0';
+          const ledger = balanceData.ledgerBalance || '0';
+          const delta = (BigInt(cached) - BigInt(ledger)).toString();
+          parityData = { inSync: delta === '0', delta };
+        } else {
+          parityData = await api.getFundsParity(currentProject.id);
+        }
+        renderParityHealth(parityData);
 
         document.getElementById('quickProjectId').textContent = project.id;
       } catch (error) {
         console.error('Failed to load project info:', error);
         document.getElementById('gasTankBalance').textContent = 'Error loading balance';
+        document.getElementById('parityHealth').textContent = 'Error';
+        document.getElementById('parityHealth').className = 'badge badge-error';
+      }
+    }
+
+    function renderParityHealth(parityData) {
+      const badge = document.getElementById('parityHealth');
+      if (!parityData) {
+        badge.textContent = 'Unknown';
+        badge.className = 'badge badge-warning';
+        return;
+      }
+
+      if (parityData.inSync) {
+        badge.textContent = 'In Sync';
+        badge.className = 'badge badge-success';
+      } else {
+        const delta = parityData.delta || '0';
+        badge.textContent = `Drift (${formatWei(delta)} S)`;
+        badge.className = 'badge badge-error';
+      }
+    }
+
+    async function copyFundingAddress() {
+      if (!currentFundingAddress) return;
+
+      try {
+        await navigator.clipboard.writeText(currentFundingAddress);
+        const btn = document.getElementById('copyFundingAddressBtn');
+        const previous = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(() => {
+          btn.textContent = previous;
+        }, 1200);
+      } catch (error) {
+        console.error('Failed to copy funding address:', error);
+        showError('Failed to copy funding address');
       }
     }
 
