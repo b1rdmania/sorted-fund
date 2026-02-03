@@ -167,6 +167,7 @@ curl -X POST https://sorted-backend.onrender.com/sponsor/authorize \
 - [ERC-4337 Spec](https://eips.ethereum.org/EIPS/eip-4337) — Account Abstraction standard
 - [Sonic Docs](https://docs.soniclabs.com) — The chain we're on
 - [Pimlico](https://docs.pimlico.io) — Bundler infrastructure
+- [Changelog](CHANGELOG.md) — release notes and notable project changes
 
 ---
 
