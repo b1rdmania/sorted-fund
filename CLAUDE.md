@@ -1,15 +1,15 @@
 # CLAUDE.md - Sorted.fund Project Context
 
-Last Updated: 2026-02-01
+Last Updated: 2026-02-03
 
-## Status: Privy Auth Integrated, Projects Need Work
+## Status: Security Hardened, Demo Live
 
 **What works:**
 - Live gasless transactions on Sonic testnet
 - Demo page at sorted.fund/demo.html (one click, real tx)
 - Privy authentication at sorted.fund/login/ (wallet + email + Google)
 - Documentation at sorted.fund/docs/ (VitePress)
-- Backend API on Render
+- Backend API on Render with auth boundaries enforced
 - ERC-4337 paymaster + bundler integration
 
 **What needs work:**
@@ -17,6 +17,37 @@ Last Updated: 2026-02-01
 - Deposits → need to allocate to correct user/project
 - Dashboard → verify it works with Privy auth end-to-end
 - Self-service deposits not implemented yet
+- **Rotate all secrets before mainnet** (testnet keys exposed in git history)
+
+## Security Status (2026-02-03)
+
+**Hardening applied:**
+- Admin endpoints (`/admin/*`) require `ADMIN_API_TOKEN` env var, return 404 without it
+- All `/projects` routes require developer auth + ownership verification
+- All `/allowlist` routes require developer auth + ownership verification
+- `/sponsor/link` and `/sponsor/reconcile` filter by authenticated project ID (no cross-project mutations)
+- Atomic fund reservation in authorization service (`reserveFunds`/`releaseFunds`)
+- Secrets removed from code - use `window.SORTED_DEMO_CONFIG` for runtime injection
+
+**Before mainnet, rotate:**
+- `SORTED_API_KEY` (exposed in git history)
+- `PIMLICO_API_KEY` (exposed in git history)
+- `SORTED_OWNER_PRIVATE_KEY` (exposed in git history)
+- `BACKEND_SIGNER_PRIVATE_KEY`
+- `DEMO_WALLET_PRIVATE_KEY`
+
+**Env vars to set on Render:**
+- `ADMIN_API_TOKEN` - required for admin endpoints to work
+
+## Recent Changes (2026-02-03)
+
+**Security hardening (PR #1):**
+- Added `requireDeveloperAuth` middleware to project/allowlist routes
+- Added `getProjectForDeveloper()` ownership checks
+- Admin endpoints protected with `isAdminAuthorized()` check
+- Sponsor routes filter by `req.project.id` to prevent cross-project access
+- Removed hardcoded secrets from frontend demo pages
+- Added `.env.example` with all required env vars
 
 ## Recent Changes (2026-02-01)
 
