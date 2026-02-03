@@ -175,6 +175,7 @@ curl -X POST https://sorted-backend.onrender.com/sponsor/authorize \
 Contributions are welcome. Use GitHub Issues for bugs/features and open PRs with clear test notes.
 
 For sensitive bugs, follow the private disclosure process in [`SECURITY.md`](SECURITY.md).
+Contributor workflow details are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ---
 
