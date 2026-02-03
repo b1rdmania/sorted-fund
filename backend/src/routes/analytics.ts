@@ -5,8 +5,15 @@
 
 import { Router, Request, Response } from 'express';
 import analyticsService from '../services/analyticsService';
+import { requirePrivyAuth } from '../middleware/privyAuth';
+import projectService from '../services/projectService';
 
 const router = Router();
+router.use(requirePrivyAuth);
+
+async function requireAccessibleProject(projectId: string, developerId: number) {
+  return projectService.getProjectForDeveloper(projectId, developerId);
+}
 
 /**
  * GET /analytics/overview
@@ -20,6 +27,14 @@ router.get('/overview', async (req: Request, res: Response) => {
       return res.status(400).json({
         error: 'Missing required query parameter: projectId',
         code: 'INVALID_REQUEST',
+      });
+    }
+
+    const project = await requireAccessibleProject(projectId, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
       });
     }
 
@@ -47,6 +62,14 @@ router.get('/timeline', async (req: Request, res: Response) => {
       return res.status(400).json({
         error: 'Missing required query parameter: projectId',
         code: 'INVALID_REQUEST',
+      });
+    }
+
+    const project = await requireAccessibleProject(projectId, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
       });
     }
 
@@ -82,6 +105,14 @@ router.get('/events', async (req: Request, res: Response) => {
       });
     }
 
+    const project = await requireAccessibleProject(projectId, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
     const events = await analyticsService.getEvents(
       projectId,
       limit ? parseInt(limit as string) : 50,
@@ -112,6 +143,14 @@ router.get('/top-users', async (req: Request, res: Response) => {
       return res.status(400).json({
         error: 'Missing required query parameter: projectId',
         code: 'INVALID_REQUEST',
+      });
+    }
+
+    const project = await requireAccessibleProject(projectId, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
       });
     }
 

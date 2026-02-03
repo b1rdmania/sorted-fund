@@ -4,17 +4,15 @@
  */
 
 class Auth {
-  // Privy token (primary)
+  // Privy token
   static PRIVY_TOKEN_KEY = 'sorted_privy_token';
-  // Legacy token (for backward compat during migration)
-  static TOKEN_KEY = 'sorted_session_token';
   static DEVELOPER_KEY = 'sorted_developer';
 
   /**
-   * Get session token from localStorage (Privy or legacy)
+   * Get session token from localStorage
    */
   static getToken() {
-    return localStorage.getItem(this.PRIVY_TOKEN_KEY) || localStorage.getItem(this.TOKEN_KEY);
+    return localStorage.getItem(this.PRIVY_TOKEN_KEY);
   }
 
   /**
@@ -29,7 +27,6 @@ class Auth {
    */
   static clearToken() {
     localStorage.removeItem(this.PRIVY_TOKEN_KEY);
-    localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.DEVELOPER_KEY);
     localStorage.removeItem('sorted_privy_user');
   }
@@ -50,24 +47,12 @@ class Auth {
     if (!token) return false;
 
     try {
-      // Try Privy endpoint first
-      let response = await fetch(`${api.baseUrl}/auth/privy/me`, {
+      const response = await fetch(`${api.baseUrl}/auth/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-
-      // If Privy fails, try legacy endpoint
-      if (!response.ok && localStorage.getItem(this.TOKEN_KEY)) {
-        response = await fetch(`${api.baseUrl}/auth/me`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem(this.TOKEN_KEY)}`
-          },
-          credentials: 'include'
-        });
-      }
 
       if (!response.ok) {
         this.clearToken();

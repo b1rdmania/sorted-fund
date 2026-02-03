@@ -5,13 +5,13 @@
 
 import { Request, Response, NextFunction } from 'express';
 import privyService from '../services/privyService';
-import { Developer } from '../services/authService';
+import { Developer } from '../types';
 
-// Note: Express Request type is extended in developerAuth.ts
-// We just add privyUserId here
+// Extend Express request with auth context
 declare global {
   namespace Express {
     interface Request {
+      developer?: Developer;
       privyUserId?: string;
     }
   }

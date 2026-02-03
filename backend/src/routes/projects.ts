@@ -5,11 +5,11 @@
 import { Router } from 'express';
 import projectService from '../services/projectService';
 import apiKeyService from '../services/apiKeyService';
-import { requireDeveloperAuth } from '../middleware/developerAuth';
+import { requirePrivyAuth } from '../middleware/privyAuth';
 import { CreateProjectRequest, RefuelRequest } from '../types';
 
 const router = Router();
-router.use(requireDeveloperAuth);
+router.use(requirePrivyAuth);
 
 async function requireOwnedProject(projectId: string, developerId: number) {
   return projectService.getProjectForDeveloper(projectId, developerId);
@@ -216,14 +216,61 @@ router.get('/:id/balance', async (req, res) => {
       });
     }
 
-    const balance = await projectService.getGasTankBalance(req.params.id);
+    const [balance, ledgerBalance] = await Promise.all([
+      projectService.getGasTankBalance(req.params.id),
+      projectService.getLedgerBalance(req.params.id),
+    ]);
 
-    res.json({ balance });
+    res.json({ balance, ledgerBalance });
   } catch (error: any) {
     console.error('Get balance error:', error);
     res.status(500).json({
       error: 'Failed to get balance',
       code: 'GET_BALANCE_ERROR',
+      details: error.message,
+    });
+  }
+});
+
+/**
+ * GET /projects/:id/funds/ledger
+ * Get immutable funds ledger entries for the project
+ */
+router.get('/:id/funds/ledger', async (req, res) => {
+  try {
+    const project = await requireOwnedProject(req.params.id, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
+    const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
+
+    const [entries, ledgerBalance, cachedBalance] = await Promise.all([
+      projectService.getLedgerEntries(req.params.id, limit, offset),
+      projectService.getLedgerBalance(req.params.id),
+      projectService.getGasTankBalance(req.params.id),
+    ]);
+
+    res.json({
+      entries,
+      pagination: {
+        limit,
+        offset,
+      },
+      balances: {
+        ledger: ledgerBalance,
+        cached: cachedBalance,
+      },
+    });
+  } catch (error: any) {
+    console.error('Get funds ledger error:', error);
+    res.status(500).json({
+      error: 'Failed to get funds ledger',
+      code: 'GET_FUNDS_LEDGER_ERROR',
       details: error.message,
     });
   }

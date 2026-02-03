@@ -5,7 +5,7 @@
 
 import { PrivyClient } from '@privy-io/server-auth';
 import { query } from '../db/database';
-import { Developer } from './authService';
+import { Developer } from '../types';
 
 // Initialize Privy client
 const privy = new PrivyClient(

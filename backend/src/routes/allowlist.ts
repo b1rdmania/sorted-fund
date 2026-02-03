@@ -4,12 +4,12 @@
 
 import { Router } from 'express';
 import { query } from '../db/database';
-import { requireDeveloperAuth } from '../middleware/developerAuth';
+import { requirePrivyAuth } from '../middleware/privyAuth';
 import projectService from '../services/projectService';
 import { AddAllowlistRequest, Allowlist } from '../types';
 
 const router = Router();
-router.use(requireDeveloperAuth);
+router.use(requirePrivyAuth);
 
 /**
  * POST /projects/:id/allowlist

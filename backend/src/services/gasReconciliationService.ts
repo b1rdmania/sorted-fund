@@ -3,8 +3,9 @@
  * Handles updating sponsorship events with actual gas usage after transactions complete
  */
 
-import { query } from '../db/database';
+import { getClient, query } from '../db/database';
 import { ethers } from 'ethers';
+import projectService from './projectService';
 
 export interface ReconcileGasParams {
   projectId: string;
@@ -30,31 +31,83 @@ export class GasReconciliationService {
   async reconcileGas(params: ReconcileGasParams): Promise<void> {
     const { projectId, userOpHash, actualGas, status, errorMessage } = params;
 
-    // Update the sponsorship event
-    const result = await query(
-      `UPDATE sponsorship_events
-       SET actual_gas = $1,
-           status = $2,
-           completed_at = NOW(),
-           error_message = $3
-       WHERE project_id = $4
-         AND user_op_hash = $5
-       RETURNING id, project_id, estimated_gas, actual_gas, max_cost`,
-      [actualGas, status, errorMessage || null, projectId, userOpHash]
-    );
+    const client = await getClient();
+    let event: {
+      id: number;
+      project_id: string;
+      estimated_gas: string;
+      actual_gas: string | null;
+      max_cost: string;
+      completed_at: Date | null;
+      settled_ledger_entry_id: number | null;
+      released_ledger_entry_id: number | null;
+    } | null = null;
 
-    if (result.rows.length === 0) {
-      throw new Error(`Sponsorship event not found for userOpHash: ${userOpHash}`);
+    try {
+      await client.query('BEGIN');
+
+      const eventResult = await client.query<{
+        id: number;
+        project_id: string;
+        estimated_gas: string;
+        actual_gas: string | null;
+        max_cost: string;
+        completed_at: Date | null;
+        settled_ledger_entry_id: number | null;
+        released_ledger_entry_id: number | null;
+      }>(
+        `SELECT id, project_id, estimated_gas, actual_gas, max_cost, completed_at,
+                settled_ledger_entry_id, released_ledger_entry_id
+         FROM sponsorship_events
+         WHERE project_id = $1
+           AND user_op_hash = $2
+         FOR UPDATE`,
+        [projectId, userOpHash]
+      );
+
+      if (eventResult.rows.length === 0) {
+        throw new Error(`Sponsorship event not found for userOpHash: ${userOpHash}`);
+      }
+
+      event = eventResult.rows[0];
+
+      // Idempotency guard: if already completed, no-op.
+      if (event.completed_at) {
+        await client.query('COMMIT');
+        return;
+      }
+
+      await client.query(
+        `UPDATE sponsorship_events
+         SET actual_gas = $1,
+             status = $2,
+             completed_at = NOW(),
+             error_message = $3
+         WHERE id = $4`,
+        [actualGas, status, errorMessage || null, event.id]
+      );
+
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
     }
 
-    const event = result.rows[0];
+    if (!event) {
+      throw new Error('Sponsorship event missing after reconciliation update');
+    }
+
     const estimatedGas = BigInt(event.estimated_gas);
-    const actualGasBigInt = BigInt(event.actual_gas);
+    const actualGasBigInt = BigInt(actualGas);
     const maxCost = BigInt(event.max_cost);
 
     // Calculate estimation accuracy
     const difference = actualGasBigInt - estimatedGas;
-    const percentDifference = Number((difference * 100n) / estimatedGas);
+    const percentDifference = estimatedGas > 0n
+      ? Number((difference * 100n) / estimatedGas)
+      : 0;
 
     // Calculate actual cost (get gas price from chain)
     let actualCost = 0n;
@@ -72,12 +125,50 @@ export class GasReconciliationService {
       // Calculate refund (max cost reserved - actual cost)
       refundAmount = maxCost - actualCost;
 
+      // Record final settled amount for auditability.
+      const settle = await projectService.recordSettlement(projectId, actualCost.toString(), {
+        idempotencyKey: `settlement:${projectId}:${userOpHash}`,
+        referenceType: 'sponsorship_event',
+        referenceId: event.id.toString(),
+        metadata: {
+          userOpHash,
+          status,
+          estimatedGas: estimatedGas.toString(),
+          actualGas: actualGasBigInt.toString(),
+        },
+      });
+
+      if (settle.ledgerEntryId) {
+        await query(
+          `UPDATE sponsorship_events
+           SET settled_ledger_entry_id = COALESCE(settled_ledger_entry_id, $1)
+           WHERE id = $2`,
+          [settle.ledgerEntryId, event.id]
+        );
+      }
+
       // Refund unused gas to project if refund > 0
       if (refundAmount > 0n) {
-        await query(
-          'UPDATE projects SET gas_tank_balance = gas_tank_balance + $1 WHERE id = $2',
-          [refundAmount.toString(), event.project_id]
-        );
+        const release = await projectService.releaseFunds(event.project_id, refundAmount.toString(), {
+          idempotencyKey: `release:${projectId}:${userOpHash}`,
+          referenceType: 'sponsorship_event',
+          referenceId: event.id.toString(),
+          metadata: {
+            reason: 'gas_reconciliation_refund',
+            userOpHash,
+            maxCost: maxCost.toString(),
+            actualCost: actualCost.toString(),
+          },
+        });
+
+        if (release.ledgerEntryId) {
+          await query(
+            `UPDATE sponsorship_events
+             SET released_ledger_entry_id = COALESCE(released_ledger_entry_id, $1)
+             WHERE id = $2`,
+            [release.ledgerEntryId, event.id]
+          );
+        }
 
         console.log('Gas refunded to project:', {
           userOpHash,

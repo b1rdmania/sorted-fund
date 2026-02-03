@@ -26,8 +26,8 @@ class ApiClient {
   async _request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
 
-    // Get session token
-    const token = localStorage.getItem('sorted_session_token');
+    // Get Privy access token
+    const token = localStorage.getItem('sorted_privy_token');
 
     const config = {
       headers: {
@@ -35,7 +35,6 @@ class ApiClient {
         ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers
       },
-      credentials: 'include', // Include cookies
       ...options
     };
 
@@ -50,12 +49,12 @@ class ApiClient {
 
       clearTimeout(timeoutId);
 
-      // Handle 401 Unauthorized (session expired)
+      // Handle 401 Unauthorized
       if (response.status === 401) {
-        localStorage.removeItem('sorted_session_token');
+        localStorage.removeItem('sorted_privy_token');
         localStorage.removeItem('sorted_developer');
-        window.location.href = '/login.html';
-        throw new Error('Session expired. Please login again.');
+        window.location.href = '/login/';
+        throw new Error('Session expired. Please sign in again.');
       }
 
       // Handle non-OK responses

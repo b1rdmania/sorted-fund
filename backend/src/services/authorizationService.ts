@@ -85,8 +85,17 @@ export class AuthorizationService {
     const maxCost = (gasWithBuffer * gasPrice * BigInt(110)) / BigInt(100);
 
     // Atomically reserve funds from the project's gas tank.
-    const reserved = await projectService.reserveFunds(projectId, maxCost.toString());
-    if (!reserved) {
+    const reserveResult = await projectService.reserveFunds(projectId, maxCost.toString(), {
+      idempotencyKey: `reserve:${projectId}:${clientNonce}`,
+      referenceType: 'sponsorship_event',
+      referenceId: clientNonce,
+      metadata: {
+        user,
+        target,
+        selector,
+      },
+    });
+    if (!reserveResult.reserved) {
       const gasTankBalance = BigInt(project.gas_tank_balance);
       throw new Error(
         `Insufficient gas tank balance. Required: ${maxCost.toString()}, Available: ${gasTankBalance.toString()}`
@@ -126,6 +135,7 @@ export class AuthorizationService {
       await this.recordSponsorshipEvent({
         project_id: projectId,
         developer_id: project.developer_id,
+        reserved_ledger_entry_id: reserveResult.ledgerEntryId,
         sender: user,
         target,
         selector,
@@ -144,7 +154,14 @@ export class AuthorizationService {
         paymasterSignature: signature,
       };
     } catch (error) {
-      await projectService.releaseFunds(projectId, maxCost.toString());
+      await projectService.releaseFunds(projectId, maxCost.toString(), {
+        idempotencyKey: `release:authorize-error:${projectId}:${clientNonce}`,
+        referenceType: 'sponsorship_event',
+        referenceId: clientNonce,
+        metadata: {
+          reason: 'authorize_failed_after_reserve',
+        },
+      });
       throw error;
     }
   }
@@ -284,12 +301,14 @@ export class AuthorizationService {
   /**
    * Record sponsorship event in database
    */
-  private async recordSponsorshipEvent(event: Partial<SponsorshipEvent> & { developer_id?: number }): Promise<void> {
+  private async recordSponsorshipEvent(
+    event: Partial<SponsorshipEvent> & { developer_id?: number; reserved_ledger_entry_id?: number }
+  ): Promise<void> {
     await query(
       `INSERT INTO sponsorship_events
        (project_id, developer_id, sender, target, selector, estimated_gas, max_cost,
-        status, paymaster_signature, policy_hash, expiry)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        status, paymaster_signature, policy_hash, expiry, reserved_ledger_entry_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
         event.project_id,
         event.developer_id || null,
@@ -302,6 +321,7 @@ export class AuthorizationService {
         event.paymaster_signature,
         event.policy_hash,
         event.expiry,
+        event.reserved_ledger_entry_id || null,
       ]
     );
   }

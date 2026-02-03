@@ -2,6 +2,29 @@
  * TypeScript types and interfaces for Sorted.fund backend
  */
 
+// Developer account types (Privy-backed auth)
+export interface Developer {
+  id: number;
+  privy_user_id?: string | null;
+  email: string | null;
+  name: string | null;
+  credit_balance: string; // bigint as string
+  status: string;
+  created_at: Date;
+}
+
+export interface Organization {
+  id: number;
+  slug: string;
+  name: string;
+  status: 'active' | 'suspended';
+  default_for_developer_id: number | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export type OrganizationRole = 'owner' | 'admin' | 'developer' | 'viewer';
+
 // Project types
 export interface Project {
   id: string;
@@ -14,7 +37,8 @@ export interface Project {
   daily_reset_at: Date;
   created_at: Date;
   updated_at: Date;
-  developer_id?: number; // Developer who owns this project (optional for backward compatibility)
+  developer_id?: number; // Legacy ownership field (backward compatibility)
+  organization_id?: number;
 }
 
 export interface CreateProjectRequest {
@@ -80,6 +104,7 @@ export interface RefuelRequest {
 export interface SponsorshipEvent {
   id: number;
   project_id: string;
+  developer_id?: number | null;
   user_op_hash: string | null;
   sender: string;
   target: string;
@@ -94,6 +119,9 @@ export interface SponsorshipEvent {
   created_at: Date;
   completed_at: Date | null;
   error_message: string | null;
+  reserved_ledger_entry_id?: number | null;
+  settled_ledger_entry_id?: number | null;
+  released_ledger_entry_id?: number | null;
 }
 
 // Authorization Request/Response types

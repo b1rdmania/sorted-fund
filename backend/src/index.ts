@@ -2,12 +2,10 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { initializeDatabase, closeDatabase } from './db/database';
 
 // Import routes
-import authRoutes from './routes/auth';
 import privyAuthRoutes from './routes/privyAuth';
 import projectRoutes from './routes/projects';
 import sponsorRoutes from './routes/sponsor';
@@ -53,7 +51,6 @@ app.use(cors({
   credentials: true, // Allow cookies
 }));
 app.use(express.json()); // Parse JSON bodies
-app.use(cookieParser()); // Parse cookies
 app.use(morgan('combined')); // Request logging
 
 // Health check endpoint
@@ -79,55 +76,6 @@ function isAdminAuthorized(req: Request): boolean {
   const authHeader = req.headers.authorization;
   return authHeader === `Bearer ${ADMIN_API_TOKEN}`;
 }
-
-// Debug endpoint to check demo account
-app.get('/admin/demo-check', async (req: Request, res: Response) => {
-  if (!isAdminAuthorized(req)) {
-    return res.status(404).json({ error: 'Not found', code: 'NOT_FOUND' });
-  }
-
-  try {
-    const { query } = await import('./db/database');
-    const result = await query('SELECT id, email, name, credit_balance, password_hash FROM developers WHERE email = $1', ['demo@sorted.fund']);
-
-    res.status(200).json({
-      exists: result.rows.length > 0,
-      account: result.rows[0] ? {
-        id: result.rows[0].id,
-        email: result.rows[0].email,
-        name: result.rows[0].name,
-        credits: result.rows[0].credit_balance,
-        hash_preview: result.rows[0].password_hash?.substring(0, 20) + '...'
-      } : null
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Endpoint to fix demo account password
-app.post('/admin/fix-demo-password', async (req: Request, res: Response) => {
-  if (!isAdminAuthorized(req)) {
-    return res.status(404).json({ error: 'Not found', code: 'NOT_FOUND' });
-  }
-
-  try {
-    const { query } = await import('./db/database');
-    const correctHash = '$2b$10$3v/4nWZWzbx9moXvNY4jnOs2Y3TE4pW4ycebf8xk6i0tcoXtnIpGK'; // demo123
-
-    await query(
-      'UPDATE developers SET password_hash = $1 WHERE email = $2',
-      [correctHash, 'demo@sorted.fund']
-    );
-
-    res.status(200).json({
-      success: true,
-      message: 'Demo account password updated'
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // Temporary migration endpoint (remove after initial setup)
 app.post('/admin/migrate', async (req: Request, res: Response) => {
@@ -167,8 +115,7 @@ app.post('/admin/migrate', async (req: Request, res: Response) => {
 });
 
 // API Routes
-app.use('/auth', authRoutes); // Legacy email/password auth (deprecated)
-app.use('/auth/privy', privyAuthRoutes); // New Privy auth
+app.use('/auth', privyAuthRoutes); // Privy auth
 app.use('/projects', projectRoutes);
 app.use('/sponsor', sponsorRoutes);
 app.use('/projects', allowlistRoutes); // Allowlist routes under /projects/:id/allowlist

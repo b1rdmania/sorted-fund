@@ -17,7 +17,7 @@ export default function App() {
           const accessToken = await getAccessToken()
 
           // Verify with backend and get/create developer
-          const res = await fetch(`${API_BASE}/auth/privy/me`, {
+          const res = await fetch(`${API_BASE}/auth/me`, {
             headers: {
               'Authorization': `Bearer ${accessToken}`,
             },
@@ -50,7 +50,7 @@ export default function App() {
       const token = localStorage.getItem('sorted_privy_token')
       if (token && !authenticated) {
         try {
-          const res = await fetch(`${API_BASE}/auth/privy/me`, {
+          const res = await fetch(`${API_BASE}/auth/me`, {
             headers: { 'Authorization': `Bearer ${token}` },
           })
           if (res.ok) {
