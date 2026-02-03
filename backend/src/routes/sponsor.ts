@@ -88,6 +88,16 @@ router.post('/authorize', authenticateApiKey, async (req: AuthenticatedRequest, 
       });
     }
 
+    if (
+      error.message.includes('Unsupported or inactive chain') ||
+      error.message.includes('disabled for runtime traffic')
+    ) {
+      return res.status(400).json({
+        error: error.message,
+        code: 'INVALID_CHAIN',
+      });
+    }
+
     res.status(500).json({
       error: 'Authorization failed',
       code: 'AUTHORIZATION_ERROR',

@@ -36,6 +36,25 @@ function getEnvRpcForChain(chainId: number): string | null {
 }
 
 export class ChainService {
+  private getRuntimeAllowedChainIds(): number[] {
+    const raw = process.env.RUNTIME_ALLOWED_CHAIN_IDS || process.env.SONIC_CHAIN_ID || '14601';
+    return raw
+      .split(',')
+      .map((v) => parseInt(v.trim(), 10))
+      .filter((v) => !Number.isNaN(v));
+  }
+
+  isRuntimeChainAllowed(chainId: number): boolean {
+    const allowed = this.getRuntimeAllowedChainIds();
+    return allowed.includes(chainId);
+  }
+
+  assertRuntimeChainAllowed(chainId: number): void {
+    if (!this.isRuntimeChainAllowed(chainId)) {
+      throw new Error(`Chain ${chainId} is disabled for runtime traffic`);
+    }
+  }
+
   async listActiveChains(): Promise<ChainConfig[]> {
     const result = await query<ChainConfig>(
       `SELECT chain_id, name, rpc_url, entrypoint_address, native_symbol, paymaster_address, is_testnet, status
@@ -69,6 +88,7 @@ export class ChainService {
     if (!chain || chain.status !== 'active') {
       throw new Error(`Unsupported or inactive chain: ${chainId}`);
     }
+    this.assertRuntimeChainAllowed(chainId);
 
     const rpcUrl = getEnvRpcForChain(chainId) || chain.rpc_url;
     const paymasterAddress = getEnvPaymasterForChain(chainId) || chain.paymaster_address;
@@ -96,4 +116,3 @@ export class ChainService {
 }
 
 export default new ChainService();
-

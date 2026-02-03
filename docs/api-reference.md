@@ -2,7 +2,7 @@
 
 Base URL: `https://sorted-backend.onrender.com`
 
-> Note: Grant funding logic is not part of the current runtime API scope. Funding currently relies on project-managed deposits.
+> Note: Runtime scope is currently Sonic Testnet only (`chainId=14601`). Grant funding logic is not part of the current runtime API scope; funding currently relies on project-managed deposits.
 
 ## Authentication
 

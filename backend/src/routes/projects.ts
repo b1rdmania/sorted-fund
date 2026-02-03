@@ -254,9 +254,9 @@ router.post('/:id/refuel', async (req, res) => {
 
     if (data.chainId !== undefined) {
       const chain = await chainService.getChain(data.chainId);
-      if (!chain || chain.status !== 'active') {
+      if (!chain || chain.status !== 'active' || !chainService.isRuntimeChainAllowed(data.chainId)) {
         return res.status(400).json({
-          error: 'Unsupported chainId for refuel',
+          error: 'Unsupported chainId for current runtime scope',
           code: 'INVALID_CHAIN',
         });
       }
@@ -324,9 +324,9 @@ router.get('/:id/funding-accounts/:chainId', async (req, res) => {
     }
 
     const chain = await chainService.getChain(chainId);
-    if (!chain || chain.status !== 'active') {
+    if (!chain || chain.status !== 'active' || !chainService.isRuntimeChainAllowed(chainId)) {
       return res.status(400).json({
-        error: 'Unsupported or inactive chain',
+        error: 'Unsupported chain for current runtime scope',
         code: 'INVALID_CHAIN',
       });
     }

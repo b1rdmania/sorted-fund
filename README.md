@@ -39,6 +39,9 @@ const tx = await sorted.sponsor({
 
 ## Status
 
+### Current Trial Scope
+- Sonic Testnet only (Chain ID `14601`) for live user trials.
+
 ### What's Working Now
 - Live gasless transactions on Sonic testnet
 - Privy-only developer authentication
