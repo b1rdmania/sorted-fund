@@ -41,15 +41,19 @@ const tx = await sorted.sponsor({
 
 ### What's Working Now
 - Live gasless transactions on Sonic testnet
+- Privy-only developer authentication
+- Organization and role-based project access
 - Developer dashboard with analytics
 - API key management
 - Contract allowlist controls
 - Gas tank balance tracking
+- Per-project, per-chain funding account support
+- Ledger/cached balance parity checks and audit endpoints
 - Real transactions executing on-chain
 
 ### What's Next
-- [ ] **Privy integration** — Wallet + social login (replacing custom auth)
-- [ ] **Production database hardening** — Battle-tested account management
+- [ ] **Dashboard UX for multi-chain funding accounts**
+- [ ] **Chain admin tooling** — manage RPC/paymaster config per chain
 - [ ] **Self-service deposits** — Fund your gas tank directly
 - [ ] **Mainnet deployment** — Graduate from testnet
 
@@ -168,6 +172,7 @@ curl -X POST https://sorted-backend.onrender.com/sponsor/authorize \
 - [Sonic Docs](https://docs.soniclabs.com) — The chain we're on
 - [Pimlico](https://docs.pimlico.io) — Bundler infrastructure
 - [Changelog](CHANGELOG.md) — release notes and notable project changes
+- [Deployment Checklist](docs/sorted-fund/deployment-checklist.md) — production readiness checks
 
 ---
 

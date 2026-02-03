@@ -16,7 +16,11 @@ We already have working sponsorship flows and Privy login. The next step is to r
 
 - Re-architecting smart contracts.
 - Full billing/invoicing UI.
-- Multi-chain expansion.
+- Runtime grant funding logic for customer spend allocation.
+
+## Scope note on grants
+
+When we refer to grants in planning, we mean ecosystem grants to Sorted for building/deploying infra (business funding), not a user-facing grant balance product inside sponsorship authorization.
 
 ---
 

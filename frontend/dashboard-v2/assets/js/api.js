@@ -162,6 +162,25 @@ class ApiClient {
     return this._post(`/projects/${projectId}/refuel`, refuelData);
   }
 
+  /**
+   * Get all per-chain funding accounts for a project
+   * @param {string} projectId - Project ID
+   * @returns {Promise<Array>} Funding accounts
+   */
+  async getFundingAccounts(projectId) {
+    return this._get(`/projects/${projectId}/funding-accounts`);
+  }
+
+  /**
+   * Get or provision a chain-specific funding account
+   * @param {string} projectId - Project ID
+   * @param {number} chainId - Chain ID
+   * @returns {Promise<Object>} Funding account response
+   */
+  async getFundingAccountByChain(projectId, chainId) {
+    return this._get(`/projects/${projectId}/funding-accounts/${chainId}`);
+  }
+
   // ===== API Keys =====
 
   /**
@@ -258,6 +277,16 @@ class ApiClient {
     return this._post('/sponsor/authorize', request, {
       'Authorization': `Bearer ${apiKey}`
     });
+  }
+
+  // ===== Chains =====
+
+  /**
+   * List active chain configurations
+   * @returns {Promise<Array>} Chain configs
+   */
+  async getChains() {
+    return this._get('/blockchain/chains');
   }
 
   // ===== Health Check =====

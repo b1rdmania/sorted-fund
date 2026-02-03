@@ -2,6 +2,8 @@
 
 Base URL: `https://sorted-backend.onrender.com`
 
+> Note: Grant funding logic is not part of the current runtime API scope. Funding currently relies on project-managed deposits.
+
 ## Authentication
 
 All endpoints require an API key in the Authorization header:
