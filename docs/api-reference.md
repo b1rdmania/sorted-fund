@@ -243,6 +243,86 @@ Get project analytics.
     }
   ]
 }
+
+---
+
+## Organizations (Privy-authenticated dashboard APIs)
+
+These endpoints are intended for logged-in developers using Privy access tokens.
+
+### GET /orgs
+
+List organizations the authenticated developer belongs to.
+
+### POST /orgs
+
+Create a new organization.
+
+**Request:**
+
+```json
+{
+  "name": "My Studio",
+  "slug": "my-studio"
+}
+```
+
+### GET /orgs/:orgId/members
+
+List organization members.
+
+### POST /orgs/:orgId/members
+
+Add or update a member by email (admin+ role required).
+
+**Request:**
+
+```json
+{
+  "email": "teammate@example.com",
+  "role": "developer"
+}
+```
+
+### PATCH /orgs/:orgId/members/:developerId
+
+Change member role (owner only).
+
+---
+
+## Funds Parity / Drift Checks
+
+### GET /projects/:id/funds/parity
+
+Compare cached `projects.gas_tank_balance` vs ledger-derived balance for one project.
+
+**Response:**
+
+```json
+{
+  "projectId": "my-game",
+  "ledgerBalance": "1000000000000000000",
+  "cachedBalance": "1000000000000000000",
+  "delta": "0",
+  "inSync": true
+}
+```
+
+### GET /projects/funds/parity-report
+
+Cross-project parity report for all projects accessible to the authenticated developer.
+
+**Query params:**
+
+- `onlyDrift` — `true` to return only out-of-sync projects
+
+### GET /orgs/:orgId/funds/parity
+
+Organization-scoped parity report.
+
+**Query params:**
+
+- `onlyDrift` — `true` to return only out-of-sync projects
 ```
 
 ### GET /projects/:id/analytics/events
