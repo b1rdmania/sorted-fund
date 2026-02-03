@@ -312,6 +312,43 @@ router.get('/:id/funds/ledger', async (req, res) => {
 });
 
 /**
+ * GET /projects/:id/funds/parity
+ * Compare cached balance vs ledger-derived balance.
+ */
+router.get('/:id/funds/parity', async (req, res) => {
+  try {
+    const project = await requireOwnedProject(req.params.id, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
+    const [ledger, cached] = await Promise.all([
+      projectService.getLedgerBalance(req.params.id),
+      projectService.getGasTankBalance(req.params.id),
+    ]);
+
+    const delta = (BigInt(cached) - BigInt(ledger)).toString();
+    res.json({
+      projectId: req.params.id,
+      ledgerBalance: ledger,
+      cachedBalance: cached,
+      delta,
+      inSync: delta === '0',
+    });
+  } catch (error: any) {
+    console.error('Get funds parity error:', error);
+    res.status(500).json({
+      error: 'Failed to get funds parity',
+      code: 'GET_FUNDS_PARITY_ERROR',
+      details: error.message,
+    });
+  }
+});
+
+/**
  * GET /projects/:id/refuels
  * Get refuel history
  */

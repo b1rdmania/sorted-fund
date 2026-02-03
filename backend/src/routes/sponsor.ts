@@ -171,6 +171,17 @@ router.post('/reconcile', authenticateApiKey, async (req: AuthenticatedRequest, 
       });
     }
 
+    try {
+      if (BigInt(actualGas) < 0n) {
+        throw new Error('negative');
+      }
+    } catch {
+      return res.status(400).json({
+        error: 'Invalid actualGas. Must be a non-negative integer string',
+        code: 'INVALID_ACTUAL_GAS',
+      });
+    }
+
     // Reconcile gas
     await gasReconciliationService.reconcileGas({
       projectId: req.project!.id,

@@ -5,7 +5,7 @@
 
 import { getClient, query } from '../db/database';
 import { ethers } from 'ethers';
-import projectService from './projectService';
+import type { PoolClient } from 'pg';
 
 export interface ReconcileGasParams {
   projectId: string;
@@ -25,42 +25,90 @@ export interface GasEstimationStats {
 }
 
 export class GasReconciliationService {
+  private async upsertLedgerEntry(
+    client: PoolClient,
+    params: {
+      organizationId: number;
+      projectId: string;
+      entryType: 'settlement' | 'release';
+      amount: string;
+      idempotencyKey: string;
+      referenceId: string;
+      metadata: Record<string, any>;
+    }
+  ): Promise<number> {
+    const insertResult = await client.query<{ id: number }>(
+      `INSERT INTO fund_ledger_entries (
+         organization_id,
+         project_id,
+         entry_type,
+         amount,
+         asset,
+         reference_type,
+         reference_id,
+         idempotency_key,
+         metadata_json
+       )
+       VALUES ($1, $2, $3, $4, 'S', 'sponsorship_event', $5, $6, $7)
+       ON CONFLICT (project_id, idempotency_key) DO NOTHING
+       RETURNING id`,
+      [
+        params.organizationId,
+        params.projectId,
+        params.entryType,
+        params.amount,
+        params.referenceId,
+        params.idempotencyKey,
+        JSON.stringify(params.metadata),
+      ]
+    );
+
+    if (insertResult.rows.length > 0) {
+      return insertResult.rows[0].id;
+    }
+
+    const existing = await client.query<{ id: number }>(
+      `SELECT id
+       FROM fund_ledger_entries
+       WHERE project_id = $1 AND idempotency_key = $2`,
+      [params.projectId, params.idempotencyKey]
+    );
+
+    if (existing.rows.length === 0) {
+      throw new Error('Failed to resolve ledger entry id after upsert');
+    }
+
+    return existing.rows[0].id;
+  }
+
   /**
    * Update sponsorship event with actual gas used and refund unused credits
    */
   async reconcileGas(params: ReconcileGasParams): Promise<void> {
     const { projectId, userOpHash, actualGas, status, errorMessage } = params;
 
-    const client = await getClient();
-    let event: {
-      id: number;
-      project_id: string;
-      estimated_gas: string;
-      actual_gas: string | null;
-      max_cost: string;
-      completed_at: Date | null;
-      settled_ledger_entry_id: number | null;
-      released_ledger_entry_id: number | null;
-    } | null = null;
+    // Fetch chain fee data first; fallback keeps reconciliation functional during RPC hiccups.
+    const provider = new ethers.JsonRpcProvider(process.env.SONIC_RPC_URL);
+    const feeData = await provider.getFeeData().catch(() => null);
+    const gasPrice = feeData?.maxFeePerGas || feeData?.gasPrice || BigInt(2000000000);
 
+    const client = await getClient();
     try {
       await client.query('BEGIN');
 
       const eventResult = await client.query<{
         id: number;
         project_id: string;
+        organization_id: number;
         estimated_gas: string;
-        actual_gas: string | null;
         max_cost: string;
         completed_at: Date | null;
-        settled_ledger_entry_id: number | null;
-        released_ledger_entry_id: number | null;
       }>(
-        `SELECT id, project_id, estimated_gas, actual_gas, max_cost, completed_at,
-                settled_ledger_entry_id, released_ledger_entry_id
-         FROM sponsorship_events
-         WHERE project_id = $1
-           AND user_op_hash = $2
+        `SELECT se.id, se.project_id, p.organization_id, se.estimated_gas, se.max_cost, se.completed_at
+         FROM sponsorship_events se
+         INNER JOIN projects p ON p.id = se.project_id
+         WHERE se.project_id = $1
+           AND se.user_op_hash = $2 
          FOR UPDATE`,
         [projectId, userOpHash]
       );
@@ -69,7 +117,10 @@ export class GasReconciliationService {
         throw new Error(`Sponsorship event not found for userOpHash: ${userOpHash}`);
       }
 
-      event = eventResult.rows[0];
+      const event = eventResult.rows[0];
+      const estimatedGas = BigInt(event.estimated_gas);
+      const actualGasBigInt = BigInt(actualGas);
+      const maxCost = BigInt(event.max_cost);
 
       // Idempotency guard: if already completed, no-op.
       if (event.completed_at) {
@@ -77,135 +128,85 @@ export class GasReconciliationService {
         return;
       }
 
-      await client.query(
-        `UPDATE sponsorship_events
-         SET actual_gas = $1,
-             status = $2,
-             completed_at = NOW(),
-             error_message = $3
-         WHERE id = $4`,
-        [actualGas, status, errorMessage || null, event.id]
-      );
+      // Cost cannot exceed reserved maxCost. If chain price spikes, we cap settlement.
+      const uncappedActualCost = actualGasBigInt * gasPrice;
+      const settledCost = uncappedActualCost > maxCost ? maxCost : uncappedActualCost;
+      const refundAmount = maxCost - settledCost;
 
-      await client.query('COMMIT');
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
-
-    if (!event) {
-      throw new Error('Sponsorship event missing after reconciliation update');
-    }
-
-    const estimatedGas = BigInt(event.estimated_gas);
-    const actualGasBigInt = BigInt(actualGas);
-    const maxCost = BigInt(event.max_cost);
-
-    // Calculate estimation accuracy
-    const difference = actualGasBigInt - estimatedGas;
-    const percentDifference = estimatedGas > 0n
-      ? Number((difference * 100n) / estimatedGas)
-      : 0;
-
-    // Calculate actual cost (get gas price from chain)
-    let actualCost = 0n;
-    let refundAmount = 0n;
-
-    try {
-      // Get gas price at time of execution
-      const provider = new ethers.JsonRpcProvider(process.env.SONIC_RPC_URL);
-      const feeData = await provider.getFeeData();
-      const gasPrice = feeData.maxFeePerGas || feeData.gasPrice || BigInt(2000000000);
-
-      // Calculate actual cost
-      actualCost = actualGasBigInt * gasPrice;
-
-      // Calculate refund (max cost reserved - actual cost)
-      refundAmount = maxCost - actualCost;
-
-      // Record final settled amount for auditability.
-      const settle = await projectService.recordSettlement(projectId, actualCost.toString(), {
+      const settledLedgerId = await this.upsertLedgerEntry(client, {
+        organizationId: event.organization_id,
+        projectId: event.project_id,
+        entryType: 'settlement',
+        amount: settledCost.toString(),
         idempotencyKey: `settlement:${projectId}:${userOpHash}`,
-        referenceType: 'sponsorship_event',
         referenceId: event.id.toString(),
         metadata: {
           userOpHash,
           status,
           estimatedGas: estimatedGas.toString(),
           actualGas: actualGasBigInt.toString(),
+          gasPrice: gasPrice.toString(),
+          capped: uncappedActualCost > maxCost,
         },
       });
 
-      if (settle.ledgerEntryId) {
-        await query(
-          `UPDATE sponsorship_events
-           SET settled_ledger_entry_id = COALESCE(settled_ledger_entry_id, $1)
-           WHERE id = $2`,
-          [settle.ledgerEntryId, event.id]
-        );
-      }
-
-      // Refund unused gas to project if refund > 0
+      let releasedLedgerId: number | null = null;
       if (refundAmount > 0n) {
-        const release = await projectService.releaseFunds(event.project_id, refundAmount.toString(), {
+        releasedLedgerId = await this.upsertLedgerEntry(client, {
+          organizationId: event.organization_id,
+          projectId: event.project_id,
+          entryType: 'release',
+          amount: refundAmount.toString(),
           idempotencyKey: `release:${projectId}:${userOpHash}`,
-          referenceType: 'sponsorship_event',
           referenceId: event.id.toString(),
           metadata: {
             reason: 'gas_reconciliation_refund',
             userOpHash,
             maxCost: maxCost.toString(),
-            actualCost: actualCost.toString(),
+            settledCost: settledCost.toString(),
           },
         });
 
-        if (release.ledgerEntryId) {
-          await query(
-            `UPDATE sponsorship_events
-             SET released_ledger_entry_id = COALESCE(released_ledger_entry_id, $1)
-             WHERE id = $2`,
-            [release.ledgerEntryId, event.id]
-          );
-        }
+        // Credit the cached project balance once, linked to this unique release key.
+        await client.query(
+          `UPDATE projects
+           SET gas_tank_balance = gas_tank_balance + $1
+           WHERE id = $2`,
+          [refundAmount.toString(), event.project_id]
+        );
+      }
 
-        console.log('Gas refunded to project:', {
+      await client.query(
+        `UPDATE sponsorship_events se
+         SET actual_gas = $1,
+             status = $2,
+             completed_at = NOW(),
+             error_message = $3,
+             settled_ledger_entry_id = COALESCE(se.settled_ledger_entry_id, $5),
+             released_ledger_entry_id = COALESCE(se.released_ledger_entry_id, $6)
+         WHERE id = $4`,
+        [actualGas, status, errorMessage || null, event.id, settledLedgerId, releasedLedgerId]
+      );
+
+      await client.query('COMMIT');
+      const difference = actualGasBigInt - estimatedGas;
+      const percentDifference = estimatedGas > 0n
+        ? Number((difference * 100n) / estimatedGas)
+        : 0;
+      if (Math.abs(percentDifference) > 20) {
+        console.warn('Gas estimation discrepancy detected:', {
           userOpHash,
           projectId: event.project_id,
-          maxCost: maxCost.toString(),
-          actualCost: actualCost.toString(),
-          refunded: refundAmount.toString(),
+          estimated: estimatedGas.toString(),
+          actual: actualGasBigInt.toString(),
+          percentDifference: `${percentDifference.toFixed(2)}%`,
         });
       }
-    } catch (error: any) {
-      console.error('Failed to refund credits:', error);
-      // Don't throw - reconciliation should still complete even if refund fails
-    }
-
-    // Log significant discrepancies (>20% off)
-    if (Math.abs(percentDifference) > 20) {
-      console.warn('Gas estimation discrepancy detected:', {
-        userOpHash,
-        projectId: event.project_id,
-        estimated: estimatedGas.toString(),
-        actual: actualGasBigInt.toString(),
-        difference: difference.toString(),
-        percentDifference: `${percentDifference.toFixed(2)}%`,
-        maxCost: maxCost.toString(),
-        actualCost: actualCost.toString(),
-        refunded: refundAmount.toString(),
-      });
-    } else {
-      console.log('Gas reconciled:', {
-        userOpHash,
-        estimated: estimatedGas.toString(),
-        actual: actualGasBigInt.toString(),
-        accuracy: `${(100 - Math.abs(percentDifference)).toFixed(2)}%`,
-        maxCost: maxCost.toString(),
-        actualCost: actualCost.toString(),
-        refunded: refundAmount.toString(),
-      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
     }
   }
 
