@@ -115,6 +115,59 @@ app.post('/admin/migrate', async (req: Request, res: Response) => {
   }
 });
 
+// Admin parity drift check endpoint
+app.get('/admin/funds-parity', async (req: Request, res: Response) => {
+  if (!isAdminAuthorized(req)) {
+    return res.status(404).json({ error: 'Not found', code: 'NOT_FOUND' });
+  }
+
+  try {
+    const { query } = await import('./db/database');
+    const parity = await query<{
+      project_id: string;
+      cached_balance: string;
+      ledger_balance: string;
+    }>(
+      `SELECT
+         p.id AS project_id,
+         p.gas_tank_balance::text AS cached_balance,
+         COALESCE(SUM(
+           CASE
+             WHEN fle.entry_type IN ('credit', 'release') THEN fle.amount
+             WHEN fle.entry_type IN ('reserve', 'debit') THEN -fle.amount
+             ELSE 0
+           END
+         ), 0)::text AS ledger_balance
+       FROM projects p
+       LEFT JOIN fund_ledger_entries fle ON fle.project_id = p.id
+       GROUP BY p.id, p.gas_tank_balance
+       ORDER BY p.id`
+    );
+
+    const rows = parity.rows.map((row) => {
+      const delta = (BigInt(row.cached_balance) - BigInt(row.ledger_balance)).toString();
+      return {
+        projectId: row.project_id,
+        cachedBalance: row.cached_balance,
+        ledgerBalance: row.ledger_balance,
+        delta,
+        inSync: delta === '0',
+      };
+    });
+
+    const drift = rows.filter((row) => !row.inSync);
+    res.status(200).json({
+      summary: {
+        totalProjects: rows.length,
+        outOfSyncProjects: drift.length,
+      },
+      drift,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // API Routes
 app.use('/auth', privyAuthRoutes); // Privy auth
 app.use('/projects', projectRoutes);

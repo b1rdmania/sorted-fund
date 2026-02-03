@@ -10,6 +10,7 @@
     "test": "jest",
     "test:connectivity": "ts-node src/test-connectivity.ts",
     "test:smoke": "ts-node src/scripts/test-system-smoke.ts",
+    "audit:parity": "ts-node src/scripts/check-funds-parity.ts",
     "migrate": "ts-node src/scripts/migrate.ts"
   },
   "dependencies": {
