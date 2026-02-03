@@ -67,14 +67,14 @@ https://testnet.soniclabs.com/address/0x2577e25eBc6596eE9E05241a028b42EE4bffAD4f
 
 ### Deployer Private Key
 ```
-0xbb1ab1a9dadbbca09ff9042dfe912c68620f742882ed9bd925a93e628ac755df
+0xREDACTED_ACCOUNT_OWNER_PRIVATE_KEY
 ```
 - **Location:** `contracts/.env` as `DEPLOYER_PRIVATE_KEY`
 - **Used for:** Contract deployment, admin functions
 
 ### Backend Signer Private Key
 ```
-0x640216c8915f4ae34c17481fdc16e306c289eed8040b49ef241c061abd6a6253
+0xREDACTED_BACKEND_SIGNER_PRIVATE_KEY
 ```
 - **Location:** `backend/.env` as `BACKEND_SIGNER_PRIVATE_KEY`
 - **Used for:** Signing `paymasterAndData` payloads
@@ -187,7 +187,7 @@ PAYMASTER_ADDRESS=0x54fE2D4e7B1A35e57d18353e3E7C745411fd226b
 ### backend/.env
 ```bash
 PAYMASTER_ADDRESS=0x54fE2D4e7B1A35e57d18353e3E7C745411fd226b
-BACKEND_SIGNER_PRIVATE_KEY=0x640216c8915f4ae34c17481fdc16e306c289eed8040b49ef241c061abd6a6253
+BACKEND_SIGNER_PRIVATE_KEY=0xREDACTED_BACKEND_SIGNER_PRIVATE_KEY
 ```
 
 ---

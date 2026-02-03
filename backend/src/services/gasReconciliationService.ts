@@ -7,6 +7,7 @@ import { query } from '../db/database';
 import { ethers } from 'ethers';
 
 export interface ReconcileGasParams {
+  projectId: string;
   userOpHash: string;
   actualGas: string; // bigint as string
   status: 'success' | 'failed' | 'reverted';
@@ -27,7 +28,7 @@ export class GasReconciliationService {
    * Update sponsorship event with actual gas used and refund unused credits
    */
   async reconcileGas(params: ReconcileGasParams): Promise<void> {
-    const { userOpHash, actualGas, status, errorMessage } = params;
+    const { projectId, userOpHash, actualGas, status, errorMessage } = params;
 
     // Update the sponsorship event
     const result = await query(
@@ -36,9 +37,10 @@ export class GasReconciliationService {
            status = $2,
            completed_at = NOW(),
            error_message = $3
-       WHERE user_op_hash = $4
+       WHERE project_id = $4
+         AND user_op_hash = $5
        RETURNING id, project_id, estimated_gas, actual_gas, max_cost`,
-      [actualGas, status, errorMessage || null, userOpHash]
+      [actualGas, status, errorMessage || null, projectId, userOpHash]
     );
 
     if (result.rows.length === 0) {

@@ -224,10 +224,10 @@
       testCounter: '0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3',
       incrementSelector: '0xd09de08a',
       entryPoint: '0x0000000071727de22e5e9d8baf0edac6f37da032',
-      // Owner private key for signing (from .env)
-      ownerPrivateKey: '0xbb1ab1a9dadbbca09ff9042dfe912c68620f742882ed9bd925a93e628ac755df',
-      apiKey: 'sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092',
-      pimlicoApiKey: 'pim_ZL9gKSF5okZT96AHbrTu6d',
+      // Inject secrets at runtime only (window.SORTED_DEMO_CONFIG)
+      ownerPrivateKey: window.SORTED_DEMO_CONFIG?.ownerPrivateKey || '',
+      apiKey: window.SORTED_DEMO_CONFIG?.apiKey || '',
+      pimlicoApiKey: window.SORTED_DEMO_CONFIG?.pimlicoApiKey || '',
     };
 
     let provider;
@@ -275,6 +275,10 @@
     // Initialize
     async function init() {
       try {
+        if (!CONFIG.ownerPrivateKey || !CONFIG.apiKey || !CONFIG.pimlicoApiKey) {
+          throw new Error('Missing runtime demo credentials (window.SORTED_DEMO_CONFIG)');
+        }
+
         provider = new ethers.providers.JsonRpcProvider(CONFIG.sonicRpc);
         wallet = new ethers.Wallet(CONFIG.ownerPrivateKey, provider);
 

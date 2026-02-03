@@ -78,7 +78,7 @@ Balance: 0.15 S (150,000,000,000,000,000 wei)
 **Request:**
 ```bash
 POST http://localhost:3000/sponsor/authorize
-Authorization: Bearer sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092
+Authorization: Bearer sk_sorted_REDACTED
 ```
 
 **Response:**
@@ -120,7 +120,7 @@ Authorization: Bearer sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f38
 
 **API Call:**
 ```bash
-POST https://api.pimlico.io/v1/14601/rpc?apikey=pim_ZL9gKSF5okZT96AHbrTu6d
+POST https://api.pimlico.io/v1/14601/rpc?apikey=pim_REDACTED
 Method: eth_sendUserOperation
 Params: [userOp, "0x0000000071727de22e5e9d8baf0edac6f37da032"]
 ```
@@ -320,7 +320,7 @@ function validateUserOp(
 ### Pimlico Request
 
 ```bash
-curl -X POST 'https://api.pimlico.io/v1/14601/rpc?apikey=pim_ZL9gKSF5okZT96AHbrTu6d' \
+curl -X POST 'https://api.pimlico.io/v1/14601/rpc?apikey=pim_REDACTED' \
   -H 'Content-Type: application/json' \
   -d '{
     "jsonrpc": "2.0",
@@ -486,7 +486,7 @@ npx hardhat run scripts/test-integration.ts --network sonic
 
 ```bash
 curl -X POST http://localhost:3000/sponsor/authorize \
-  -H "Authorization: Bearer sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092" \
+  -H "Authorization: Bearer sk_sorted_REDACTED" \
   -H "Content-Type: application/json" \
   -d '{
     "projectId": "test-game",

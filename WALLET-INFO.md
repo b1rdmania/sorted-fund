@@ -12,7 +12,7 @@ I've generated two wallets and configured them in the `.env` files:
 
 **Address:** `0xDCBa4C636bCd0b2d8B476646df64AE621f1ED670`
 
-**Private Key:** `0xbb1ab1a9dadbbca09ff9042dfe912c68620f742882ed9bd925a93e628ac755df`
+**Private Key:** `0xREDACTED_ACCOUNT_OWNER_PRIVATE_KEY`
 
 **Needs Funding:** ✅ YES - needs Sonic testnet tokens
 
@@ -26,7 +26,7 @@ I've generated two wallets and configured them in the `.env` files:
 
 **Address:** `0x2577e25eBc6596eE9E05241a028b42EE4bffAD4f`
 
-**Private Key:** `0x640216c8915f4ae34c17481fdc16e306c289eed8040b49ef241c061abd6a6253`
+**Private Key:** `0xREDACTED_BACKEND_SIGNER_PRIVATE_KEY`
 
 **Needs Funding:** ❌ NO - only used for off-chain signing
 

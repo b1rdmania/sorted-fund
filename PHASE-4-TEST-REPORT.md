@@ -25,12 +25,12 @@ Phase 4 SDK is **fully operational** and tested end-to-end. All core functionali
 - **Database:** PostgreSQL 14 (Docker container)
 - **SDK:** TypeScript compiled with tsc
 - **Test Project:** test-game (from Phase 3)
-- **Test API Key:** sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092
+- **Test API Key:** sk_sorted_REDACTED
 
 ### Configuration
 ```typescript
 {
-  apiKey: 'sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092',
+  apiKey: 'sk_sorted_REDACTED',
   backendUrl: 'http://localhost:3000',
   chainId: 14601,
   pimlicoApiKey: undefined // Not needed for authorization testing

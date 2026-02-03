@@ -5,14 +5,18 @@
 
 import { SortedClient } from './src/index';
 
-// Test configuration from Phase 3
-const TEST_API_KEY = 'sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092';
+// Test configuration from environment
+const TEST_API_KEY = process.env.SORTED_API_KEY;
 const TEST_PROJECT_ID = 'test-game';
 const BACKEND_URL = 'http://localhost:3000';
 const ALLOWLISTED_TARGET = '0x1111111111111111111111111111111111111111';
 const ALLOWLISTED_SELECTOR = '0x12345678';
 
 async function testSDK() {
+  if (!TEST_API_KEY) {
+    throw new Error('SORTED_API_KEY is required');
+  }
+
   console.log('🧪 Testing Sorted SDK\n');
   console.log('=' .repeat(60));
 

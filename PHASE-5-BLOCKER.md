@@ -270,13 +270,13 @@ EntryPoint v0.6: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
 
 **Pimlico API Key:**
 ```
-pim_ZL9gKSF5okZT96AHbrTu6d
+pim_REDACTED
 ```
 
 **Backend Test Project:**
 ```
 Project ID: test-game
-API Key: sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092
+API Key: sk_sorted_REDACTED
 Gas Tank: ~5 ether
 ```
 

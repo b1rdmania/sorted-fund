@@ -10,7 +10,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 // Configuration
-const SORTED_API_KEY = process.env.SORTED_API_KEY || 'sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092';
+const SORTED_API_KEY = process.env.SORTED_API_KEY;
 const SORTED_BACKEND_URL = process.env.SORTED_BACKEND_URL || 'http://localhost:3000';
 const PIMLICO_API_KEY = process.env.PIMLICO_API_KEY;
 const SIMPLE_ACCOUNT_ADDRESS = process.env.SIMPLE_ACCOUNT_ADDRESS!;
@@ -41,6 +41,10 @@ function packGasFees(maxPriorityFeePerGas: bigint, maxFeePerGas: bigint): string
 }
 
 async function main() {
+  if (!SORTED_API_KEY) {
+    throw new Error('SORTED_API_KEY is required');
+  }
+
   console.log('🧪 Phase 5 Integration Test\n');
   console.log('=' .repeat(60));
 

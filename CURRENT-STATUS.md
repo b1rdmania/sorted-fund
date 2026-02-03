@@ -76,7 +76,7 @@ cat /tmp/claude/-Users-andy-Cursor-Projects-2026-Sorted/tasks/bafb1dd.output
 ### 3. Test Project Configuration
 **Project ID:** `test-game`
 **Owner:** `0x1234567890123456789012345678901234567890`
-**API Key:** `sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092`
+**API Key:** `sk_sorted_REDACTED`
 **Gas Tank Balance:** ~5 ether (minus testing usage)
 **Daily Cap:** 1 ether
 **Status:** Active
@@ -284,7 +284,7 @@ docker exec -it sorted-postgres psql -U postgres -d sorted_fund -c '\dt'
 SONIC_RPC_URL=https://rpc.testnet.soniclabs.com
 SONIC_CHAIN_ID=14601
 ENTRYPOINT_ADDRESS=0x0000000071727de22e5e9d8baf0edac6f37da032
-DEPLOYER_PRIVATE_KEY=0xbb1ab1a9dadbbca09ff9042dfe912c68620f742882ed9bd925a93e628ac755df
+DEPLOYER_PRIVATE_KEY=0xREDACTED_ACCOUNT_OWNER_PRIVATE_KEY
 PAYMASTER_ADDRESS=0x54fE2D4e7B1A35e57d18353e3E7C745411fd226b
 ```
 
@@ -296,7 +296,7 @@ DB_NAME=sorted_fund
 DB_USER=postgres
 DB_PASSWORD=sortedtest
 API_KEY_SALT=test_salt_change_in_production
-BACKEND_SIGNER_PRIVATE_KEY=0x640216c8915f4ae34c17481fdc16e306c289eed8040b49ef241c061abd6a6253
+BACKEND_SIGNER_PRIVATE_KEY=0xREDACTED_BACKEND_SIGNER_PRIVATE_KEY
 PAYMASTER_ADDRESS=0x54fE2D4e7B1A35e57d18353e3E7C745411fd226b
 SONIC_RPC_URL=https://rpc.testnet.soniclabs.com
 CHAIN_ID=14601
@@ -304,7 +304,7 @@ CHAIN_ID=14601
 
 ### sdk/.env (for testing)
 ```bash
-SORTED_API_KEY=sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092
+SORTED_API_KEY=sk_sorted_REDACTED
 SORTED_BACKEND_URL=http://localhost:3000
 PIMLICO_API_KEY=(not yet obtained)
 ```

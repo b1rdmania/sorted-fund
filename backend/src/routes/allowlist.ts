@@ -4,9 +4,12 @@
 
 import { Router } from 'express';
 import { query } from '../db/database';
+import { requireDeveloperAuth } from '../middleware/developerAuth';
+import projectService from '../services/projectService';
 import { AddAllowlistRequest, Allowlist } from '../types';
 
 const router = Router();
+router.use(requireDeveloperAuth);
 
 /**
  * POST /projects/:id/allowlist
@@ -16,6 +19,14 @@ router.post('/:id/allowlist', async (req, res) => {
   try {
     const data: AddAllowlistRequest = req.body;
     const projectId = req.params.id;
+    const project = await projectService.getProjectForDeveloper(projectId, req.developer!.id);
+
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
 
     if (!data.targetContract || !data.functionSelector) {
       return res.status(400).json({
@@ -51,6 +62,14 @@ router.post('/:id/allowlist', async (req, res) => {
 router.get('/:id/allowlist', async (req, res) => {
   try {
     const projectId = req.params.id;
+    const project = await projectService.getProjectForDeveloper(projectId, req.developer!.id);
+
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
 
     const result = await query<Allowlist>(
       `SELECT * FROM allowlists
@@ -78,6 +97,14 @@ router.delete('/:id/allowlist', async (req, res) => {
   try {
     const { targetContract, functionSelector } = req.body;
     const projectId = req.params.id;
+    const project = await projectService.getProjectForDeveloper(projectId, req.developer!.id);
+
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
 
     if (!targetContract || !functionSelector) {
       return res.status(400).json({
