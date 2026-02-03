@@ -8,6 +8,7 @@ import { Project, CreateProjectRequest, RefuelRequest, GasTankRefuel } from '../
 import { ethers } from 'ethers';
 import * as depositService from './depositService';
 import organizationService from './organizationService';
+import chainService from './chainService';
 
 export class ProjectService {
   private createLedgerIdempotencyKey(prefix: string, projectId: string): string {
@@ -18,11 +19,18 @@ export class ProjectService {
    * Get next available derivation index
    */
   private async getNextDerivationIndex(): Promise<number> {
-    const result = await query<{ max_index: number }>(
-      'SELECT COALESCE(MAX(derivation_index), -1) as max_index FROM projects'
-    );
+    try {
+      const result = await query<{ max_index: number }>(
+        'SELECT COALESCE(MAX(derivation_index), -1) as max_index FROM project_funding_accounts'
+      );
 
-    return (result.rows[0]?.max_index ?? -1) + 1;
+      return (result.rows[0]?.max_index ?? -1) + 1;
+    } catch {
+      const legacy = await query<{ max_index: number }>(
+        'SELECT COALESCE(MAX(derivation_index), -1) as max_index FROM projects'
+      );
+      return (legacy.rows[0]?.max_index ?? -1) + 1;
+    }
   }
 
   /**
@@ -66,6 +74,15 @@ export class ProjectService {
          VALUES ($1, $2, 'owner')
          ON CONFLICT (developer_id, project_id) DO NOTHING`,
         [developerId, data.id]
+      );
+
+      const defaultChainId = chainService.getDefaultChainId();
+      await client.query(
+        `INSERT INTO project_funding_accounts
+         (project_id, chain_id, asset_symbol, deposit_address, derivation_index, status, last_checked_block)
+         VALUES ($1, $2, 'NATIVE', $3, $4, 'active', 0)
+         ON CONFLICT (project_id, chain_id, asset_symbol) DO NOTHING`,
+        [data.id, defaultChainId, depositAddress, derivationIndex]
       );
 
       await client.query('COMMIT');
@@ -173,6 +190,8 @@ export class ProjectService {
         [refuel.amount, projectId]
       );
 
+      const chainId = refuel.chainId || chainService.getDefaultChainId();
+
       const projectResult = await client.query<{ organization_id: number }>(
         `SELECT organization_id FROM projects WHERE id = $1`,
         [projectId]
@@ -183,6 +202,7 @@ export class ProjectService {
           `INSERT INTO fund_ledger_entries (
              organization_id,
              project_id,
+             chain_id,
              entry_type,
              amount,
              asset,
@@ -191,16 +211,18 @@ export class ProjectService {
              idempotency_key,
              metadata_json
            )
-           VALUES ($1, $2, 'credit', $3, 'S', 'refuel', $4, $5, $6)`,
+           VALUES ($1, $2, $3, 'credit', $4, 'S', 'refuel', $5, $6, $7)`,
           [
             projectResult.rows[0].organization_id,
             projectId,
+            chainId,
             refuel.amount,
             refuelResult.rows[0].id?.toString() || null,
-            `refuel:${projectId}:${refuelResult.rows[0].id}`,
+            `refuel:${projectId}:${chainId}:${refuelResult.rows[0].id}`,
             JSON.stringify({
               note: refuel.note || null,
               txHash: refuel.txHash || null,
+              chainId,
             }),
           ]
         );
@@ -244,6 +266,7 @@ export class ProjectService {
       referenceType?: string;
       referenceId?: string;
       metadata?: Record<string, any>;
+      chainId?: number;
     }
   ): Promise<{ reserved: boolean; ledgerEntryId?: number }> {
     const client = await getClient();
@@ -282,6 +305,7 @@ export class ProjectService {
       }
 
       const project = projectResult.rows[0];
+      const chainId = options?.chainId || chainService.getDefaultChainId();
       if (BigInt(project.gas_tank_balance) < BigInt(amount)) {
         await client.query('ROLLBACK');
         return { reserved: false };
@@ -298,6 +322,7 @@ export class ProjectService {
         `INSERT INTO fund_ledger_entries (
            organization_id,
            project_id,
+           chain_id,
            entry_type,
            amount,
            asset,
@@ -306,16 +331,17 @@ export class ProjectService {
            idempotency_key,
            metadata_json
          )
-         VALUES ($1, $2, 'reserve', $3, 'S', $4, $5, $6, $7)
+         VALUES ($1, $2, $3, 'reserve', $4, 'S', $5, $6, $7, $8)
          RETURNING id`,
         [
           project.organization_id,
           projectId,
+          chainId,
           amount,
           options?.referenceType || null,
           options?.referenceId || null,
           idempotencyKey,
-          JSON.stringify(options?.metadata || {}),
+          JSON.stringify({ ...(options?.metadata || {}), chainId }),
         ]
       );
 
@@ -341,6 +367,7 @@ export class ProjectService {
       referenceType?: string;
       referenceId?: string;
       metadata?: Record<string, any>;
+      chainId?: number;
     }
   ): Promise<{ ledgerEntryId?: number }> {
     const client = await getClient();
@@ -373,6 +400,7 @@ export class ProjectService {
       if (projectResult.rows.length === 0) {
         throw new Error('Project not found');
       }
+      const chainId = options?.chainId || chainService.getDefaultChainId();
 
       await client.query(
         `UPDATE projects
@@ -385,6 +413,7 @@ export class ProjectService {
         `INSERT INTO fund_ledger_entries (
            organization_id,
            project_id,
+           chain_id,
            entry_type,
            amount,
            asset,
@@ -393,16 +422,17 @@ export class ProjectService {
            idempotency_key,
            metadata_json
          )
-         VALUES ($1, $2, 'release', $3, 'S', $4, $5, $6, $7)
+         VALUES ($1, $2, $3, 'release', $4, 'S', $5, $6, $7, $8)
          RETURNING id`,
         [
           projectResult.rows[0].organization_id,
           projectId,
+          chainId,
           amount,
           options?.referenceType || null,
           options?.referenceId || null,
           idempotencyKey,
-          JSON.stringify(options?.metadata || {}),
+          JSON.stringify({ ...(options?.metadata || {}), chainId }),
         ]
       );
 
@@ -424,6 +454,7 @@ export class ProjectService {
       referenceType?: string;
       referenceId?: string;
       metadata?: Record<string, any>;
+      chainId?: number;
     }
   ): Promise<{ ledgerEntryId?: number }> {
     const idempotencyKey =
@@ -434,6 +465,7 @@ export class ProjectService {
       `INSERT INTO fund_ledger_entries (
          organization_id,
          project_id,
+         chain_id,
          entry_type,
          amount,
          asset,
@@ -445,24 +477,29 @@ export class ProjectService {
        SELECT
          p.organization_id,
          p.id,
-         'settlement',
          $2,
-         'S',
+         'settlement',
          $3,
+         'S',
          $4,
          $5,
-         $6
+         $6,
+         $7
        FROM projects p
        WHERE p.id = $1
        ON CONFLICT (project_id, idempotency_key) DO NOTHING
        RETURNING id`,
       [
         projectId,
+        options?.chainId || chainService.getDefaultChainId(),
         amount,
         options?.referenceType || null,
         options?.referenceId || null,
         idempotencyKey,
-        JSON.stringify(options?.metadata || {}),
+        JSON.stringify({
+          ...(options?.metadata || {}),
+          chainId: options?.chainId || chainService.getDefaultChainId(),
+        }),
       ]
     );
 
@@ -677,6 +714,64 @@ export class ProjectService {
         inSync: delta === '0',
       };
     });
+  }
+
+  async getFundingAccounts(projectId: string) {
+    const result = await query(
+      `SELECT
+         pfa.id,
+         pfa.project_id,
+         pfa.chain_id,
+         c.name as chain_name,
+         c.native_symbol,
+         pfa.asset_symbol,
+         pfa.deposit_address,
+         pfa.derivation_index,
+         pfa.status,
+         pfa.last_checked_block,
+         pfa.created_at,
+         pfa.updated_at
+       FROM project_funding_accounts pfa
+       INNER JOIN chains c ON c.chain_id = pfa.chain_id
+       WHERE pfa.project_id = $1
+       ORDER BY pfa.chain_id ASC`,
+      [projectId]
+    );
+
+    return result.rows;
+  }
+
+  async getFundingAccount(projectId: string, chainId: number) {
+    const result = await query(
+      `SELECT *
+       FROM project_funding_accounts
+       WHERE project_id = $1 AND chain_id = $2 AND asset_symbol = 'NATIVE'`,
+      [projectId, chainId]
+    );
+
+    return result.rows[0] || null;
+  }
+
+  async ensureFundingAccount(projectId: string, chainId: number) {
+    const existing = await this.getFundingAccount(projectId, chainId);
+    if (existing) {
+      return existing;
+    }
+
+    const nextIndex = await this.getNextDerivationIndex();
+    const { address } = depositService.generateDepositAddress(nextIndex);
+
+    const result = await query(
+      `INSERT INTO project_funding_accounts
+       (project_id, chain_id, asset_symbol, deposit_address, derivation_index, status, last_checked_block)
+       VALUES ($1, $2, 'NATIVE', $3, $4, 'active', 0)
+       ON CONFLICT (project_id, chain_id, asset_symbol)
+       DO UPDATE SET deposit_address = project_funding_accounts.deposit_address
+       RETURNING *`,
+      [projectId, chainId, address, nextIndex]
+    );
+
+    return result.rows[0];
   }
 }
 

@@ -39,28 +39,64 @@ CREATE INDEX IF NOT EXISTS idx_sponsorship_released_ledger ON sponsorship_events
 -- =====================================================
 -- 3. BACKFILL OPENING BALANCE ENTRIES
 -- =====================================================
-INSERT INTO fund_ledger_entries (
-    organization_id,
-    project_id,
-    entry_type,
-    amount,
-    asset,
-    reference_type,
-    reference_id,
-    idempotency_key,
-    metadata_json
-)
-SELECT
-    p.organization_id,
-    p.id,
-    'credit',
-    p.gas_tank_balance,
-    'S',
-    'migration',
-    NULL,
-    CONCAT('opening-balance-', p.id),
-    jsonb_build_object('source', 'projects.gas_tank_balance', 'migrated_at', NOW())
-FROM projects p
-WHERE p.gas_tank_balance > 0
-ON CONFLICT (project_id, idempotency_key) DO NOTHING;
-
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'fund_ledger_entries'
+          AND column_name = 'chain_id'
+    ) THEN
+        INSERT INTO fund_ledger_entries (
+            organization_id,
+            project_id,
+            chain_id,
+            entry_type,
+            amount,
+            asset,
+            reference_type,
+            reference_id,
+            idempotency_key,
+            metadata_json
+        )
+        SELECT
+            p.organization_id,
+            p.id,
+            14601,
+            'credit',
+            p.gas_tank_balance,
+            'S',
+            'migration',
+            NULL,
+            CONCAT('opening-balance-', p.id),
+            jsonb_build_object('source', 'projects.gas_tank_balance', 'migrated_at', NOW())
+        FROM projects p
+        WHERE p.gas_tank_balance > 0
+        ON CONFLICT (project_id, idempotency_key) DO NOTHING;
+    ELSE
+        INSERT INTO fund_ledger_entries (
+            organization_id,
+            project_id,
+            entry_type,
+            amount,
+            asset,
+            reference_type,
+            reference_id,
+            idempotency_key,
+            metadata_json
+        )
+        SELECT
+            p.organization_id,
+            p.id,
+            'credit',
+            p.gas_tank_balance,
+            'S',
+            'migration',
+            NULL,
+            CONCAT('opening-balance-', p.id),
+            jsonb_build_object('source', 'projects.gas_tank_balance', 'migrated_at', NOW())
+        FROM projects p
+        WHERE p.gas_tank_balance > 0
+        ON CONFLICT (project_id, idempotency_key) DO NOTHING;
+    END IF;
+END $$;

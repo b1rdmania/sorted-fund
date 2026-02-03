@@ -7,6 +7,7 @@ import projectService from '../services/projectService';
 import apiKeyService from '../services/apiKeyService';
 import { requirePrivyAuth } from '../middleware/privyAuth';
 import organizationService from '../services/organizationService';
+import chainService from '../services/chainService';
 import { CreateProjectRequest, RefuelRequest } from '../types';
 
 const router = Router();
@@ -251,6 +252,16 @@ router.post('/:id/refuel', async (req, res) => {
       });
     }
 
+    if (data.chainId !== undefined) {
+      const chain = await chainService.getChain(data.chainId);
+      if (!chain || chain.status !== 'active') {
+        return res.status(400).json({
+          error: 'Unsupported chainId for refuel',
+          code: 'INVALID_CHAIN',
+        });
+      }
+    }
+
     const refuel = await projectService.refuelGasTank(projectId, data);
 
     res.status(201).json(refuel);
@@ -259,6 +270,81 @@ router.post('/:id/refuel', async (req, res) => {
     res.status(500).json({
       error: 'Failed to refuel gas tank',
       code: 'REFUEL_ERROR',
+      details: error.message,
+    });
+  }
+});
+
+/**
+ * GET /projects/:id/funding-accounts
+ * Get per-chain funding/deposit accounts for a project.
+ */
+router.get('/:id/funding-accounts', async (req, res) => {
+  try {
+    const project = await requireOwnedProject(req.params.id, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
+    const accounts = await projectService.getFundingAccounts(req.params.id);
+    res.json(accounts);
+  } catch (error: any) {
+    console.error('Get funding accounts error:', error);
+    res.status(500).json({
+      error: 'Failed to get funding accounts',
+      code: 'GET_FUNDING_ACCOUNTS_ERROR',
+      details: error.message,
+    });
+  }
+});
+
+/**
+ * GET /projects/:id/funding-accounts/:chainId
+ * Get or provision a funding address for a specific chain.
+ */
+router.get('/:id/funding-accounts/:chainId', async (req, res) => {
+  try {
+    const project = await requireOwnedProject(req.params.id, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
+    const chainId = parseInt(req.params.chainId, 10);
+    if (Number.isNaN(chainId)) {
+      return res.status(400).json({
+        error: 'Invalid chainId',
+        code: 'INVALID_REQUEST',
+      });
+    }
+
+    const chain = await chainService.getChain(chainId);
+    if (!chain || chain.status !== 'active') {
+      return res.status(400).json({
+        error: 'Unsupported or inactive chain',
+        code: 'INVALID_CHAIN',
+      });
+    }
+
+    const account = await projectService.ensureFundingAccount(req.params.id, chainId);
+    res.json({
+      chain: {
+        chainId: chain.chain_id,
+        name: chain.name,
+        nativeSymbol: chain.native_symbol,
+      },
+      account,
+    });
+  } catch (error: any) {
+    console.error('Get funding account by chain error:', error);
+    res.status(500).json({
+      error: 'Failed to get funding account',
+      code: 'GET_FUNDING_ACCOUNT_ERROR',
       details: error.message,
     });
   }

@@ -120,6 +120,14 @@ Get gas tank balance.
 }
 ```
 
+### GET /projects/:id/funding-accounts
+
+List all funding/deposit accounts for the project (per chain).
+
+### GET /projects/:id/funding-accounts/:chainId
+
+Get (or provision) the funding address for a specific chain.
+
 ---
 
 ## API Keys
@@ -323,6 +331,14 @@ Organization-scoped parity report.
 **Query params:**
 
 - `onlyDrift` — `true` to return only out-of-sync projects
+
+---
+
+## Chain Registry
+
+### GET /blockchain/chains
+
+List active EVM chain configurations currently supported by the backend.
 ```
 
 ### GET /projects/:id/analytics/events

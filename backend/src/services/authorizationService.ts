@@ -12,11 +12,10 @@ import {
   Allowlist,
 } from '../types';
 import projectService from './projectService';
+import chainService from './chainService';
 
 export class AuthorizationService {
   private backendSigner: ethers.Wallet;
-  private paymasterAddress: string;
-  private chainId: number;
 
   constructor() {
     const privateKey = process.env.BACKEND_SIGNER_PRIVATE_KEY;
@@ -25,13 +24,9 @@ export class AuthorizationService {
     }
 
     this.backendSigner = new ethers.Wallet(privateKey);
-    this.paymasterAddress = process.env.PAYMASTER_ADDRESS || '';
-    this.chainId = parseInt(process.env.SONIC_CHAIN_ID || '14601');
 
     console.log('🔑 Authorization Service initialized');
     console.log('   Backend Signer:', this.backendSigner.address);
-    console.log('   Paymaster:', this.paymasterAddress);
-    console.log('   Chain ID:', this.chainId);
   }
 
   /**
@@ -49,10 +44,7 @@ export class AuthorizationService {
       clientNonce,
     } = request;
 
-    // Validate chain ID
-    if (chainId !== this.chainId) {
-      throw new Error(`Invalid chain ID. Expected ${this.chainId}, got ${chainId}`);
-    }
+    const chainConfig = await chainService.getEffectiveChainConfig(chainId);
 
     // Get project
     const project = await projectService.getProject(projectId);
@@ -75,7 +67,7 @@ export class AuthorizationService {
     }
 
     // Estimate max cost (gas * price + buffer)
-    const provider = new ethers.JsonRpcProvider(process.env.SONIC_RPC_URL);
+    const provider = new ethers.JsonRpcProvider(chainConfig.rpcUrl);
     const feeData = await provider.getFeeData();
     const gasPrice = feeData.maxFeePerGas || feeData.gasPrice || BigInt(2000000000); // 2 Gwei fallback
 
@@ -93,7 +85,9 @@ export class AuthorizationService {
         user,
         target,
         selector,
+        chainId,
       },
+      chainId,
     });
     if (!reserveResult.reserved) {
       const gasTankBalance = BigInt(project.gas_tank_balance);
@@ -119,7 +113,9 @@ export class AuthorizationService {
         expiry,
         maxCost,
         policyHash,
-        projectIdBytes32
+        projectIdBytes32,
+        chainId,
+        chainConfig.paymasterAddress
       );
 
       // Encode paymasterAndData
@@ -128,12 +124,14 @@ export class AuthorizationService {
         maxCost,
         policyHash,
         projectIdBytes32,
-        signature
+        signature,
+        chainConfig.paymasterAddress
       );
 
       // Record sponsorship event
       await this.recordSponsorshipEvent({
         project_id: projectId,
+        chain_id: chainId,
         developer_id: project.developer_id,
         reserved_ledger_entry_id: reserveResult.ledgerEntryId,
         sender: user,
@@ -160,7 +158,9 @@ export class AuthorizationService {
         referenceId: clientNonce,
         metadata: {
           reason: 'authorize_failed_after_reserve',
+          chainId,
         },
+        chainId,
       });
       throw error;
     }
@@ -215,7 +215,9 @@ export class AuthorizationService {
     expiry: number,
     maxCost: bigint,
     policyHash: string,
-    projectId: string
+    projectId: string,
+    chainId: number,
+    paymasterAddress: string
   ): Promise<string> {
     // Match contract's _getHash function exactly
     const hash = ethers.solidityPackedKeccak256(
@@ -227,8 +229,8 @@ export class AuthorizationService {
         maxCost,
         policyHash,
         projectId,
-        this.chainId,
-        this.paymasterAddress,
+        chainId,
+        paymasterAddress,
       ]
     );
 
@@ -246,7 +248,8 @@ export class AuthorizationService {
     maxCost: bigint,
     policyHash: string,
     projectId: string,
-    signature: string
+    signature: string,
+    paymasterAddress: string
   ): string {
     // Format according to ERC-4337 v0.7 spec:
     // Bytes 0-19: Paymaster address (20 bytes)
@@ -259,7 +262,7 @@ export class AuthorizationService {
     // Bytes 154-218: Signature (65 bytes)
     // Total: 219 bytes
 
-    const paymasterAddressBytes = ethers.getBytes(this.paymasterAddress);
+    const paymasterAddressBytes = ethers.getBytes(paymasterAddress);
 
     // ERC-4337 v0.7 requires gas limits in paymasterAndData
     const verificationGasLimit = 30000n; // 30k gas for validation
@@ -302,15 +305,20 @@ export class AuthorizationService {
    * Record sponsorship event in database
    */
   private async recordSponsorshipEvent(
-    event: Partial<SponsorshipEvent> & { developer_id?: number; reserved_ledger_entry_id?: number }
+    event: Partial<SponsorshipEvent> & {
+      developer_id?: number;
+      reserved_ledger_entry_id?: number;
+      chain_id?: number;
+    }
   ): Promise<void> {
     await query(
       `INSERT INTO sponsorship_events
-       (project_id, developer_id, sender, target, selector, estimated_gas, max_cost,
+       (project_id, chain_id, developer_id, sender, target, selector, estimated_gas, max_cost,
         status, paymaster_signature, policy_hash, expiry, reserved_ledger_entry_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
       [
         event.project_id,
+        event.chain_id,
         event.developer_id || null,
         event.sender,
         event.target,

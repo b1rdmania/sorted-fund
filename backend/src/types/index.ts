@@ -39,6 +39,8 @@ export interface Project {
   updated_at: Date;
   developer_id?: number; // Legacy ownership field (backward compatibility)
   organization_id?: number;
+  deposit_address?: string | null; // legacy
+  derivation_index?: number | null; // legacy
 }
 
 export interface CreateProjectRequest {
@@ -98,12 +100,14 @@ export interface RefuelRequest {
   amount: string; // in wei as string
   note?: string;
   txHash?: string; // Optional: on-chain transaction hash for tracking
+  chainId?: number;
 }
 
 // Sponsorship Event types
 export interface SponsorshipEvent {
   id: number;
   project_id: string;
+  chain_id?: number;
   developer_id?: number | null;
   user_op_hash: string | null;
   sender: string;
@@ -122,6 +126,30 @@ export interface SponsorshipEvent {
   reserved_ledger_entry_id?: number | null;
   settled_ledger_entry_id?: number | null;
   released_ledger_entry_id?: number | null;
+}
+
+export interface Chain {
+  chain_id: number;
+  name: string;
+  rpc_url: string;
+  entrypoint_address: string | null;
+  native_symbol: string;
+  paymaster_address: string | null;
+  is_testnet: boolean;
+  status: 'active' | 'disabled';
+}
+
+export interface ProjectFundingAccount {
+  id: number;
+  project_id: string;
+  chain_id: number;
+  asset_symbol: string;
+  deposit_address: string;
+  derivation_index: number;
+  status: 'active' | 'disabled';
+  last_checked_block: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 // Authorization Request/Response types

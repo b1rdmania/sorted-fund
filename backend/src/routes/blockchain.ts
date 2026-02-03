@@ -5,8 +5,27 @@
 
 import { Router, Request, Response } from 'express';
 import * as blockchainService from '../services/blockchainService';
+import chainService from '../services/chainService';
 
 const router = Router();
+
+/**
+ * GET /blockchain/chains
+ * List active chain configurations.
+ */
+router.get('/chains', async (req: Request, res: Response) => {
+  try {
+    const chains = await chainService.listActiveChains();
+    res.json(chains);
+  } catch (error: any) {
+    console.error('Failed to list chains:', error);
+    res.status(500).json({
+      error: 'Failed to list chains',
+      code: 'BLOCKCHAIN_READ_ERROR',
+      details: error.message,
+    });
+  }
+});
 
 /**
  * GET /blockchain/counter/:contractAddress/:userAddress

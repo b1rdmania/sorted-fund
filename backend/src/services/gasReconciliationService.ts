@@ -30,6 +30,7 @@ export class GasReconciliationService {
     params: {
       organizationId: number;
       projectId: string;
+      chainId: number;
       entryType: 'settlement' | 'release';
       amount: string;
       idempotencyKey: string;
@@ -41,6 +42,7 @@ export class GasReconciliationService {
       `INSERT INTO fund_ledger_entries (
          organization_id,
          project_id,
+         chain_id,
          entry_type,
          amount,
          asset,
@@ -49,12 +51,13 @@ export class GasReconciliationService {
          idempotency_key,
          metadata_json
        )
-       VALUES ($1, $2, $3, $4, 'S', 'sponsorship_event', $5, $6, $7)
+       VALUES ($1, $2, $3, $4, $5, 'S', 'sponsorship_event', $6, $7, $8)
        ON CONFLICT (project_id, idempotency_key) DO NOTHING
        RETURNING id`,
       [
         params.organizationId,
         params.projectId,
+        params.chainId,
         params.entryType,
         params.amount,
         params.referenceId,
@@ -87,8 +90,24 @@ export class GasReconciliationService {
   async reconcileGas(params: ReconcileGasParams): Promise<void> {
     const { projectId, userOpHash, actualGas, status, errorMessage } = params;
 
+    const chainLookup = await query<{ chain_id: number; rpc_url: string | null }>(
+      `SELECT se.chain_id, c.rpc_url
+       FROM sponsorship_events se
+       LEFT JOIN chains c ON c.chain_id = se.chain_id
+       WHERE se.project_id = $1 AND se.user_op_hash = $2
+       LIMIT 1`,
+      [projectId, userOpHash]
+    );
+
+    if (chainLookup.rows.length === 0) {
+      throw new Error(`Sponsorship event not found for userOpHash: ${userOpHash}`);
+    }
+
+    const lookupRow = chainLookup.rows[0];
+    const rpcUrl = lookupRow.rpc_url || process.env.SONIC_RPC_URL;
+
     // Fetch chain fee data first; fallback keeps reconciliation functional during RPC hiccups.
-    const provider = new ethers.JsonRpcProvider(process.env.SONIC_RPC_URL);
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
     const feeData = await provider.getFeeData().catch(() => null);
     const gasPrice = feeData?.maxFeePerGas || feeData?.gasPrice || BigInt(2000000000);
 
@@ -99,12 +118,13 @@ export class GasReconciliationService {
       const eventResult = await client.query<{
         id: number;
         project_id: string;
+        chain_id: number;
         organization_id: number;
         estimated_gas: string;
         max_cost: string;
         completed_at: Date | null;
       }>(
-        `SELECT se.id, se.project_id, p.organization_id, se.estimated_gas, se.max_cost, se.completed_at
+        `SELECT se.id, se.project_id, se.chain_id, p.organization_id, se.estimated_gas, se.max_cost, se.completed_at
          FROM sponsorship_events se
          INNER JOIN projects p ON p.id = se.project_id
          WHERE se.project_id = $1
@@ -136,6 +156,7 @@ export class GasReconciliationService {
       const settledLedgerId = await this.upsertLedgerEntry(client, {
         organizationId: event.organization_id,
         projectId: event.project_id,
+        chainId: event.chain_id,
         entryType: 'settlement',
         amount: settledCost.toString(),
         idempotencyKey: `settlement:${projectId}:${userOpHash}`,
@@ -147,6 +168,7 @@ export class GasReconciliationService {
           actualGas: actualGasBigInt.toString(),
           gasPrice: gasPrice.toString(),
           capped: uncappedActualCost > maxCost,
+          chainId: event.chain_id,
         },
       });
 
@@ -155,6 +177,7 @@ export class GasReconciliationService {
         releasedLedgerId = await this.upsertLedgerEntry(client, {
           organizationId: event.organization_id,
           projectId: event.project_id,
+          chainId: event.chain_id,
           entryType: 'release',
           amount: refundAmount.toString(),
           idempotencyKey: `release:${projectId}:${userOpHash}`,
@@ -164,6 +187,7 @@ export class GasReconciliationService {
             userOpHash,
             maxCost: maxCost.toString(),
             settledCost: settledCost.toString(),
+            chainId: event.chain_id,
           },
         });
 
