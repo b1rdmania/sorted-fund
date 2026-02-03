@@ -1,0 +1,6 @@
+# Default owner for all files
+* @b1rdmania
+
+# Smart contracts and backend
+/contracts/ @b1rdmania
+/backend/ @b1rdmania
