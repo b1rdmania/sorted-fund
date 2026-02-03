@@ -187,3 +187,5 @@ MIT
 ---
 
 *Built for games. Invisible to players. Sorted.*
+
+<!-- yolo badge trigger: tiny docs touch -->
