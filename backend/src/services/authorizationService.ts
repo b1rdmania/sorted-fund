@@ -84,69 +84,69 @@ export class AuthorizationService {
     // Add 10% buffer to maxCost to account for gas price fluctuations
     const maxCost = (gasWithBuffer * gasPrice * BigInt(110)) / BigInt(100);
 
-    // Check project has sufficient gas tank balance
-    const gasTankBalance = BigInt(project.gas_tank_balance);
-    if (gasTankBalance < maxCost) {
+    // Atomically reserve funds from the project's gas tank.
+    const reserved = await projectService.reserveFunds(projectId, maxCost.toString());
+    if (!reserved) {
+      const gasTankBalance = BigInt(project.gas_tank_balance);
       throw new Error(
         `Insufficient gas tank balance. Required: ${maxCost.toString()}, Available: ${gasTankBalance.toString()}`
       );
     }
 
-    // Deduct from project gas tank (will be refunded after reconciliation)
-    const newBalance = gasTankBalance - maxCost;
-    await query(
-      'UPDATE projects SET gas_tank_balance = $1 WHERE id = $2',
-      [newBalance.toString(), projectId]
-    );
+    try {
+      // Generate expiry (1 hour from now)
+      const expiry = Math.floor(Date.now() / 1000) + 3600; // 1 hour
 
-    // Generate expiry (1 hour from now)
-    const expiry = Math.floor(Date.now() / 1000) + 3600; // 1 hour
+      // Generate policy hash (hash of allowlist state for this project)
+      const policyHash = await this.generatePolicyHash(projectId);
 
-    // Generate policy hash (hash of allowlist state for this project)
-    const policyHash = await this.generatePolicyHash(projectId);
+      // Convert projectId to bytes32
+      const projectIdBytes32 = ethers.id(projectId);
 
-    // Convert projectId to bytes32
-    const projectIdBytes32 = ethers.id(projectId);
+      // Generate signature
+      const signature = await this.signAuthorization(
+        user,
+        clientNonce,
+        expiry,
+        maxCost,
+        policyHash,
+        projectIdBytes32
+      );
 
-    // Generate signature
-    const signature = await this.signAuthorization(
-      user,
-      clientNonce,
-      expiry,
-      maxCost,
-      policyHash,
-      projectIdBytes32
-    );
+      // Encode paymasterAndData
+      const paymasterAndData = this.encodePaymasterAndData(
+        expiry,
+        maxCost,
+        policyHash,
+        projectIdBytes32,
+        signature
+      );
 
-    // Encode paymasterAndData
-    const paymasterAndData = this.encodePaymasterAndData(
-      expiry,
-      maxCost,
-      policyHash,
-      projectIdBytes32,
-      signature
-    );
+      // Record sponsorship event
+      await this.recordSponsorshipEvent({
+        project_id: projectId,
+        developer_id: project.developer_id,
+        sender: user,
+        target,
+        selector,
+        estimated_gas: estimatedGas.toString(),
+        max_cost: maxCost.toString(),
+        paymaster_signature: signature,
+        policy_hash: policyHash,
+        expiry: new Date(expiry * 1000),
+      });
 
-    // Record sponsorship event
-    await this.recordSponsorshipEvent({
-      project_id: projectId,
-      sender: user,
-      target,
-      selector,
-      estimated_gas: estimatedGas.toString(),
-      max_cost: maxCost.toString(),
-      paymaster_signature: signature,
-      policy_hash: policyHash,
-      expiry: new Date(expiry * 1000),
-    });
-
-    return {
-      paymasterAndData,
-      expiresAt: new Date(expiry * 1000).toISOString(),
-      maxCost: '0x' + maxCost.toString(16),
-      policyHash,
-      paymasterSignature: signature,
-    };
+      return {
+        paymasterAndData,
+        expiresAt: new Date(expiry * 1000).toISOString(),
+        maxCost: '0x' + maxCost.toString(16),
+        policyHash,
+        paymasterSignature: signature,
+      };
+    } catch (error) {
+      await projectService.releaseFunds(projectId, maxCost.toString());
+      throw error;
+    }
   }
 
   /**
@@ -182,7 +182,7 @@ export class AuthorizationService {
 
     // Hash all allowlist entries together
     const entries = result.rows.map(
-      (row) => row.target_contract + row.function_selector
+      (row: Allowlist) => row.target_contract + row.function_selector
     );
     const combined = entries.join('');
 

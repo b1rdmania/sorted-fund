@@ -8,7 +8,7 @@ import { SortedClient } from './src/index';
 import axios from 'axios';
 
 // Configuration
-const API_KEY = 'sk_sorted_e579aea9ba39f0ba7fd2098d4180ccfcc6ab70810f16dfc8c5d9dcc1f3a22a44';
+const API_KEY = process.env.SORTED_API_KEY;
 const PROJECT_ID = 'test-game';
 const BACKEND_URL = 'http://localhost:3000';
 const ALTO_BUNDLER_URL = 'http://localhost:4337'; // Local Alto bundler
@@ -20,9 +20,13 @@ const INCREMENT_SELECTOR = '0xd09de08a';
 const ENTRYPOINT = '0x0000000071727De22E5E9d8BAf0edAc6f37da032';
 
 // Account owner private key (deployer wallet)
-const ACCOUNT_OWNER_KEY = '0xbb1ab1a9dadbbca09ff9042dfe912c68620f742882ed9bd925a93e628ac755df';
+const ACCOUNT_OWNER_KEY = process.env.SORTED_OWNER_PRIVATE_KEY;
 
 async function main() {
+  if (!API_KEY || !ACCOUNT_OWNER_KEY) {
+    throw new Error('Missing required env vars: SORTED_API_KEY, SORTED_OWNER_PRIVATE_KEY');
+  }
+
   console.log('\n' + '='.repeat(70));
   console.log('🚀  PHASE 5: END-TO-END GASLESS TRANSACTION TEST');
   console.log('='.repeat(70) + '\n');

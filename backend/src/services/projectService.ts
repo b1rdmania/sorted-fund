@@ -3,7 +3,7 @@
  * Handles project CRUD operations and gas tank management
  */
 
-import { query } from '../db/database';
+import { getClient, query } from '../db/database';
 import { Project, CreateProjectRequest, RefuelRequest, GasTankRefuel } from '../types';
 import { ethers } from 'ethers';
 import * as depositService from './depositService';
@@ -23,7 +23,7 @@ export class ProjectService {
   /**
    * Create a new project
    */
-  async createProject(data: CreateProjectRequest): Promise<Project> {
+  async createProject(data: CreateProjectRequest, developerId: number): Promise<Project> {
     const dailyCap = data.dailyCap || ethers.parseEther('1').toString();
 
     // Get next derivation index
@@ -32,14 +32,32 @@ export class ProjectService {
     // Generate deposit address
     const { address: depositAddress } = depositService.generateDepositAddress(derivationIndex);
 
-    const result = await query<Project>(
-      `INSERT INTO projects (id, name, owner, daily_cap, daily_reset_at, deposit_address, derivation_index)
-       VALUES ($1, $2, $3, $4, NOW(), $5, $6)
-       RETURNING *`,
-      [data.id, data.name, data.owner, dailyCap, depositAddress, derivationIndex]
-    );
+    const client = await getClient();
+    try {
+      await client.query('BEGIN');
 
-    return result.rows[0];
+      const result = await client.query<Project>(
+        `INSERT INTO projects (id, name, owner, daily_cap, daily_reset_at, deposit_address, derivation_index, developer_id)
+         VALUES ($1, $2, $3, $4, NOW(), $5, $6, $7)
+         RETURNING *`,
+        [data.id, data.name, data.owner, dailyCap, depositAddress, derivationIndex, developerId]
+      );
+
+      await client.query(
+        `INSERT INTO developer_projects (developer_id, project_id, role)
+         VALUES ($1, $2, 'owner')
+         ON CONFLICT (developer_id, project_id) DO NOTHING`,
+        [developerId, data.id]
+      );
+
+      await client.query('COMMIT');
+      return result.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -55,11 +73,24 @@ export class ProjectService {
   }
 
   /**
+   * Get project by ID only if developer owns it
+   */
+  async getProjectForDeveloper(projectId: string, developerId: number): Promise<Project | null> {
+    const result = await query<Project>(
+      'SELECT * FROM projects WHERE id = $1 AND developer_id = $2',
+      [projectId, developerId]
+    );
+
+    return result.rows[0] || null;
+  }
+
+  /**
    * Get all projects
    */
-  async getAllProjects(): Promise<Project[]> {
+  async getAllProjectsForDeveloper(developerId: number): Promise<Project[]> {
     const result = await query<Project>(
-      'SELECT * FROM projects ORDER BY created_at DESC'
+      'SELECT * FROM projects WHERE developer_id = $1 ORDER BY created_at DESC',
+      [developerId]
     );
 
     return result.rows;
@@ -91,11 +122,12 @@ export class ProjectService {
     projectId: string,
     refuel: RefuelRequest
   ): Promise<GasTankRefuel> {
-    const client = await query('BEGIN');
-
+    const client = await getClient();
     try {
+      await client.query('BEGIN');
+
       // Add refuel record
-      const refuelResult = await query<GasTankRefuel>(
+      const refuelResult = await client.query<GasTankRefuel>(
         `INSERT INTO gas_tank_refuels (project_id, amount, note, tx_hash, status)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING *`,
@@ -109,19 +141,21 @@ export class ProjectService {
       );
 
       // Update project balance
-      await query(
+      await client.query(
         `UPDATE projects
          SET gas_tank_balance = gas_tank_balance + $1
          WHERE id = $2`,
         [refuel.amount, projectId]
       );
 
-      await query('COMMIT');
+      await client.query('COMMIT');
 
       return refuelResult.rows[0];
     } catch (error) {
-      await query('ROLLBACK');
+      await client.query('ROLLBACK');
       throw error;
+    } finally {
+      client.release();
     }
   }
 

@@ -41,10 +41,14 @@ async function main() {
   const TEST_COUNTER = '0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3';
   const INCREMENT_SELECTOR = '0xd09de08a';
   const ENTRYPOINT = '0x0000000071727de22e5e9d8baf0edac6f37da032';
-  const BACKEND_URL = 'http://localhost:3000';
-  const API_KEY = 'sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092';
-  const PIMLICO_KEY = 'pim_ZL9gKSF5okZT96AHbrTu6d';
-  const OWNER_KEY = '0xbb1ab1a9dadbbca09ff9042dfe912c68620f742882ed9bd925a93e628ac755df';
+  const BACKEND_URL = process.env.SORTED_BACKEND_URL || 'http://localhost:3000';
+  const API_KEY = process.env.SORTED_API_KEY;
+  const PIMLICO_KEY = process.env.PIMLICO_API_KEY;
+  const OWNER_KEY = process.env.SORTED_OWNER_PRIVATE_KEY;
+
+  if (!API_KEY || !PIMLICO_KEY || !OWNER_KEY) {
+    throw new Error('Missing required env vars: SORTED_API_KEY, PIMLICO_API_KEY, SORTED_OWNER_PRIVATE_KEY');
+  }
 
   // Setup
   const provider = new ethers.JsonRpcProvider(SONIC_RPC);

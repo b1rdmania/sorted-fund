@@ -118,9 +118,11 @@ router.post('/link', authenticateApiKey, async (req: AuthenticatedRequest, res) 
       `UPDATE sponsorship_events
        SET user_op_hash = $1,
            status = 'pending'
-       WHERE paymaster_signature = $2
+       WHERE project_id = $2
+         AND paymaster_signature = $3
+         AND user_op_hash IS NULL
        RETURNING id`,
-      [userOpHash, paymasterSignature]
+      [userOpHash, req.project!.id, paymasterSignature]
     );
 
     if (result.rows.length === 0) {
@@ -171,6 +173,7 @@ router.post('/reconcile', authenticateApiKey, async (req: AuthenticatedRequest, 
 
     // Reconcile gas
     await gasReconciliationService.reconcileGas({
+      projectId: req.project!.id,
       userOpHash,
       actualGas,
       status,

@@ -5,9 +5,15 @@
 import { Router } from 'express';
 import projectService from '../services/projectService';
 import apiKeyService from '../services/apiKeyService';
+import { requireDeveloperAuth } from '../middleware/developerAuth';
 import { CreateProjectRequest, RefuelRequest } from '../types';
 
 const router = Router();
+router.use(requireDeveloperAuth);
+
+async function requireOwnedProject(projectId: string, developerId: number) {
+  return projectService.getProjectForDeveloper(projectId, developerId);
+}
 
 /**
  * POST /projects
@@ -16,16 +22,21 @@ const router = Router();
 router.post('/', async (req, res) => {
   try {
     const data: CreateProjectRequest = req.body;
+    const developer = req.developer!;
 
     // Validate required fields
-    if (!data.id || !data.name || !data.owner) {
+    if (!data.id || !data.name) {
       return res.status(400).json({
-        error: 'Missing required fields: id, name, owner',
+        error: 'Missing required fields: id, name',
         code: 'INVALID_REQUEST',
       });
     }
 
-    const project = await projectService.createProject(data);
+    const owner = data.owner || developer.email || developer.name || `developer-${developer.id}`;
+    const project = await projectService.createProject(
+      { ...data, owner },
+      developer.id
+    );
 
     res.status(201).json(project);
   } catch (error: any) {
@@ -44,7 +55,7 @@ router.post('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const project = await projectService.getProject(req.params.id);
+    const project = await requireOwnedProject(req.params.id, req.developer!.id);
 
     if (!project) {
       return res.status(404).json({
@@ -70,7 +81,7 @@ router.get('/:id', async (req, res) => {
  */
 router.get('/', async (req, res) => {
   try {
-    const projects = await projectService.getAllProjects();
+    const projects = await projectService.getAllProjectsForDeveloper(req.developer!.id);
     res.json(projects);
   } catch (error: any) {
     console.error('Get projects error:', error);
@@ -92,7 +103,7 @@ router.post('/:id/apikeys', async (req, res) => {
     const projectId = req.params.id;
 
     // Verify project exists
-    const project = await projectService.getProject(projectId);
+    const project = await requireOwnedProject(projectId, req.developer!.id);
     if (!project) {
       return res.status(404).json({
         error: 'Project not found',
@@ -122,6 +133,14 @@ router.post('/:id/apikeys', async (req, res) => {
  */
 router.get('/:id/apikeys', async (req, res) => {
   try {
+    const project = await requireOwnedProject(req.params.id, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
     const keys = await apiKeyService.getProjectApiKeys(req.params.id);
 
     // Don't return key hashes, only metadata
@@ -155,6 +174,14 @@ router.post('/:id/refuel', async (req, res) => {
     const data: RefuelRequest = req.body;
     const projectId = req.params.id;
 
+    const project = await requireOwnedProject(projectId, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
     if (!data.amount) {
       return res.status(400).json({
         error: 'Missing required field: amount',
@@ -181,6 +208,14 @@ router.post('/:id/refuel', async (req, res) => {
  */
 router.get('/:id/balance', async (req, res) => {
   try {
+    const project = await requireOwnedProject(req.params.id, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
     const balance = await projectService.getGasTankBalance(req.params.id);
 
     res.json({ balance });
@@ -200,6 +235,14 @@ router.get('/:id/balance', async (req, res) => {
  */
 router.get('/:id/refuels', async (req, res) => {
   try {
+    const project = await requireOwnedProject(req.params.id, req.developer!.id);
+    if (!project) {
+      return res.status(404).json({
+        error: 'Project not found',
+        code: 'PROJECT_NOT_FOUND',
+      });
+    }
+
     const refuels = await projectService.getRefuelHistory(req.params.id);
     res.json(refuels);
   } catch (error: any) {

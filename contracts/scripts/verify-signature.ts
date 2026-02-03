@@ -6,7 +6,14 @@ async function main() {
   const TEST_COUNTER = '0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3';
   const INCREMENT_SELECTOR = '0xd09de08a';
   const PAYMASTER = process.env.PAYMASTER_ADDRESS || '0x96802bD321315aEbf7595eB3E558278E1DD5beA7';
-  const BACKEND_SIGNER_PRIVATE_KEY = '0x640216c8915f4ae34c17481fdc16e306c289eed8040b49ef241c061abd6a6253';
+  const BACKEND_SIGNER_PRIVATE_KEY = process.env.BACKEND_SIGNER_PRIVATE_KEY;
+  const SORTED_API_KEY = process.env.SORTED_API_KEY;
+  if (!BACKEND_SIGNER_PRIVATE_KEY) {
+    throw new Error('BACKEND_SIGNER_PRIVATE_KEY is required');
+  }
+  if (!SORTED_API_KEY) {
+    throw new Error('SORTED_API_KEY is required');
+  }
 
   console.log('\n=== Manual Signature Verification ===\n');
 
@@ -26,7 +33,7 @@ async function main() {
     chainId: 14601,
   }, {
     headers: {
-      Authorization: 'Bearer sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092',
+      Authorization: `Bearer ${SORTED_API_KEY}`,
     },
   });
 

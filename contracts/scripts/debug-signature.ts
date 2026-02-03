@@ -5,8 +5,15 @@ async function main() {
   const SIMPLE_ACCOUNT = '0x4BEfFA7558375a0f8e55a4eABbE9a53F661E5506';
   const TEST_COUNTER = '0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3';
   const INCREMENT_SELECTOR = '0xd09de08a';
-  const PAYMASTER = '0xB3034d28A4e374aad345756145c9EbCA0CC7584e';
-  const BACKEND_SIGNER_PRIVATE_KEY = '0x640216c8915f4ae34c17481fdc16e306c289eed8040b49ef241c061abd6a6253';
+  const PAYMASTER = process.env.PAYMASTER_ADDRESS || '0xB3034d28A4e374aad345756145c9EbCA0CC7584e';
+  const BACKEND_SIGNER_PRIVATE_KEY = process.env.BACKEND_SIGNER_PRIVATE_KEY;
+  const SORTED_API_KEY = process.env.SORTED_API_KEY;
+  if (!BACKEND_SIGNER_PRIVATE_KEY) {
+    throw new Error('BACKEND_SIGNER_PRIVATE_KEY is required');
+  }
+  if (!SORTED_API_KEY) {
+    throw new Error('SORTED_API_KEY is required');
+  }
 
   console.log('\n=== Signature Debugging ===\n');
 
@@ -21,7 +28,7 @@ async function main() {
     chainId: 14601,
   }, {
     headers: {
-      Authorization: 'Bearer sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092',
+      Authorization: `Bearer ${SORTED_API_KEY}`,
     },
   });
 

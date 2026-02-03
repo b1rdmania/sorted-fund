@@ -21,6 +21,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN;
 
 // Middleware
 app.use(helmet()); // Security headers
@@ -65,8 +66,26 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+function isAdminAuthorized(req: Request): boolean {
+  if (!ADMIN_API_TOKEN) {
+    return false;
+  }
+
+  const headerToken = req.headers['x-admin-token'];
+  if (typeof headerToken === 'string' && headerToken === ADMIN_API_TOKEN) {
+    return true;
+  }
+
+  const authHeader = req.headers.authorization;
+  return authHeader === `Bearer ${ADMIN_API_TOKEN}`;
+}
+
 // Debug endpoint to check demo account
 app.get('/admin/demo-check', async (req: Request, res: Response) => {
+  if (!isAdminAuthorized(req)) {
+    return res.status(404).json({ error: 'Not found', code: 'NOT_FOUND' });
+  }
+
   try {
     const { query } = await import('./db/database');
     const result = await query('SELECT id, email, name, credit_balance, password_hash FROM developers WHERE email = $1', ['demo@sorted.fund']);
@@ -88,6 +107,10 @@ app.get('/admin/demo-check', async (req: Request, res: Response) => {
 
 // Endpoint to fix demo account password
 app.post('/admin/fix-demo-password', async (req: Request, res: Response) => {
+  if (!isAdminAuthorized(req)) {
+    return res.status(404).json({ error: 'Not found', code: 'NOT_FOUND' });
+  }
+
   try {
     const { query } = await import('./db/database');
     const correctHash = '$2b$10$3v/4nWZWzbx9moXvNY4jnOs2Y3TE4pW4ycebf8xk6i0tcoXtnIpGK'; // demo123
@@ -108,6 +131,10 @@ app.post('/admin/fix-demo-password', async (req: Request, res: Response) => {
 
 // Temporary migration endpoint (remove after initial setup)
 app.post('/admin/migrate', async (req: Request, res: Response) => {
+  if (!isAdminAuthorized(req)) {
+    return res.status(404).json({ error: 'Not found', code: 'NOT_FOUND' });
+  }
+
   try {
     const fs = await import('fs');
     const path = await import('path');

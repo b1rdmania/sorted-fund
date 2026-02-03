@@ -91,7 +91,7 @@ CHAIN_ID: 14601
 **Response:**
 ```json
 {
-  "apiKey": "sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092",
+  "apiKey": "sk_sorted_REDACTED",
   "preview": "sk_sorted_1b...",
   "projectId": "test-game",
   "rateLimit": 100

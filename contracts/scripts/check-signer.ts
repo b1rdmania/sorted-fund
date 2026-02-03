@@ -3,8 +3,10 @@ import { ethers } from 'hardhat';
 async function main() {
   const PAYMASTER = '0xB3034d28A4e374aad345756145c9EbCA0CC7584e';
 
-  // Backend signer private key from backend .env
-  const BACKEND_SIGNER_PRIVATE_KEY = '0x640216c8915f4ae34c17481fdc16e306c289eed8040b49ef241c061abd6a6253';
+  const BACKEND_SIGNER_PRIVATE_KEY = process.env.BACKEND_SIGNER_PRIVATE_KEY;
+  if (!BACKEND_SIGNER_PRIVATE_KEY) {
+    throw new Error('BACKEND_SIGNER_PRIVATE_KEY is required');
+  }
 
   console.log('\n=== Backend Signer Verification ===\n');
 
