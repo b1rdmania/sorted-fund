@@ -639,6 +639,45 @@ export class ProjectService {
       };
     });
   }
+
+  async getFundsParityReportForOrganization(organizationId: number) {
+    const result = await query<{
+      project_id: string;
+      project_name: string;
+      cached_balance: string;
+      ledger_balance: string;
+    }>(
+      `SELECT
+         p.id as project_id,
+         p.name as project_name,
+         p.gas_tank_balance::text as cached_balance,
+         COALESCE(SUM(
+           CASE
+             WHEN fle.entry_type IN ('credit', 'release') THEN fle.amount
+             WHEN fle.entry_type IN ('reserve', 'debit') THEN -fle.amount
+             ELSE 0
+           END
+         ), 0)::text as ledger_balance
+       FROM projects p
+       LEFT JOIN fund_ledger_entries fle ON fle.project_id = p.id
+       WHERE p.organization_id = $1
+       GROUP BY p.id, p.name, p.gas_tank_balance
+       ORDER BY p.created_at DESC`,
+      [organizationId]
+    );
+
+    return result.rows.map((row) => {
+      const delta = (BigInt(row.cached_balance) - BigInt(row.ledger_balance)).toString();
+      return {
+        projectId: row.project_id,
+        projectName: row.project_name,
+        cachedBalance: row.cached_balance,
+        ledgerBalance: row.ledger_balance,
+        delta,
+        inSync: delta === '0',
+      };
+    });
+  }
 }
 
 export default new ProjectService();

@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { requirePrivyAuth } from '../middleware/privyAuth';
 import organizationService from '../services/organizationService';
+import projectService from '../services/projectService';
 import { OrganizationRole } from '../types';
 
 const router = Router();
@@ -74,6 +75,46 @@ router.get('/:orgId/members', async (req, res) => {
     res.status(500).json({
       error: 'Failed to get members',
       code: 'GET_MEMBERS_ERROR',
+      details: error.message,
+    });
+  }
+});
+
+router.get('/:orgId/funds/parity', async (req, res) => {
+  try {
+    const orgId = parseInt(req.params.orgId, 10);
+    if (Number.isNaN(orgId)) {
+      return res.status(400).json({
+        error: 'Invalid organization id',
+        code: 'INVALID_REQUEST',
+      });
+    }
+
+    const role = await organizationService.getOrganizationRole(orgId, req.developer!.id);
+    if (!role) {
+      return res.status(404).json({
+        error: 'Organization not found',
+        code: 'ORG_NOT_FOUND',
+      });
+    }
+
+    const onlyDrift = String(req.query.onlyDrift || '').toLowerCase() === 'true';
+    const rows = await projectService.getFundsParityReportForOrganization(orgId);
+    const filtered = onlyDrift ? rows.filter((row) => !row.inSync) : rows;
+
+    res.json({
+      summary: {
+        organizationId: orgId,
+        totalProjects: rows.length,
+        outOfSyncProjects: rows.filter((row) => !row.inSync).length,
+      },
+      rows: filtered,
+    });
+  } catch (error: any) {
+    console.error('Get organization funds parity error:', error);
+    res.status(500).json({
+      error: 'Failed to get organization funds parity',
+      code: 'GET_ORG_FUNDS_PARITY_ERROR',
       details: error.message,
     });
   }
@@ -187,4 +228,3 @@ router.patch('/:orgId/members/:developerId', async (req, res) => {
 });
 
 export default router;
-
