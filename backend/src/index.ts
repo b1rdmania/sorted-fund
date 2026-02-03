@@ -13,6 +13,7 @@ import allowlistRoutes from './routes/allowlist';
 import analyticsRoutes from './routes/analytics';
 import blockchainRoutes from './routes/blockchain';
 import demoRoutes from './routes/demo';
+import orgRoutes from './routes/orgs';
 
 // Load environment variables
 dotenv.config();
@@ -117,6 +118,7 @@ app.post('/admin/migrate', async (req: Request, res: Response) => {
 // API Routes
 app.use('/auth', privyAuthRoutes); // Privy auth
 app.use('/projects', projectRoutes);
+app.use('/orgs', orgRoutes);
 app.use('/sponsor', sponsorRoutes);
 app.use('/projects', allowlistRoutes); // Allowlist routes under /projects/:id/allowlist
 app.use('/analytics', analyticsRoutes);

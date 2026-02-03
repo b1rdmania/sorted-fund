@@ -5,11 +5,23 @@
 import { Router } from 'express';
 import { query } from '../db/database';
 import { requirePrivyAuth } from '../middleware/privyAuth';
-import projectService from '../services/projectService';
+import organizationService from '../services/organizationService';
 import { AddAllowlistRequest, Allowlist } from '../types';
 
 const router = Router();
 router.use(requirePrivyAuth);
+
+async function requireProjectRole(
+  projectId: string,
+  developerId: number,
+  minimumRole: 'viewer' | 'developer' | 'admin' | 'owner'
+) {
+  const membership = await organizationService.getProjectRole(projectId, developerId);
+  if (!membership) {
+    return null;
+  }
+  return organizationService.hasMinimumRole(membership.role, minimumRole);
+}
 
 /**
  * POST /projects/:id/allowlist
@@ -19,12 +31,17 @@ router.post('/:id/allowlist', async (req, res) => {
   try {
     const data: AddAllowlistRequest = req.body;
     const projectId = req.params.id;
-    const project = await projectService.getProjectForDeveloper(projectId, req.developer!.id);
-
-    if (!project) {
+    const access = await requireProjectRole(projectId, req.developer!.id, 'developer');
+    if (access === null) {
       return res.status(404).json({
         error: 'Project not found',
         code: 'PROJECT_NOT_FOUND',
+      });
+    }
+    if (!access) {
+      return res.status(403).json({
+        error: 'Insufficient permissions',
+        code: 'FORBIDDEN',
       });
     }
 
@@ -62,12 +79,17 @@ router.post('/:id/allowlist', async (req, res) => {
 router.get('/:id/allowlist', async (req, res) => {
   try {
     const projectId = req.params.id;
-    const project = await projectService.getProjectForDeveloper(projectId, req.developer!.id);
-
-    if (!project) {
+    const access = await requireProjectRole(projectId, req.developer!.id, 'viewer');
+    if (access === null) {
       return res.status(404).json({
         error: 'Project not found',
         code: 'PROJECT_NOT_FOUND',
+      });
+    }
+    if (!access) {
+      return res.status(403).json({
+        error: 'Insufficient permissions',
+        code: 'FORBIDDEN',
       });
     }
 
@@ -97,12 +119,17 @@ router.delete('/:id/allowlist', async (req, res) => {
   try {
     const { targetContract, functionSelector } = req.body;
     const projectId = req.params.id;
-    const project = await projectService.getProjectForDeveloper(projectId, req.developer!.id);
-
-    if (!project) {
+    const access = await requireProjectRole(projectId, req.developer!.id, 'developer');
+    if (access === null) {
       return res.status(404).json({
         error: 'Project not found',
         code: 'PROJECT_NOT_FOUND',
+      });
+    }
+    if (!access) {
+      return res.status(403).json({
+        error: 'Insufficient permissions',
+        code: 'FORBIDDEN',
       });
     }
 

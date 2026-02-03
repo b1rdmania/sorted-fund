@@ -6,6 +6,7 @@ import { Router } from 'express';
 import projectService from '../services/projectService';
 import apiKeyService from '../services/apiKeyService';
 import { requirePrivyAuth } from '../middleware/privyAuth';
+import organizationService from '../services/organizationService';
 import { CreateProjectRequest, RefuelRequest } from '../types';
 
 const router = Router();
@@ -13,6 +14,23 @@ router.use(requirePrivyAuth);
 
 async function requireOwnedProject(projectId: string, developerId: number) {
   return projectService.getProjectForDeveloper(projectId, developerId);
+}
+
+async function requireProjectRole(
+  projectId: string,
+  developerId: number,
+  minimumRole: 'viewer' | 'developer' | 'admin' | 'owner'
+) {
+  const membership = await organizationService.getProjectRole(projectId, developerId);
+  if (!membership) {
+    return null;
+  }
+
+  if (!organizationService.hasMinimumRole(membership.role, minimumRole)) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -102,12 +120,17 @@ router.post('/:id/apikeys', async (req, res) => {
     const { rateLimit } = req.body;
     const projectId = req.params.id;
 
-    // Verify project exists
-    const project = await requireOwnedProject(projectId, req.developer!.id);
-    if (!project) {
+    const access = await requireProjectRole(projectId, req.developer!.id, 'admin');
+    if (access === null) {
       return res.status(404).json({
         error: 'Project not found',
         code: 'PROJECT_NOT_FOUND',
+      });
+    }
+    if (access === false) {
+      return res.status(403).json({
+        error: 'Insufficient permissions',
+        code: 'FORBIDDEN',
       });
     }
 
@@ -133,11 +156,17 @@ router.post('/:id/apikeys', async (req, res) => {
  */
 router.get('/:id/apikeys', async (req, res) => {
   try {
-    const project = await requireOwnedProject(req.params.id, req.developer!.id);
-    if (!project) {
+    const access = await requireProjectRole(req.params.id, req.developer!.id, 'developer');
+    if (access === null) {
       return res.status(404).json({
         error: 'Project not found',
         code: 'PROJECT_NOT_FOUND',
+      });
+    }
+    if (access === false) {
+      return res.status(403).json({
+        error: 'Insufficient permissions',
+        code: 'FORBIDDEN',
       });
     }
 
@@ -174,11 +203,17 @@ router.post('/:id/refuel', async (req, res) => {
     const data: RefuelRequest = req.body;
     const projectId = req.params.id;
 
-    const project = await requireOwnedProject(projectId, req.developer!.id);
-    if (!project) {
+    const access = await requireProjectRole(projectId, req.developer!.id, 'admin');
+    if (access === null) {
       return res.status(404).json({
         error: 'Project not found',
         code: 'PROJECT_NOT_FOUND',
+      });
+    }
+    if (access === false) {
+      return res.status(403).json({
+        error: 'Insufficient permissions',
+        code: 'FORBIDDEN',
       });
     }
 
