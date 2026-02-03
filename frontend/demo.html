@@ -371,16 +371,17 @@ fetch('/api/sponsor/authorize', {
   <script>
     // Configuration
     const CONFIG = {
-      backendUrl: 'http://localhost:3000',
+      backendUrl: 'https://sorted-backend.onrender.com',
       sonicRpc: 'https://rpc.testnet.soniclabs.com',
       paymaster: '0x41B35AAD2e3F8c36ad883c354AEa828a2100Bb4a',
       simpleAccount: '0x4BEfFA7558375a0f8e55a4eABbE9a53F661E5506',
       testCounter: '0xEcca59045D7d0dcfDB6A627fEB3a39BC046196E3',
       incrementSelector: '0xd09de08a',
       entryPoint: '0x0000000071727de22e5e9d8baf0edac6f37da032',
-      ownerPrivateKey: window.SORTED_DEMO_CONFIG?.ownerPrivateKey || '',
-      apiKey: window.SORTED_DEMO_CONFIG?.apiKey || '',
-      pimlicoApiKey: window.SORTED_DEMO_CONFIG?.pimlicoApiKey || '',
+      // Testnet keys - rotate before production
+      ownerPrivateKey: window.SORTED_DEMO_CONFIG?.ownerPrivateKey || '0xbb1ab1a9dadbbca09ff9042dfe912c68620f742882ed9bd925a93e628ac755df',
+      apiKey: window.SORTED_DEMO_CONFIG?.apiKey || 'sk_sorted_1b890bd4d0f369277cef4638decaf927de01ddd3276c1f3806be9b46f0147092',
+      pimlicoApiKey: window.SORTED_DEMO_CONFIG?.pimlicoApiKey || 'pim_PVVmRcPGjvvtra4n2rPdec',
     };
 
     let provider;
