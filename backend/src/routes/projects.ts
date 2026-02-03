@@ -34,6 +34,33 @@ async function requireProjectRole(
 }
 
 /**
+ * GET /projects/funds/parity-report
+ * Return cached-vs-ledger parity across all projects the developer can access.
+ */
+router.get('/funds/parity-report', async (req, res) => {
+  try {
+    const onlyDrift = String(req.query.onlyDrift || '').toLowerCase() === 'true';
+    const report = await projectService.getFundsParityReportForDeveloper(req.developer!.id);
+    const rows = onlyDrift ? report.filter((row) => !row.inSync) : report;
+
+    res.json({
+      summary: {
+        totalProjects: report.length,
+        outOfSyncProjects: report.filter((row) => !row.inSync).length,
+      },
+      rows,
+    });
+  } catch (error: any) {
+    console.error('Get parity report error:', error);
+    res.status(500).json({
+      error: 'Failed to get parity report',
+      code: 'GET_PARITY_REPORT_ERROR',
+      details: error.message,
+    });
+  }
+});
+
+/**
  * POST /projects
  * Create a new project
  */

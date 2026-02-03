@@ -593,6 +593,52 @@ export class ProjectService {
 
     return result.rows;
   }
+
+  /**
+   * Get parity report for all projects accessible to a developer.
+   */
+  async getFundsParityReportForDeveloper(developerId: number) {
+    const result = await query<{
+      project_id: string;
+      project_name: string;
+      organization_id: number;
+      cached_balance: string;
+      ledger_balance: string;
+    }>(
+      `SELECT
+         p.id as project_id,
+         p.name as project_name,
+         p.organization_id,
+         p.gas_tank_balance::text as cached_balance,
+         COALESCE(SUM(
+           CASE
+             WHEN fle.entry_type IN ('credit', 'release') THEN fle.amount
+             WHEN fle.entry_type IN ('reserve', 'debit') THEN -fle.amount
+             ELSE 0
+           END
+         ), 0)::text as ledger_balance
+       FROM projects p
+       INNER JOIN organization_members om ON om.organization_id = p.organization_id
+       LEFT JOIN fund_ledger_entries fle ON fle.project_id = p.id
+       WHERE om.developer_id = $1
+       GROUP BY p.id, p.name, p.organization_id, p.gas_tank_balance
+       ORDER BY p.created_at DESC`,
+      [developerId]
+    );
+
+    return result.rows.map((row) => {
+      const delta = (BigInt(row.cached_balance) - BigInt(row.ledger_balance)).toString();
+      return {
+        projectId: row.project_id,
+        projectName: row.project_name,
+        organizationId: row.organization_id,
+        cachedBalance: row.cached_balance,
+        ledgerBalance: row.ledger_balance,
+        delta,
+        inSync: delta === '0',
+      };
+    });
+  }
 }
 
 export default new ProjectService();
