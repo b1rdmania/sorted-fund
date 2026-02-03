@@ -87,27 +87,39 @@
         <div class="panel">
           <div class="panel-header">How to Find Function Selectors</div>
           <div class="panel-content">
-            <h3 style="margin-bottom: var(--space-sm);">Method 1: From Contract ABI</h3>
-            <p class="text-muted" style="font-size: var(--text-body-sm);">If you have the contract ABI:</p>
-            <div class="code-block">
+            <p class="text-muted" style="font-size: 13px;">
+              Start tight: allowlist only the exact contract + function you want to sponsor.
+            </p>
+
+            <details open>
+              <summary>Method 1: from contract ABI (recommended)</summary>
+              <div>
+                <div class="code-block">
 const iface = new ethers.Interface(ABI);
 const selector = iface.getFunction('functionName').selector;
 // Returns: "0x12345678"
-            </div>
+                </div>
+              </div>
+            </details>
 
-            <h3 style="margin-top: var(--space-lg); margin-bottom: var(--space-sm);">Method 2: Manual Calculation</h3>
-            <p class="text-muted" style="font-size: var(--text-body-sm);">Function selector = first 4 bytes of keccak256 hash:</p>
-            <div class="code-block">
+            <details>
+              <summary>Method 2: manual calculation</summary>
+              <div>
+                <div class="code-block">
 import { keccak256, toUtf8Bytes } from 'ethers';
 
 const signature = 'increment()';  // Function signature
 const hash = keccak256(toUtf8Bytes(signature));
 const selector = hash.slice(0, 10);  // 0x + 8 hex chars
 // Example: "0xd09de08a"
-            </div>
+                </div>
+              </div>
+            </details>
 
-            <h3 style="margin-top: var(--space-lg); margin-bottom: var(--space-sm);">Common Function Selectors</h3>
-            <table class="data-table" style="margin-top: var(--space-sm);">
+            <details>
+              <summary>Common selectors</summary>
+              <div>
+                <table class="data-table">
               <thead>
                 <tr>
                   <th>Function</th>
@@ -132,7 +144,9 @@ const selector = hash.slice(0, 10);  // 0x + 8 hex chars
                   <td><code>0xd09de08a</code></td>
                 </tr>
               </tbody>
-            </table>
+                </table>
+              </div>
+            </details>
           </div>
         </div>
       </div>

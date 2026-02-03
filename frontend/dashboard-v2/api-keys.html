@@ -87,10 +87,11 @@
         <div class="panel">
           <div class="panel-header">How to Use API Keys</div>
           <div class="panel-content">
-            <h3 style="margin-bottom: var(--space-sm);">Authorization Header</h3>
-            <p class="text-muted" style="font-size: var(--text-body-sm);">Include your API key in the Authorization header:</p>
-            <div class="code-block">
-fetch('http://localhost:3000/sponsor/authorize', {
+            <p class="text-muted" style="font-size: 13px; margin-bottom: var(--space-sm);">
+              Keep this server-side only. Put the key in your backend environment and send it as a Bearer token.
+            </p>
+            <div class="code-block" id="apiKeySnippet">
+fetch('https://sorted-backend.onrender.com/sponsor/authorize', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -107,21 +108,21 @@ fetch('http://localhost:3000/sponsor/authorize', {
   })
 })
             </div>
+            <div style="margin-top: var(--space-sm);">
+              <button class="btn-secondary btn-sm" id="copyApiSnippetBtn" onclick="copyApiSnippet()">Copy Snippet</button>
+            </div>
 
-            <h3 style="margin-top: var(--space-lg); margin-bottom: var(--space-sm);">Rate Limits</h3>
-            <p class="text-muted" style="font-size: var(--text-body-sm);">
-              Each API key has a rate limit (requests per minute). Default is 100 req/min.
-              If you exceed the limit, you'll receive a 429 error.
-            </p>
-
-            <h3 style="margin-top: var(--space-lg); margin-bottom: var(--space-sm);">Security Best Practices</h3>
-            <ul style="margin-left: var(--space-lg); color: var(--text-secondary); font-size: var(--text-body-sm);">
-              <li>Store keys in environment variables (.env file)</li>
-              <li>Never commit keys to version control</li>
-              <li>Rotate keys regularly (every 90 days)</li>
-              <li>Use different keys for dev/staging/production</li>
-              <li>Revoke compromised keys immediately</li>
-            </ul>
+            <details open>
+              <summary>Best-practice checklist</summary>
+              <div>
+                <ul style="margin-left: var(--space-lg); color: var(--text-secondary); font-size: 13px;">
+                  <li>Store keys in environment variables</li>
+                  <li>Never commit keys to source control</li>
+                  <li>Use separate keys per environment</li>
+                  <li>Rotate keys regularly and revoke on compromise</li>
+                </ul>
+              </div>
+            </details>
           </div>
         </div>
       </div>
@@ -376,6 +377,24 @@ fetch('http://localhost:3000/sponsor/authorize', {
       } else {
         showError('Failed to copy to clipboard');
       }
+    }
+
+    async function copyApiSnippet() {
+      const snippet = document.getElementById('apiKeySnippet');
+      const button = document.getElementById('copyApiSnippetBtn');
+      if (!snippet || !button) return;
+
+      const success = await copyToClipboard(snippet.innerText);
+      if (!success) {
+        showError('Failed to copy snippet');
+        return;
+      }
+
+      const previous = button.textContent;
+      button.textContent = 'Copied';
+      setTimeout(() => {
+        button.textContent = previous;
+      }, 1200);
     }
 
     function openRevokeKeyModal(keyId, keyPreview) {

@@ -54,7 +54,7 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Dashboard</h1>
-            <p class="page-subtitle">Guided setup + real-time metrics for your gas station</p>
+            <p class="page-subtitle">Monitor spend, finish setup, and ship with confidence.</p>
           </div>
           <div class="page-actions">
             <button onclick="window.location.href='api-keys.html'">API Keys</button>
@@ -126,23 +126,24 @@
             <div class="panel-content">
               <div class="quick-actions" style="flex-direction: column;">
                 <button onclick="window.location.href='api-keys.html'" class="btn-block">
-                  Generate New API Key
+                  Create API Key
                 </button>
                 <button onclick="window.location.href='allowlist.html'" class="btn-block btn-secondary">
-                  Manage Allowlist
+                  Update Allowlist
                 </button>
                 <button onclick="window.location.href='demo.html'" class="btn-block btn-secondary">
-                  View Live Demo
+                  Run Demo Flow
                 </button>
               </div>
 
               <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--border);">
-                <h3 style="margin-bottom: var(--space-sm);">Integration</h3>
-                <div class="code-block" style="margin-top: var(--space-sm);">
-<span class="text-muted">// Simple API call to sponsor gas:</span>
-fetch('/sponsor/authorize', {
+                <h3 style="margin-bottom: var(--space-sm);">Integration Quickstart</h3>
+                <div class="code-block" id="integrationSnippet" style="margin-top: var(--space-sm);">
+<span class="text-muted">// Server-side sponsorship call</span>
+fetch('https://sorted-backend.onrender.com/sponsor/authorize', {
   method: 'POST',
   headers: {
+    'Content-Type': 'application/json',
     'Authorization': 'Bearer YOUR_API_KEY'
   },
   body: JSON.stringify({
@@ -153,6 +154,9 @@ fetch('/sponsor/authorize', {
     estimatedGas: 500000
   })
 })
+                </div>
+                <div style="margin-top: var(--space-sm);">
+                  <button id="copySnippetBtn" class="btn-secondary btn-sm" onclick="copyIntegrationSnippet()">Copy Snippet</button>
                 </div>
               </div>
             </div>
@@ -373,6 +377,24 @@ fetch('/sponsor/authorize', {
         console.error('Failed to copy funding address:', error);
         showError('Failed to copy funding address');
       }
+    }
+
+    async function copyIntegrationSnippet() {
+      const snippet = document.getElementById('integrationSnippet');
+      const button = document.getElementById('copySnippetBtn');
+      if (!snippet || !button) return;
+
+      const copied = await copyToClipboard(snippet.innerText);
+      if (!copied) {
+        showError('Failed to copy snippet');
+        return;
+      }
+
+      const previous = button.textContent;
+      button.textContent = 'Copied';
+      setTimeout(() => {
+        button.textContent = previous;
+      }, 1200);
     }
 
     async function loadAnalytics() {
