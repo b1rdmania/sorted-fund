@@ -27,3 +27,10 @@ features:
     title: Built for games
     details: Allowlist contracts. Set spending limits. Track usage.
 ---
+
+## Quick Links
+
+- [Quick Start](/quick-start)
+- [API Reference](/api-reference)
+- [Examples](/examples)
+- [FAQ](/faq)
